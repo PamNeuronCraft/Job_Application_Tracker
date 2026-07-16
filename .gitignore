@@ -1,0 +1,54 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (SDK path, etc)
+local.properties
+
+# IntelliJ/Android Studio project files
+.idea/
+*.iml
+*.iws
+*.ipr
+/out/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore files
+*.jks
+*.keystore
+*.p12
+
+# Google Services
+google-services.json
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Crashlytics
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Log files
+*.log
+
+# Android Studio backups
+/shelf/
+/workspace.xml
