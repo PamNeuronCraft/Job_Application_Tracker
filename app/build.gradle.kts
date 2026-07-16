@@ -11,13 +11,30 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.pamtech.jobapplicationtracker"
+        applicationId = "com.pamneuroncraft.jobapplicationtracker"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("qa") {
+            dimension = "environment"
+            applicationIdSuffix = ".qa"
+            versionNameSuffix = "-qa"
+        }
+        create("prod") {
+            dimension = "environment"
+        }
     }
 
     buildTypes {
