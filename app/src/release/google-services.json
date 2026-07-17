@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "621221034219",
+    "project_id": "job-tracker-release",
+    "storage_bucket": "job-tracker-release.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:621221034219:android:9352fbe517bf8c250426ae",
+        "android_client_info": {
+          "package_name": "com.pamneuroncraft.jobapplicationtracker.free"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZJE80YbWZbRb8s8XrTyfh43_hwxMtZ-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:621221034219:android:2df9e5688ed9212f0426ae",
+        "android_client_info": {
+          "package_name": "com.pamneuroncraft.jobapplicationtracker.paid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZJE80YbWZbRb8s8XrTyfh43_hwxMtZ-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

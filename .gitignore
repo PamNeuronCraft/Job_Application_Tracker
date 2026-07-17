@@ -1,11 +1,13 @@
-# Gradle files
+# Gradle
 .gradle/
 build/
+*/build/
+.kotlin/
 
 # Local configuration file (SDK path, etc)
 local.properties
 
-# IntelliJ/Android Studio project files
+# IntelliJ/Android Studio
 .idea/
 *.iml
 *.iws
@@ -14,16 +16,20 @@ local.properties
 /captures/
 .externalNativeBuild/
 .cxx/
+*.swp
+*.patch
+*.diff
 
 # Keystore files
 *.jks
 *.keystore
 *.p12
 
-# Google Services
-google-services.json
+# Google Services (usually ignored if using multiple projects, but can be kept if desired)
+# google-services.json
+# GoogleService-Info.plist
 
-# OS X
+# macOS
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -39,6 +45,24 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
+
+# Xcode / iOS
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.xcuserstate
+iosApp/iosApp.xcworkspace/xcuserdata/
 
 # Crashlytics
 com_crashlytics_export_strings.xml
