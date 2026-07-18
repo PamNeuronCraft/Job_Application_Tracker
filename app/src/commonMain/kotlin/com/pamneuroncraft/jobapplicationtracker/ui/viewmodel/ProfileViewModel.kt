@@ -44,6 +44,26 @@ class ProfileViewModel(
         }
     }
 
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            authService.signInWithGoogle(idToken)
+                .onFailure { _error.value = it.message }
+            _isLoading.value = false
+        }
+    }
+
+    fun signInWithApple(idToken: String, rawNonce: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            authService.signInWithApple(idToken, rawNonce)
+                .onFailure { _error.value = it.message }
+            _isLoading.value = false
+        }
+    }
+
     fun signOut() {
         viewModelScope.launch {
             authService.signOut()

@@ -12,6 +12,8 @@ interface AuthService {
     val currentUser: Flow<User?>
     suspend fun signUp(email: String, password: String, name: String): Result<Unit>
     suspend fun signIn(email: String, password: String): Result<Unit>
+    suspend fun signInWithGoogle(idToken: String): Result<Unit>
+    suspend fun signInWithApple(idToken: String, rawNonce: String): Result<Unit>
     suspend fun signOut()
     fun isUserSignedIn(): Boolean
 }

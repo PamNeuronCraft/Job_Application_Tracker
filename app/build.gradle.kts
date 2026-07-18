@@ -24,6 +24,7 @@ buildkonfig {
         // Default to Google Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-9098088729873683~6121804769")
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-9098088729873683/1918835878")
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID", "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com")
     }
     
     targetConfigs {
@@ -102,6 +103,10 @@ kotlin {
             implementation(libs.generativeai)
             implementation(libs.jsoup)
             implementation(libs.play.services.ads)
+            
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.services.auth)
+            implementation(libs.googleid)
         }
         
         iosMain.dependencies {

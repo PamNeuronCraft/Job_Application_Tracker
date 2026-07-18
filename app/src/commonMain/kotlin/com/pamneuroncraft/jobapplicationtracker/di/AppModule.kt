@@ -9,6 +9,8 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobExtractor
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SocialAuthManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.createSocialAuthManager
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.*
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.*
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
@@ -24,6 +26,7 @@ val appModule = module {
     single { createPermissionManager() }
     single<AuthService> { FirebaseAuthService() }
     single<CloudBackupService> { FirebaseCloudBackupService() }
+    single<SocialAuthManager> { createSocialAuthManager() }
 }
 
 val useCaseModule = module {

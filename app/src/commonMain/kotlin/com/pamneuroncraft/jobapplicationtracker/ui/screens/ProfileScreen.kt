@@ -13,16 +13,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SocialAuthManager
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ProfileViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit,
-    viewModel: ProfileViewModel = koinViewModel()
+    viewModel: ProfileViewModel = koinViewModel(),
+    socialAuthManager: SocialAuthManager = koinInject()
 ) {
     val user by viewModel.currentUser.collectAsState()
     val isLoading by viewModel.isLoading
@@ -32,6 +35,23 @@ fun ProfileScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+
+    var triggerGoogleAuth by remember { mutableStateOf(false) }
+    var triggerAppleAuth by remember { mutableStateOf(false) }
+
+    if (triggerGoogleAuth) {
+        socialAuthManager.RequestGoogleSignIn { result ->
+            triggerGoogleAuth = false
+            result?.let { viewModel.signInWithGoogle(it.idToken) }
+        }
+    }
+
+    if (triggerAppleAuth) {
+        socialAuthManager.RequestAppleSignIn { result ->
+            triggerAppleAuth = false
+            result?.let { viewModel.signInWithApple(it.idToken, it.rawNonce ?: "") }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -168,6 +188,24 @@ fun ProfileScreen(
                     enabled = !isLoading
                 ) {
                     Text(if (isSignUp) "Already have an account? Sign In" else "Don't have an account? Sign Up")
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                OutlinedButton(
+                    onClick = { triggerGoogleAuth = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    Text("Continue with Google")
+                }
+
+                OutlinedButton(
+                    onClick = { triggerAppleAuth = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    Text("Continue with Apple")
                 }
                 
                 Spacer(modifier = Modifier.weight(1f))
