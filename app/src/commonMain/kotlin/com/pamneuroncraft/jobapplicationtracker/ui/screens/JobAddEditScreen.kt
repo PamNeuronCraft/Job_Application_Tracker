@@ -32,6 +32,7 @@ fun JobAddEditScreen(
     prefilledCompanyName: String? = null,
     prefilledDescription: String? = null,
     prefilledCompensation: String? = null,
+    initialUrl: String? = null,
     onBack: () -> Unit,
     viewModel: JobAddEditViewModel = koinViewModel(),
     permissionManager: PermissionManager = koinInject()
@@ -44,7 +45,8 @@ fun JobAddEditScreen(
             prefilledJobName = prefilledJobName,
             prefilledCompanyName = prefilledCompanyName,
             prefilledDescription = prefilledDescription,
-            prefilledCompensation = prefilledCompensation
+            prefilledCompensation = prefilledCompensation,
+            initialUrl = initialUrl
         )
     }
 
@@ -55,6 +57,7 @@ fun JobAddEditScreen(
     val compensation by viewModel.compensation
     val status by viewModel.status
     val interviewDate by viewModel.interviewDate
+    val isAutoExtracting by viewModel.isAutoExtracting
 
     Scaffold(
         topBar = {
@@ -66,7 +69,16 @@ fun JobAddEditScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.onSaveJob(onBack) }) {
+                    if (isAutoExtracting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(end = 16.dp).size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    IconButton(
+                        onClick = { viewModel.onSaveJob(onBack) },
+                        enabled = !isAutoExtracting
+                    ) {
                         Icon(Icons.Default.Save, contentDescription = "Save")
                     }
                 }

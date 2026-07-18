@@ -40,6 +40,7 @@ fun JobListScreen(
     onAddJob: (JobAddEditKey) -> Unit,
     onJobClick: (Int) -> Unit,
     onProfileClick: () -> Unit,
+    showPremiumShareRationale: Boolean = false,
     viewModel: JobListViewModel = koinViewModel(),
     backupViewModel: BackupViewModel = koinViewModel(),
     importViewModel: ImportViewModel = koinViewModel(),
@@ -52,7 +53,7 @@ fun JobListScreen(
     
     var showAddOptions by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
-    var showPaidFeatureDialog by remember { mutableStateOf(false) }
+    var showPaidFeatureDialog by remember { mutableStateOf(showPremiumShareRationale) }
 
     JobListContent(
         jobs = jobs,

@@ -19,7 +19,8 @@ data class JobAddEditKey(
     val prefilledJobName: String? = null,
     val prefilledCompanyName: String? = null,
     val prefilledDescription: String? = null,
-    val prefilledCompensation: String? = null
+    val prefilledCompensation: String? = null,
+    val initialUrl: String? = null
 ) : JobTrackerKey
 
 @Serializable

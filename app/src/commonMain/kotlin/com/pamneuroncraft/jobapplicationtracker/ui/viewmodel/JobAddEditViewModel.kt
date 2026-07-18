@@ -35,6 +35,9 @@ class JobAddEditViewModel(
     private val _interviewDate = mutableStateOf<kotlinx.datetime.Instant?>(null)
     val interviewDate: State<kotlinx.datetime.Instant?> = _interviewDate
 
+    private val _isAutoExtracting = mutableStateOf(false)
+    val isAutoExtracting: State<Boolean> = _isAutoExtracting
+
     private var currentJobId: Int? = null
 
     fun loadJob(
@@ -42,7 +45,8 @@ class JobAddEditViewModel(
         prefilledJobName: String? = null,
         prefilledCompanyName: String? = null,
         prefilledDescription: String? = null,
-        prefilledCompensation: String? = null
+        prefilledCompensation: String? = null,
+        initialUrl: String? = null
     ) {
         if (jobId != null) {
             viewModelScope.launch {
@@ -62,6 +66,23 @@ class JobAddEditViewModel(
             prefilledCompanyName?.let { _companyName.value = it }
             prefilledDescription?.let { _description.value = it }
             prefilledCompensation?.let { _compensation.value = it }
+
+            initialUrl?.let { url ->
+                viewModelScope.launch {
+                    _isAutoExtracting.value = true
+                    try {
+                        val extracted = jobUseCases.extractJobFromUrl(url)
+                        extracted.jobName?.let { _jobName.value = it }
+                        extracted.companyName?.let { _companyName.value = it }
+                        extracted.description?.let { _description.value = it }
+                        extracted.compensation?.let { _compensation.value = it }
+                    } catch (e: Exception) {
+                        // Silent fail for auto-extract
+                    } finally {
+                        _isAutoExtracting.value = false
+                    }
+                }
+            }
         }
     }
 

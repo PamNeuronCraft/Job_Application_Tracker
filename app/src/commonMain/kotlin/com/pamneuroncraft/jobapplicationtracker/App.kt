@@ -12,12 +12,21 @@ import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTh
 import org.koin.compose.koinInject
 
 @Composable
-fun App() {
+fun App(initialUrl: String? = null) {
     JobApplicationTrackerTheme {
         val navController = rememberNavController()
         val localSettings: LocalSettings = koinInject()
+        val appConfig: AppConfig = koinInject()
         
-        val startDestination = if (localSettings.isOnboardingCompleted) JobListKey else OnboardingKey
+        val startDestination = if (localSettings.isOnboardingCompleted) {
+            if (initialUrl != null && appConfig.featureAiImport) {
+                JobAddEditKey(initialUrl = initialUrl)
+            } else {
+                JobListKey
+            }
+        } else {
+            OnboardingKey
+        }
 
         NavHost(
             navController = navController,
@@ -36,7 +45,8 @@ fun App() {
                 JobListScreen(
                     onAddJob = { key -> navController.navigate(key) },
                     onJobClick = { jobId -> navController.navigate(JobDetailKey(jobId)) },
-                    onProfileClick = { navController.navigate(ProfileKey) }
+                    onProfileClick = { navController.navigate(ProfileKey) },
+                    showPremiumShareRationale = initialUrl != null && !appConfig.featureAiImport
                 )
             }
             composable<JobDetailKey> { backStackEntry ->
@@ -55,6 +65,7 @@ fun App() {
                     prefilledCompanyName = key.prefilledCompanyName,
                     prefilledDescription = key.prefilledDescription,
                     prefilledCompensation = key.prefilledCompensation,
+                    initialUrl = key.initialUrl,
                     onBack = { navController.popBackStack() }
                 )
             }
