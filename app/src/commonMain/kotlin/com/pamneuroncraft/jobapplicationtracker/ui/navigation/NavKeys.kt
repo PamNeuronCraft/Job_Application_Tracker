@@ -25,3 +25,9 @@ data class JobAddEditKey(
 
 @Serializable
 data object ProfileKey : JobTrackerKey
+
+@Serializable
+data object SettingsKey : JobTrackerKey
+
+@Serializable
+data object SummaryKey : JobTrackerKey

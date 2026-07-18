@@ -20,6 +20,7 @@ buildkonfig {
     defaultConfigs {
         buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "false")
         buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "false")
+        buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "false")
         
         // Default to Google Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-9098088729873683~6121804769")
@@ -31,6 +32,7 @@ buildkonfig {
         create("paid") {
             buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "true")
             buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "true")
+            buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "true")
         }
     }
 }

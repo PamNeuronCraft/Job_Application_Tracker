@@ -1,6 +1,8 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,19 +15,34 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,15 +54,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
+import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PermissionRationaleDialog
+import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobAddEditViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.Permission
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionState
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +83,9 @@ fun JobAddEditScreen(
     permissionManager: PermissionManager = koinInject()
 ) {
     var showPermissionRationale by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var showReminderMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(jobId) {
         viewModel.loadJob(
@@ -80,6 +105,7 @@ fun JobAddEditScreen(
     val compensation by viewModel.compensation
     val status by viewModel.status
     val interviewDate by viewModel.interviewDate
+    val reminderDuration by viewModel.reminderDuration
     val isAutoExtracting by viewModel.isAutoExtracting
 
     Scaffold(
@@ -162,45 +188,160 @@ fun JobAddEditScreen(
                     FilterChip(
                         selected = status == jobStatus,
                         onClick = { viewModel.onStatusChange(jobStatus) },
-                        label = { Text(jobStatus.name, style = MaterialTheme.typography.bodySmall) }
+                        label = { Text(jobStatus.name.replace("_", " "), style = MaterialTheme.typography.bodySmall) }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider()
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Interview Date Reminder", style = MaterialTheme.typography.titleSmall)
-                    Text(
-                        text = if (interviewDate != null) "Reminder set for $interviewDate" else "No reminder set",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                Switch(
-                    checked = interviewDate != null,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            val state = permissionManager.checkPermission(Permission.NOTIFICATIONS)
-                            if (state == PermissionState.GRANTED) {
-                                // Mock picking a date 1 day from now
-                                viewModel.onInterviewDateChange(Clock.System.now().plus(1.days))
-                            } else {
-                                showPermissionRationale = true
+            if (status == JobStatus.INTERVIEW) {
+                HorizontalDivider()
+
+                ListItem(
+                    headlineContent = { Text("Interview Date") },
+                    supportingContent = {
+                        Text(
+                            text = interviewDate?.let {
+                                DateFormatter.format(it, "MMM dd, yyyy")
+                            } ?: "No date set"
+                        )
+                    },
+                    leadingContent = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
+                    modifier = Modifier.clickable { showDatePicker = true }
+                )
+
+                ListItem(
+                    headlineContent = { Text("Interview Time") },
+                    supportingContent = {
+                        Text(
+                            text = interviewDate?.let {
+                                DateFormatter.format(it, "HH:mm")
+                            } ?: "No time set"
+                        )
+                    },
+                    leadingContent = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    modifier = Modifier.clickable { showTimePicker = true }
+                )
+
+                ListItem(
+                    headlineContent = { Text("Reminder") },
+                    supportingContent = {
+                        Text(text = reminderDuration?.label ?: "No reminder set")
+                    },
+                    leadingContent = { Icon(Icons.Default.Notifications, contentDescription = null) },
+                    trailingContent = {
+                        Box {
+                            IconButton(onClick = { showReminderMenu = true }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                             }
-                        } else {
-                            viewModel.onInterviewDateChange(null)
+                            DropdownMenu(
+                                expanded = showReminderMenu,
+                                onDismissRequest = { showReminderMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("None") },
+                                    onClick = {
+                                        viewModel.onReminderDurationChange(null)
+                                        showReminderMenu = false
+                                    }
+                                )
+                                ReminderDuration.entries.forEach { duration ->
+                                    DropdownMenuItem(
+                                        text = { Text(duration.label) },
+                                        onClick = {
+                                            val state = permissionManager.checkPermission(Permission.NOTIFICATIONS)
+                                            if (state == PermissionState.GRANTED) {
+                                                if (interviewDate == null) {
+                                                    showDatePicker = true
+                                                } else {
+                                                    viewModel.onReminderDurationChange(duration)
+                                                }
+                                            } else {
+                                                showPermissionRationale = true
+                                            }
+                                            showReminderMenu = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 )
             }
         }
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = interviewDate?.toEpochMilliseconds() ?: Clock.System.now().toEpochMilliseconds()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val current = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault())
+                        val newDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
+                        val updated = kotlinx.datetime.LocalDateTime(
+                            newDate.year, newDate.month, newDate.dayOfMonth,
+                            current?.hour ?: 9, current?.minute ?: 0
+                        ).toInstant(TimeZone.currentSystemDefault())
+                        
+                        viewModel.onInterviewDateChange(updated)
+                        if (current == null) {
+                            showTimePicker = true
+                        }
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showTimePicker) {
+        val current = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault())
+        val timePickerState = rememberTimePickerState(
+            initialHour = current?.hour ?: 9,
+            initialMinute = current?.minute ?: 0
+        )
+        
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val date = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault()) 
+                        ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                    
+                    val updated = kotlinx.datetime.LocalDateTime(
+                        date.year, date.month, date.dayOfMonth,
+                        timePickerState.hour, timePickerState.minute
+                    ).toInstant(TimeZone.currentSystemDefault())
+                    
+                    viewModel.onInterviewDateChange(updated)
+                    showTimePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text("Cancel")
+                }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
+        )
     }
 
     if (showPermissionRationale) {

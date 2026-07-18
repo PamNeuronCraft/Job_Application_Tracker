@@ -56,5 +56,7 @@ val viewModelModule = module {
     viewModelOf(::BackupViewModel)
     viewModelOf(::ImportViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::SummaryViewModel)
 }
 

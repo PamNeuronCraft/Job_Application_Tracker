@@ -19,6 +19,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
+import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobDetailViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import kotlinx.datetime.Instant
@@ -44,7 +45,7 @@ fun JobDetailScreen(
         onBack = onBack,
         onEditJob = { onEditJob(jobId) },
         onDeleteJob = { viewModel.onDeleteJob(onBack) },
-        onUpdateInterviewDate = { viewModel.onUpdateInterviewDate(it) }
+        onUpdateInterviewDate = { date, duration -> viewModel.onUpdateInterviewDate(date, duration) }
     )
 }
 
@@ -55,7 +56,7 @@ fun JobDetailContent(
     onBack: () -> Unit,
     onEditJob: () -> Unit,
     onDeleteJob: () -> Unit,
-    onUpdateInterviewDate: (Instant) -> Unit
+    onUpdateInterviewDate: (Instant, ReminderDuration?) -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -100,10 +101,24 @@ fun JobDetailContent(
                     DetailItem(label = "Job Name", value = currentJob.jobName)
                     DetailItem(label = "Company Name", value = currentJob.companyName)
                     DetailItem(label = "Description", value = currentJob.description)
-                    DetailItem(label = "Job Type", value = currentJob.jobType.name)
+                    DetailItem(label = "Job Type", value = currentJob.jobType.name.replace("_", " "))
                     DetailItem(label = "Compensation", value = currentJob.compensation)
-                    DetailItem(label = "Status", value = currentJob.status.name)
+                    DetailItem(label = "Status", value = currentJob.status.name.replace("_", " "))
                     DetailItem(label = "Date Added", value = DateFormatter.format(currentJob.dateAdded, "MMM dd, yyyy"))
+
+                    if (currentJob.status == JobStatus.INTERVIEW) {
+                        HorizontalDivider()
+                        DetailItem(
+                            label = "Interview Date & Time",
+                            value = currentJob.interviewDate?.let {
+                                DateFormatter.format(it, "MMM dd, yyyy HH:mm")
+                            } ?: "Not set"
+                        )
+                        DetailItem(
+                            label = "Reminder",
+                            value = currentJob.reminderDuration?.label ?: "No reminder set"
+                        )
+                    }
 
                     HorizontalDivider()
 
@@ -112,10 +127,10 @@ fun JobDetailContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("Interview Date", style = MaterialTheme.typography.labelMedium)
+                            Text("Quick Action: Set Interview Date", style = MaterialTheme.typography.labelMedium)
                             Text(
                                 text = currentJob.interviewDate?.let { 
-                                    DateFormatter.format(it, "MMM dd, yyyy HH:mm")
+                                    DateFormatter.format(it, "MMM dd, yyyy")
                                 } ?: "Not set",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold
@@ -137,7 +152,7 @@ fun JobDetailContent(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        onUpdateInterviewDate(Instant.fromEpochMilliseconds(millis))
+                        onUpdateInterviewDate(Instant.fromEpochMilliseconds(millis), null)
                     }
                     showDatePicker = false
                 }) {
@@ -167,12 +182,12 @@ fun JobDetailScreenPreview() {
                 description = "Build amazing things.",
                 jobType = JobType.REMOTE,
                 compensation = "150k",
-                status = JobStatus.INTERVIEWING,
+                status = JobStatus.INTERVIEW,
             ),
             onBack = {},
             onEditJob = {},
             onDeleteJob = {},
-            onUpdateInterviewDate = {}
+            onUpdateInterviewDate = { _, _ -> }
         )
     }
 }
@@ -188,8 +203,8 @@ fun DetailItem(label: String, value: String) {
 fun getStatusLightColor(status: JobStatus): Color {
     return when (status) {
         JobStatus.APPLIED -> Color(0xFFE3F2FD) // Very Light Blue
-        JobStatus.INTERVIEWING -> Color(0xFFFFFDE7) // Very Light Yellow
-        JobStatus.JOB_OFFER -> Color(0xFFE8F5E9) // Very Light Green
+        JobStatus.INTERVIEW -> Color(0xFFFFFDE7) // Very Light Yellow
+        JobStatus.OFFER -> Color(0xFFE8F5E9) // Very Light Green
         JobStatus.NO_OFFER -> Color(0xFFFFEBEE) // Very Light Red
     }
 }

@@ -5,13 +5,15 @@ import androidx.compose.runtime.*
 
 @Composable
 fun PaidFeatureDialog(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    title: String = "Premium Feature",
+    message: String = "This feature is only available for paid users. Upgrade now to unlock all premium capabilities."
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Premium Feature") },
+        title = { Text(title) },
         text = {
-            Text("Cloud backup and sync is only available for paid users. Upgrade now to keep your data safe and synced across devices.")
+            Text(message)
         },
         confirmButton = {
             Button(onClick = onDismiss) {

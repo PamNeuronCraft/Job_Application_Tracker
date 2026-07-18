@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.pamneuroncraft.jobapplicationtracker.data.local.entity.JobApplicationEntity
 
-@Database(entities = [JobApplicationEntity::class], version = 1, exportSchema = false)
+@Database(entities = [JobApplicationEntity::class], version = 2, exportSchema = false)
 @ConstructedBy(JobDatabaseConstructor::class)
 abstract class JobDatabase : RoomDatabase() {
     abstract val jobDao: JobDao

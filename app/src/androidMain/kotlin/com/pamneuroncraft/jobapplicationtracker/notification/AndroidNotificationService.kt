@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
+import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 
 class AndroidNotificationService(
@@ -27,7 +28,14 @@ class AndroidNotificationService(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
-        val reminderTime = interviewDate.toEpochMilliseconds() - (30 * 60 * 1000)
+        val offsetMillis = when (job.reminderDuration) {
+            ReminderDuration.ONE_DAY -> 24 * 60 * 60 * 1000L
+            ReminderDuration.TWO_HOURS -> 2 * 60 * 60 * 1000L
+            ReminderDuration.THIRTY_MINUTES -> 30 * 60 * 1000L
+            null -> 30 * 60 * 1000L // Default to 30 mins if not specified
+        }
+
+        val reminderTime = interviewDate.toEpochMilliseconds() - offsetMillis
         
         if (reminderTime > System.currentTimeMillis()) {
             try {

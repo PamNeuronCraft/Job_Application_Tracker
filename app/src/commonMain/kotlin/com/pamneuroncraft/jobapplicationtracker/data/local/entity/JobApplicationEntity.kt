@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
+import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import kotlinx.datetime.Instant
 
 @Entity(tableName = "job_applications")
@@ -17,7 +18,8 @@ data class JobApplicationEntity(
     val compensation: String,
     val status: String,
     val dateAdded: Long,
-    val interviewDate: Long?
+    val interviewDate: Long?,
+    val reminderDuration: String?
 ) {
     fun toDomainModel(): JobApplication {
         return JobApplication(
@@ -29,7 +31,8 @@ data class JobApplicationEntity(
             compensation = compensation,
             status = JobStatus.valueOf(status),
             dateAdded = Instant.fromEpochMilliseconds(dateAdded),
-            interviewDate = interviewDate?.let { Instant.fromEpochMilliseconds(it) }
+            interviewDate = interviewDate?.let { Instant.fromEpochMilliseconds(it) },
+            reminderDuration = reminderDuration?.let { ReminderDuration.valueOf(it) }
         )
     }
 
@@ -44,7 +47,8 @@ data class JobApplicationEntity(
                 compensation = job.compensation,
                 status = job.status.name,
                 dateAdded = job.dateAdded.toEpochMilliseconds(),
-                interviewDate = job.interviewDate?.toEpochMilliseconds()
+                interviewDate = job.interviewDate?.toEpochMilliseconds(),
+                reminderDuration = job.reminderDuration?.name
             )
         }
     }

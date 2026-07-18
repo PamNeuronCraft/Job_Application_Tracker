@@ -53,7 +53,7 @@ fun OnboardingScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Get timely reminders 30 minutes before your scheduled interviews so you never miss an opportunity.",
+                text = "Get timely reminders before your scheduled interviews so you never miss an opportunity.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

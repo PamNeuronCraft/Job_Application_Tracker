@@ -24,7 +24,6 @@ import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
-import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ImportViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobListViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
@@ -34,49 +33,64 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ProfileViewModel
 
+enum class PaidFeatureType(val title: String, val message: String) {
+    SUMMARY(
+        "Job Summary",
+        "The job summary and visual overview feature is only available for paid users. Upgrade now to unlock deep insights into your application progress."
+    ),
+    AI_IMPORT(
+        "AI Job Extraction",
+        "AI-powered job extraction is only available for paid users. Upgrade now to automatically fill in job details from URLs."
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListScreen(
     onAddJob: (JobAddEditKey) -> Unit,
     onJobClick: (Int) -> Unit,
     onProfileClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onSummaryClick: () -> Unit,
     showPremiumShareRationale: Boolean = false,
     viewModel: JobListViewModel = koinViewModel(),
-    backupViewModel: BackupViewModel = koinViewModel(),
     importViewModel: ImportViewModel = koinViewModel(),
     profileViewModel: ProfileViewModel = koinViewModel(),
     appConfig: AppConfig = koinInject()
 ) {
     val jobs by viewModel.jobs.collectAsState()
-    val isAscending by viewModel.isAscending.collectAsState()
     val user by profileViewModel.currentUser.collectAsState()
     
     var showAddOptions by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
-    var showPaidFeatureDialog by remember { mutableStateOf(showPremiumShareRationale) }
+    var paidFeatureToShow by remember { 
+        mutableStateOf(if (showPremiumShareRationale) PaidFeatureType.AI_IMPORT else null) 
+    }
 
     JobListContent(
         jobs = jobs,
-        isAscending = isAscending,
         userInitial = user?.displayName?.firstOrNull()?.toString() ?: user?.email?.firstOrNull()?.toString() ?: "G",
         onAddJob = { showAddOptions = true },
         onJobClick = onJobClick,
         onProfileClick = onProfileClick,
-        onToggleSort = { viewModel.onToggleSort() },
-        onDeleteJob = { viewModel.onDeleteJob(it) },
-        onBackupToDrive = { 
-            if (!appConfig.featureGoogleDriveBackup || !backupViewModel.isUserSignedIn) {
-                showPaidFeatureDialog = true
+        onSettingsClick = onSettingsClick,
+        onSummaryClick = {
+            if (appConfig.featureSummary) {
+                onSummaryClick()
             } else {
-                backupViewModel.backupToCloud()
+                paidFeatureToShow = PaidFeatureType.SUMMARY
             }
         },
-        isCloudBackupEnabled = backupViewModel.isUserSignedIn,
+        onDeleteJob = { viewModel.onDeleteJob(it) },
         showAds = !appConfig.featureGoogleDriveBackup
     )
 
-    if (showPaidFeatureDialog) {
-        PaidFeatureDialog(onDismiss = { showPaidFeatureDialog = false })
+    paidFeatureToShow?.let { feature ->
+        PaidFeatureDialog(
+            onDismiss = { paidFeatureToShow = null },
+            title = feature.title,
+            message = feature.message
+        )
     }
 
     if (showAddOptions) {
@@ -228,15 +242,13 @@ fun ImportFromUrlDialog(
 @Composable
 fun JobListContent(
     jobs: List<JobApplication>,
-    isAscending: Boolean,
     userInitial: String,
     onAddJob: () -> Unit,
     onJobClick: (Int) -> Unit,
     onProfileClick: () -> Unit,
-    onToggleSort: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onSummaryClick: () -> Unit,
     onDeleteJob: (JobApplication) -> Unit,
-    onBackupToDrive: () -> Unit,
-    isCloudBackupEnabled: Boolean,
     showAds: Boolean
 ) {
     Scaffold(
@@ -262,22 +274,17 @@ fun JobListContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onToggleSort) {
+                    IconButton(onClick = onSummaryClick) {
                         Icon(
-                            imageVector = Icons.Default.Sort,
-                            contentDescription = "Sort",
-                            tint = if (isAscending) MaterialTheme.colorScheme.primary else Color.Gray
+                            imageVector = Icons.Default.Assessment,
+                            contentDescription = "Summary"
                         )
                     }
                     
-                    IconButton(onClick = onBackupToDrive) {
+                    IconButton(onClick = onSettingsClick) {
                         Icon(
-                            imageVector = Icons.Default.CloudUpload,
-                            contentDescription = "Cloud Backup",
-                            tint = if (isCloudBackupEnabled) 
-                                MaterialTheme.colorScheme.primary 
-                            else 
-                                LocalContentColor.current.copy(alpha = 0.38f)
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
                         )
                     }
                 }
@@ -390,17 +397,15 @@ fun JobListScreenPreview() {
         JobListContent(
             jobs = listOf(
                 JobApplication(id = 1, jobName = "Android Developer", companyName = "Google", description = "", jobType = JobType.REMOTE, compensation = "150k", status = JobStatus.APPLIED),
-                JobApplication(id = 2, jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensation = "140k", status = JobStatus.INTERVIEWING)
+                JobApplication(id = 2, jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensation = "140k", status = JobStatus.INTERVIEW)
             ),
-            isAscending = false,
             userInitial = "G",
             onAddJob = {},
             onJobClick = {},
             onProfileClick = {},
-            onToggleSort = {},
+            onSettingsClick = {},
+            onSummaryClick = {},
             onDeleteJob = {},
-            onBackupToDrive = {},
-            isCloudBackupEnabled = true,
             showAds = false
         )
     }
@@ -409,8 +414,8 @@ fun JobListScreenPreview() {
 fun getStatusColor(status: JobStatus): Color {
     return when (status) {
         JobStatus.APPLIED -> Color(0xFFBBDEFB) // Light Blue
-        JobStatus.INTERVIEWING -> Color(0xFFFFF9C4) // Light Yellow
-        JobStatus.JOB_OFFER -> Color(0xFFC8E6C9) // Light Green
+        JobStatus.INTERVIEW -> Color(0xFFFFF9C4) // Light Yellow
+        JobStatus.OFFER -> Color(0xFFC8E6C9) // Light Green
         JobStatus.NO_OFFER -> Color(0xFFFFCDD2) // Light Red
     }
 }

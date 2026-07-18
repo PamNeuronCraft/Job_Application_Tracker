@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
+import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.JobUseCases
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 import kotlinx.coroutines.launch
@@ -33,10 +34,13 @@ class JobDetailViewModel(
         }
     }
 
-    fun onUpdateInterviewDate(date: Instant) {
+    fun onUpdateInterviewDate(date: Instant, reminderDuration: ReminderDuration? = null) {
         viewModelScope.launch {
             _job.value?.let {
-                val updatedJob = it.copy(interviewDate = date)
+                val updatedJob = it.copy(
+                    interviewDate = date,
+                    reminderDuration = reminderDuration ?: it.reminderDuration ?: ReminderDuration.THIRTY_MINUTES
+                )
                 jobUseCases.updateJob(updatedJob)
                 _job.value = updatedJob
                 notificationService.scheduleInterviewReminder(updatedJob)
@@ -44,3 +48,4 @@ class JobDetailViewModel(
         }
     }
 }
+

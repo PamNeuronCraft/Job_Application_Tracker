@@ -14,8 +14,16 @@ data class JobApplication(
     val compensation: String,
     val status: JobStatus,
     val dateAdded: Instant = Clock.System.now(),
-    val interviewDate: Instant? = null
+    val interviewDate: Instant? = null,
+    val reminderDuration: ReminderDuration? = null
 )
+
+@Serializable
+enum class ReminderDuration(val label: String) {
+    ONE_DAY("1 day before"),
+    TWO_HOURS("2 hours before"),
+    THIRTY_MINUTES("30 minutes before")
+}
 
 @Serializable
 enum class JobType {
@@ -24,5 +32,5 @@ enum class JobType {
 
 @Serializable
 enum class JobStatus {
-    APPLIED, INTERVIEWING, JOB_OFFER, NO_OFFER
+    APPLIED, INTERVIEW, OFFER, NO_OFFER
 }

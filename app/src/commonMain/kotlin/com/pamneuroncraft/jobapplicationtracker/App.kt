@@ -1,6 +1,8 @@
 package com.pamneuroncraft.jobapplicationtracker
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -9,11 +11,16 @@ import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.*
 import com.pamneuroncraft.jobapplicationtracker.ui.screens.*
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
+import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App(initialUrl: String? = null) {
-    JobApplicationTrackerTheme {
+    val settingsViewModel: SettingsViewModel = koinViewModel()
+    val themePreference by settingsViewModel.themePreference.collectAsState()
+
+    JobApplicationTrackerTheme(themePreference = themePreference) {
         val navController = rememberNavController()
         val localSettings: LocalSettings = koinInject()
         val appConfig: AppConfig = koinInject()
@@ -46,7 +53,9 @@ fun App(initialUrl: String? = null) {
                     onAddJob = { key -> navController.navigate(key) },
                     onJobClick = { jobId -> navController.navigate(JobDetailKey(jobId)) },
                     onProfileClick = { navController.navigate(ProfileKey) },
-                    showPremiumShareRationale = initialUrl != null && !appConfig.featureAiImport
+                    onSettingsClick = { navController.navigate(SettingsKey) },
+                    onSummaryClick = { navController.navigate(SummaryKey) },
+                    showPremiumShareRationale = (initialUrl != null && !appConfig.featureAiImport)
                 )
             }
             composable<JobDetailKey> { backStackEntry ->
@@ -71,6 +80,17 @@ fun App(initialUrl: String? = null) {
             }
             composable<ProfileKey> {
                 ProfileScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable<SettingsKey> {
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onProfileClick = { navController.navigate(ProfileKey) }
+                )
+            }
+            composable<SummaryKey> {
+                SummaryScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
