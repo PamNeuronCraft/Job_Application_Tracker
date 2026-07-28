@@ -20,7 +20,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val appModule = module {
-    single<JobRepository> { JobRepositoryImpl(get<JobDatabase>().jobDao) }
+    single<JobRepository> { JobRepositoryImpl(get<JobDatabase>().jobDao, get(), get()) }
     single { Settings() }
     single { LocalSettings(get()) }
     single { createPermissionManager() }
@@ -31,19 +31,25 @@ val appModule = module {
 
 val useCaseModule = module {
     single { GetJobsUseCase(get()) }
+    single { GetJobsPagedUseCase(get()) }
     single { GetJobByIdUseCase(get()) }
     single { AddJobUseCase(get()) }
     single { UpdateJobUseCase(get()) }
     single { DeleteJobUseCase(get()) }
+    single { SearchJobsUseCase(get()) }
+    single { SearchJobsPagedUseCase(get()) }
     single { ExtractJobFromUrlUseCase(get<JobExtractor>()) }
     single { CloudBackupUseCase(get(), get()) }
     single {
         JobUseCases(
             getJobs = get(),
+            getJobsPaged = get(),
             getJobById = get(),
             addJob = get(),
             updateJob = get(),
             deleteJob = get(),
+            searchJobs = get(),
+            searchJobsPaged = get(),
             extractJobFromUrl = get()
         )
     }
@@ -58,5 +64,6 @@ val viewModelModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::SummaryViewModel)
+    viewModelOf(::SubscriptionViewModel)
 }
 

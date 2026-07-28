@@ -3,13 +3,16 @@ package com.pamneuroncraft.jobapplicationtracker.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import kotlinx.coroutines.flow.*
 
 class SettingsViewModel(
-    private val localSettings: LocalSettings
+    private val localSettings: LocalSettings,
+    private val billingManager: BillingManager
 ) : ViewModel() {
 
     val themePreference: StateFlow<ThemePreference> = localSettings.themePreferenceFlow
+    val isPremium: StateFlow<Boolean> = billingManager.isPremium
 
     private val _isBiometricEnabled = MutableStateFlow(localSettings.isBiometricEnabled)
     val isBiometricEnabled: StateFlow<Boolean> = _isBiometricEnabled.asStateFlow()

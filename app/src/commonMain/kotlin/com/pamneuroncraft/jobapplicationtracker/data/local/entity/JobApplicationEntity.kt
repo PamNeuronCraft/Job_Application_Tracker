@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
@@ -8,9 +9,16 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import kotlinx.datetime.Instant
 
-@Entity(tableName = "job_applications")
+@Entity(
+    tableName = "job_applications",
+    indices = [
+        Index(value = ["userId"]),
+        Index(value = ["status"]),
+        Index(value = ["updatedAt"])
+    ]
+)
 data class JobApplicationEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val id: String,
     val jobName: String,
     val companyName: String,
     val description: String,
@@ -19,7 +27,11 @@ data class JobApplicationEntity(
     val status: String,
     val dateAdded: Long,
     val interviewDate: Long?,
-    val reminderDuration: String?
+    val reminderDuration: String?,
+    val userId: String?,
+    val updatedAt: Long,
+    val isDeleted: Boolean = false,
+    val lastSyncedAt: Long? = null
 ) {
     fun toDomainModel(): JobApplication {
         return JobApplication(
@@ -32,7 +44,11 @@ data class JobApplicationEntity(
             status = JobStatus.valueOf(status),
             dateAdded = Instant.fromEpochMilliseconds(dateAdded),
             interviewDate = interviewDate?.let { Instant.fromEpochMilliseconds(it) },
-            reminderDuration = reminderDuration?.let { ReminderDuration.valueOf(it) }
+            reminderDuration = reminderDuration?.let { ReminderDuration.valueOf(it) },
+            userId = userId,
+            updatedAt = Instant.fromEpochMilliseconds(updatedAt),
+            isDeleted = isDeleted,
+            lastSyncedAt = lastSyncedAt?.let { Instant.fromEpochMilliseconds(it) }
         )
     }
 
@@ -48,7 +64,11 @@ data class JobApplicationEntity(
                 status = job.status.name,
                 dateAdded = job.dateAdded.toEpochMilliseconds(),
                 interviewDate = job.interviewDate?.toEpochMilliseconds(),
-                reminderDuration = job.reminderDuration?.name
+                reminderDuration = job.reminderDuration?.name,
+                userId = job.userId,
+                updatedAt = job.updatedAt.toEpochMilliseconds(),
+                isDeleted = job.isDeleted,
+                lastSyncedAt = job.lastSyncedAt?.toEpochMilliseconds()
             )
         }
     }

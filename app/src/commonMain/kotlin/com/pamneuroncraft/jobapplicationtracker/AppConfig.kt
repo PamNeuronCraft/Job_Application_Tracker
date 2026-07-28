@@ -1,13 +1,28 @@
 package com.pamneuroncraft.jobapplicationtracker
 
+import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+
 interface AppConfig {
     val featureAiImport: Boolean
     val featureGoogleDriveBackup: Boolean
     val featureSummary: Boolean
+    val googleWebClientId: String
+    val isDebug: Boolean
 }
 
-class CommonAppConfig : AppConfig {
-    override val featureAiImport: Boolean = AppBuildKonfig.FEATURE_AI_IMPORT
-    override val featureGoogleDriveBackup: Boolean = AppBuildKonfig.FEATURE_GOOGLE_DRIVE_BACKUP
-    override val featureSummary: Boolean = AppBuildKonfig.FEATURE_SUMMARY
+class CommonAppConfig(
+    private val localSettings: LocalSettings,
+    override val isDebug: Boolean
+) : AppConfig {
+    override val featureAiImport: Boolean 
+        get() = AppBuildKonfig.FEATURE_AI_IMPORT && (isDebug || localSettings.isPremium)
+    
+    override val featureGoogleDriveBackup: Boolean 
+        get() = AppBuildKonfig.FEATURE_GOOGLE_DRIVE_BACKUP && (isDebug || localSettings.isPremium)
+    
+    override val featureSummary: Boolean 
+        get() = AppBuildKonfig.FEATURE_SUMMARY && (isDebug || localSettings.isPremium)
+
+    override val googleWebClientId: String
+        get() = if (isDebug) AppBuildKonfig.GOOGLE_WEB_CLIENT_ID_DEBUG else AppBuildKonfig.GOOGLE_WEB_CLIENT_ID_RELEASE
 }

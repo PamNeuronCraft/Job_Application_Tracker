@@ -4,6 +4,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import org.koin.compose.koinInject
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @Composable
 fun PermissionRationaleDialog(
@@ -12,9 +14,9 @@ fun PermissionRationaleDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Notification Permission Required") },
+        title = { Text(stringResource(Res.string.permission_required_title)) },
         text = {
-            Text("To schedule interview reminders, the app needs permission to show notifications. Please grant this permission in the system settings.")
+            Text(stringResource(Res.string.permission_required_desc))
         },
         confirmButton = {
             Button(
@@ -23,12 +25,12 @@ fun PermissionRationaleDialog(
                     onDismiss()
                 }
             ) {
-                Text("Open Settings")
+                Text(stringResource(Res.string.open_settings))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(Res.string.cancel))
             }
         }
     )

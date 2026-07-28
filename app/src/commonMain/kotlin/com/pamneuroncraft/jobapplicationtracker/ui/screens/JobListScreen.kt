@@ -2,17 +2,22 @@ package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.paging.*
+import androidx.paging.compose.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.flow.flow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,20 +32,24 @@ import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ImportViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobListViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
+import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.StringResource
+import jobapplicationtracker.app.generated.resources.*
 
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ProfileViewModel
 
-enum class PaidFeatureType(val title: String, val message: String) {
+enum class PaidFeatureType(val titleRes: StringResource, val messageRes: StringResource) {
     SUMMARY(
-        "Job Summary",
-        "The job summary and visual overview feature is only available for paid users. Upgrade now to unlock deep insights into your application progress."
+        Res.string.paid_feature_summary_title,
+        Res.string.paid_feature_summary_message
     ),
     AI_IMPORT(
-        "AI Job Extraction",
-        "AI-powered job extraction is only available for paid users. Upgrade now to automatically fill in job details from URLs."
+        Res.string.paid_feature_ai_import_title,
+        Res.string.paid_feature_ai_import_message
     )
 }
 
@@ -48,7 +57,7 @@ enum class PaidFeatureType(val title: String, val message: String) {
 @Composable
 fun JobListScreen(
     onAddJob: (JobAddEditKey) -> Unit,
-    onJobClick: (Int) -> Unit,
+    onJobClick: (String) -> Unit,
     onProfileClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onSummaryClick: () -> Unit,
@@ -58,7 +67,8 @@ fun JobListScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
     appConfig: AppConfig = koinInject()
 ) {
-    val jobs by viewModel.jobs.collectAsState()
+    val pagedJobs = viewModel.pagedJobs.collectAsLazyPagingItems()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val user by profileViewModel.currentUser.collectAsState()
     
     var showAddOptions by remember { mutableStateOf(false) }
@@ -68,7 +78,9 @@ fun JobListScreen(
     }
 
     JobListContent(
-        jobs = jobs,
+        jobs = pagedJobs,
+        searchQuery = searchQuery,
+        onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
         userInitial = user?.displayName?.firstOrNull()?.toString() ?: user?.email?.firstOrNull()?.toString() ?: "G",
         onAddJob = { showAddOptions = true },
         onJobClick = onJobClick,
@@ -88,8 +100,8 @@ fun JobListScreen(
     paidFeatureToShow?.let { feature ->
         PaidFeatureDialog(
             onDismiss = { paidFeatureToShow = null },
-            title = feature.title,
-            message = feature.message
+            title = stringResource(feature.titleRes),
+            message = stringResource(feature.messageRes)
         )
     }
 
@@ -104,12 +116,12 @@ fun JobListScreen(
                     .padding(bottom = 32.dp)
             ) {
                 Text(
-                    text = "Add New Application",
+                    text = stringResource(Res.string.add_new_application),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 ListItem(
-                    headlineContent = { Text("Manual Entry") },
+                    headlineContent = { Text(stringResource(Res.string.manual_entry)) },
                     leadingContent = { Icon(Icons.Default.EditNote, contentDescription = null) },
                     modifier = Modifier.clickable {
                         showAddOptions = false
@@ -118,7 +130,7 @@ fun JobListScreen(
                 )
                 if (appConfig.featureAiImport) {
                     ListItem(
-                        headlineContent = { Text("Import from URL (AI)") },
+                        headlineContent = { Text(stringResource(Res.string.import_from_url_ai)) },
                         leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
                         modifier = Modifier.clickable {
                             showAddOptions = false
@@ -171,15 +183,15 @@ fun ImportFromUrlDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Import from URL") },
+        title = { Text(stringResource(Res.string.import_from_url)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (state is ImportViewModel.ImportState.Idle) {
-                    Text("Paste the job posting URL below. Gemini AI will try to extract the details for you.")
+                    Text(stringResource(Res.string.import_from_url_description))
                     OutlinedTextField(
                         value = url,
                         onValueChange = { url = it },
-                        label = { Text("Job URL") },
+                        label = { Text(stringResource(Res.string.job_url)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -192,7 +204,7 @@ fun ImportFromUrlDialog(
                     ) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Extracting job details...")
+                        Text(stringResource(Res.string.extracting_job_details))
                     }
                 }
 
@@ -201,7 +213,7 @@ fun ImportFromUrlDialog(
                         text = (state as ImportViewModel.ImportState.Error).message,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Text("Would you like to try entering the details manually instead?")
+                    Text(stringResource(Res.string.try_manual_entry))
                 }
             }
         },
@@ -212,12 +224,12 @@ fun ImportFromUrlDialog(
                         onClick = { viewModel.extractJob(url) },
                         enabled = url.isNotBlank()
                     ) {
-                        Text("Extract")
+                        Text(stringResource(Res.string.extract))
                     }
                 }
                 is ImportViewModel.ImportState.Error -> {
                     Button(onClick = onProceedManually) {
-                        Text("Enter Manually")
+                        Text(stringResource(Res.string.enter_manually))
                     }
                 }
                 is ImportViewModel.ImportState.Success -> {
@@ -231,7 +243,7 @@ fun ImportFromUrlDialog(
         dismissButton = {
             if (state !is ImportViewModel.ImportState.Loading) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         }
@@ -241,10 +253,12 @@ fun ImportFromUrlDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobListContent(
-    jobs: List<JobApplication>,
+    jobs: LazyPagingItems<JobApplication>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     userInitial: String,
     onAddJob: () -> Unit,
-    onJobClick: (Int) -> Unit,
+    onJobClick: (String) -> Unit,
     onProfileClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onSummaryClick: () -> Unit,
@@ -254,7 +268,7 @@ fun JobListContent(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Job Applications") },
+                title = { Text(stringResource(Res.string.job_applications)) },
                 navigationIcon = {
                     Box(
                         modifier = Modifier
@@ -277,14 +291,14 @@ fun JobListContent(
                     IconButton(onClick = onSummaryClick) {
                         Icon(
                             imageVector = Icons.Default.Assessment,
-                            contentDescription = "Summary"
+                            contentDescription = stringResource(Res.string.summary)
                         )
                     }
                     
                     IconButton(onClick = onSettingsClick) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(Res.string.settings)
                         )
                     }
                 }
@@ -292,7 +306,7 @@ fun JobListContent(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddJob) {
-                Icon(Icons.Default.Add, contentDescription = "Add Job")
+                Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_job))
             }
         }
     ) { padding ->
@@ -301,6 +315,25 @@ fun JobListContent(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text(stringResource(Res.string.search_jobs)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(Res.string.clear_search))
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -309,14 +342,58 @@ fun JobListContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
-                    items = jobs,
-                    key = { it.id }
-                ) { job ->
-                    JobItem(
-                        job = job,
-                        onDelete = { onDeleteJob(job) },
-                        onClick = { onJobClick(job.id) }
-                    )
+                    count = jobs.itemCount,
+                    key = jobs.itemKey { it.id }
+                ) { index ->
+                    val job = jobs[index]
+                    if (job != null) {
+                        JobItem(
+                            job = job,
+                            onDelete = { onDeleteJob(job) },
+                            onClick = { onJobClick(job.id) }
+                        )
+                    }
+                }
+
+                when (val state = jobs.loadState.append) {
+                    is LoadState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                    }
+                    is LoadState.Error -> {
+                        item {
+                            Text(
+                                text = stringResource(Res.string.error_loading_more, state.error.message ?: ""),
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+            }
+
+            if (jobs.loadState.refresh is LoadState.Loading && jobs.itemCount == 0) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(Res.string.no_jobs_found))
                 }
             }
             
@@ -334,14 +411,14 @@ fun JobItem(
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
-    val swipeState = rememberSwipeToDismissBoxState()
-    
-    if (swipeState.currentValue != SwipeToDismissBoxValue.Settled) {
-        LaunchedEffect(swipeState.currentValue) {
-            onDelete()
-            swipeState.reset()
+    val swipeState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it != SwipeToDismissBoxValue.Settled) {
+                onDelete()
+            }
+            false // Item will be removed by the list update, so we don't need to transition to 'dismissed'
         }
-    }
+    )
 
     SwipeToDismissBox(
         state = swipeState,
@@ -359,16 +436,18 @@ fun JobItem(
                 contentAlignment = if (swipeState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) 
                     Alignment.CenterStart else Alignment.CenterEnd
             ) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete), tint = Color.White)
             }
         },
         content = {
+            val containerColor = getJobStatusColor(job.status, isSystemInDarkTheme())
             Card(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = getStatusColor(job.status)
+                    containerColor = containerColor,
+                    contentColor = contentColorFor(containerColor)
                 )
             ) {
                 Column(
@@ -393,12 +472,18 @@ fun JobItem(
 @Preview
 @Composable
 fun JobListScreenPreview() {
+    val jobs = flow {
+        emit(PagingData.from(listOf(
+            JobApplication(id = "1", jobName = "Android Developer", companyName = "Google", description = "", jobType = JobType.REMOTE, compensation = "150k", status = JobStatus.APPLIED),
+            JobApplication(id = "2", jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensation = "140k", status = JobStatus.INTERVIEW)
+        )))
+    }.collectAsLazyPagingItems()
+
     JobApplicationTrackerTheme {
         JobListContent(
-            jobs = listOf(
-                JobApplication(id = 1, jobName = "Android Developer", companyName = "Google", description = "", jobType = JobType.REMOTE, compensation = "150k", status = JobStatus.APPLIED),
-                JobApplication(id = 2, jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensation = "140k", status = JobStatus.INTERVIEW)
-            ),
+            jobs = jobs,
+            searchQuery = "",
+            onSearchQueryChange = {},
             userInitial = "G",
             onAddJob = {},
             onJobClick = {},
@@ -411,11 +496,4 @@ fun JobListScreenPreview() {
     }
 }
 
-fun getStatusColor(status: JobStatus): Color {
-    return when (status) {
-        JobStatus.APPLIED -> Color(0xFFBBDEFB) // Light Blue
-        JobStatus.INTERVIEW -> Color(0xFFFFF9C4) // Light Yellow
-        JobStatus.OFFER -> Color(0xFFC8E6C9) // Light Green
-        JobStatus.NO_OFFER -> Color(0xFFFFCDD2) // Light Red
-    }
-}
+

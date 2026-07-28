@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:587001402052:android:69f51f948141174816af91",
+        "mobilesdk_app_id": "1:587001402052:android:af002750f1c47c6716af91",
         "android_client_info": {
-          "package_name": "com.pamneuroncraft.jobapplicationtracker.free.dev"
+          "package_name": "com.pamneuroncraft.jobapplicationtracker.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "587001402052-ruil7jgdbim7187pvpd3vcm4iqecim6q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pamneuroncraft.jobapplicationtracker.dev",
+            "certificate_hash": "2a973cf492b6e053a781174b5bb5d76a7d80f24f"
+          }
+        },
+        {
+          "client_id": "587001402052-idcta36ao4seblo39mas8q57vaabi7l9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDK_MpeTZd5Mx2nA8kGpMRKuvGZ2D-ibcE"
@@ -20,26 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:587001402052:android:7e8328b54f51850816af91",
-        "android_client_info": {
-          "package_name": "com.pamneuroncraft.jobapplicationtracker.paid.dev"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDK_MpeTZd5Mx2nA8kGpMRKuvGZ2D-ibcE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587001402052-254s6ig1hd9sinl8svf5agqlj81ak8v7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

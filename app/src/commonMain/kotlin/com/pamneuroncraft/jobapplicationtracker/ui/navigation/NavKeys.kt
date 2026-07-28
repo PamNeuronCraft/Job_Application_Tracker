@@ -11,11 +11,11 @@ data object JobListKey : JobTrackerKey
 data object OnboardingKey : JobTrackerKey
 
 @Serializable
-data class JobDetailKey(val jobId: Int) : JobTrackerKey
+data class JobDetailKey(val jobId: String) : JobTrackerKey
 
 @Serializable
 data class JobAddEditKey(
-    val jobId: Int? = null,
+    val jobId: String? = null,
     val prefilledJobName: String? = null,
     val prefilledCompanyName: String? = null,
     val prefilledDescription: String? = null,
@@ -31,3 +31,6 @@ data object SettingsKey : JobTrackerKey
 
 @Serializable
 data object SummaryKey : JobTrackerKey
+
+@Serializable
+data object SubscriptionKey : JobTrackerKey

@@ -15,6 +15,7 @@ class LocalSettings(private val settings: Settings) {
         private const val KEY_ONBOARDING_COMPLETED = "is_onboarding_completed"
         private const val KEY_THEME_PREFERENCE = "theme_preference"
         private const val KEY_BIOMETRIC_ENABLED = "biometric_enabled"
+        private const val KEY_IS_PREMIUM = "is_premium"
     }
 
     private val _themePreferenceFlow = MutableStateFlow(getInitialTheme())
@@ -43,4 +44,8 @@ class LocalSettings(private val settings: Settings) {
     var isBiometricEnabled: Boolean
         get() = settings.getBoolean(KEY_BIOMETRIC_ENABLED, false)
         set(value) = settings.putBoolean(KEY_BIOMETRIC_ENABLED, value)
+
+    var isPremium: Boolean
+        get() = settings.getBoolean(KEY_IS_PREMIUM, false)
+        set(value) = settings.putBoolean(KEY_IS_PREMIUM, value)
 }

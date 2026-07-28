@@ -2,12 +2,14 @@ package com.pamneuroncraft.jobapplicationtracker.ui.components
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @Composable
 fun PaidFeatureDialog(
     onDismiss: () -> Unit,
-    title: String = "Premium Feature",
-    message: String = "This feature is only available for paid users. Upgrade now to unlock all premium capabilities."
+    title: String = stringResource(Res.string.premium_feature),
+    message: String = stringResource(Res.string.premium_feature_default_msg)
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -17,7 +19,7 @@ fun PaidFeatureDialog(
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Got it")
+                Text(stringResource(Res.string.got_it))
             }
         }
     )

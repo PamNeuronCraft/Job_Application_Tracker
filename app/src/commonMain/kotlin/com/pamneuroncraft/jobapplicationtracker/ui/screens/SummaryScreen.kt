@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,8 +20,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
+import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SummaryViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -30,14 +34,15 @@ fun SummaryScreen(
 ) {
     val statusCounts by viewModel.statusCounts.collectAsState()
     val totalJobs by viewModel.totalJobs.collectAsState()
+    val isDark = isSystemInDarkTheme()
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Job Summary") },
+                title = { Text(stringResource(Res.string.summary)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )
@@ -53,7 +58,7 @@ fun SummaryScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Text(
-                text = "Status Breakdown",
+                text = stringResource(Res.string.status_breakdown),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Start)
@@ -71,7 +76,7 @@ fun SummaryScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Total",
+                        text = stringResource(Res.string.total),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -85,27 +90,27 @@ fun SummaryScreen(
                 maxItemsInEachRow = 2
             ) {
                 SummaryCard(
-                    label = "Applied",
-                    count = statusCounts[JobStatus.APPLIED] ?: 0,
-                    color = getChartStatusColor(JobStatus.APPLIED),
+                    label = stringResource(Res.string.status_applied),
+                    count = totalJobs,
+                    color = getJobStatusColor(JobStatus.APPLIED, isDark),
                     modifier = Modifier.weight(1f).height(100.dp)
                 )
                 SummaryCard(
-                    label = "Interview",
+                    label = stringResource(Res.string.status_interview),
                     count = statusCounts[JobStatus.INTERVIEW] ?: 0,
-                    color = getChartStatusColor(JobStatus.INTERVIEW),
+                    color = getJobStatusColor(JobStatus.INTERVIEW, isDark),
                     modifier = Modifier.weight(1f).height(100.dp)
                 )
                 SummaryCard(
-                    label = "Offered",
+                    label = stringResource(Res.string.status_offered),
                     count = statusCounts[JobStatus.OFFER] ?: 0,
-                    color = getChartStatusColor(JobStatus.OFFER),
+                    color = getJobStatusColor(JobStatus.OFFER, isDark),
                     modifier = Modifier.weight(1f).height(100.dp)
                 )
                 SummaryCard(
-                    label = "Rejected",
+                    label = stringResource(Res.string.status_rejected),
                     count = statusCounts[JobStatus.NO_OFFER] ?: 0,
-                    color = getChartStatusColor(JobStatus.NO_OFFER),
+                    color = getJobStatusColor(JobStatus.NO_OFFER, isDark),
                     modifier = Modifier.weight(1f).height(100.dp)
                 )
             }
@@ -118,6 +123,7 @@ fun DonutChart(
     statusCounts: Map<JobStatus, Int>,
     total: Int
 ) {
+    val isDark = isSystemInDarkTheme()
     if (total == 0) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawArc(
@@ -139,7 +145,7 @@ fun DonutChart(
             if (count > 0) {
                 val sweepAngle = (count.toFloat() / total) * 360f
                 drawArc(
-                    color = getChartStatusColor(status),
+                    color = getJobStatusColor(status, isDark),
                     startAngle = startAngle,
                     sweepAngle = sweepAngle,
                     useCenter = false,
@@ -184,11 +190,4 @@ fun SummaryCard(
     }
 }
 
-private fun getChartStatusColor(status: JobStatus): Color {
-    return when (status) {
-        JobStatus.APPLIED -> Color(0xFF2196F3) // Blue
-        JobStatus.INTERVIEW -> Color(0xFFFFC107) // Yellow/Amber
-        JobStatus.OFFER -> Color(0xFF4CAF50) // Green
-        JobStatus.NO_OFFER -> Color(0xFFF44336) // Red
-    }
-}
+

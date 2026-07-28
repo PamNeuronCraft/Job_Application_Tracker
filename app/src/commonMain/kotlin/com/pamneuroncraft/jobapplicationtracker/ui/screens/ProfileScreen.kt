@@ -3,9 +3,11 @@ package com.pamneuroncraft.jobapplicationtracker.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,58 +16,58 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SocialAuthManager
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumUpsellDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ProfileViewModel
+import com.pamneuroncraft.jobapplicationtracker.ui.util.rememberPlatformContext
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit,
+    onSubscriptionClick: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel(),
     socialAuthManager: SocialAuthManager = koinInject()
 ) {
     val user by viewModel.currentUser.collectAsState()
     val isLoading by viewModel.isLoading
     val error by viewModel.error
+    val registrationSuccess by viewModel.registrationSuccess
+    
+    val scope = rememberCoroutineScope()
+    val platformContext = rememberPlatformContext()
 
     var isSignUp by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
 
-    var triggerGoogleAuth by remember { mutableStateOf(false) }
-    var triggerAppleAuth by remember { mutableStateOf(false) }
-
-    if (triggerGoogleAuth) {
-        socialAuthManager.RequestGoogleSignIn { result ->
-            triggerGoogleAuth = false
-            result?.let { viewModel.signInWithGoogle(it.idToken) }
-        }
-    }
-
-    if (triggerAppleAuth) {
-        socialAuthManager.RequestAppleSignIn { result ->
-            triggerAppleAuth = false
-            result?.let { viewModel.signInWithApple(it.idToken, it.rawNonce ?: "") }
-        }
+    if (registrationSuccess) {
+        PremiumUpsellDialog(
+            onDismiss = { viewModel.resetRegistrationState() },
+            onNavigateToSubscription = onSubscriptionClick
+        )
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Profile") },
+                title = { Text(stringResource(Res.string.profile)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
                 actions = {
                     if (user != null) {
                         IconButton(onClick = { viewModel.signOut() }) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out")
+                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = stringResource(Res.string.sign_out))
                         }
                     }
                 }
@@ -101,7 +103,7 @@ fun ProfileScreen(
 
             if (user != null) {
                 Text(
-                    text = "Hello, ${user?.displayName ?: "User"}",
+                    text = stringResource(Res.string.hello_user, user?.displayName ?: stringResource(Res.string.default_user)),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -111,6 +113,18 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = onSubscriptionClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(Icons.Default.Star, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.manage_subscription))
+                }
+
                 Spacer(modifier = Modifier.weight(1f))
                 
                 Button(
@@ -118,11 +132,11 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Sign Out")
+                    Text(stringResource(Res.string.sign_out))
                 }
             } else {
                 Text(
-                    text = if (isSignUp) "Create Account" else "Welcome Back",
+                    text = stringResource(if (isSignUp) Res.string.create_account else Res.string.welcome_back),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -131,7 +145,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Full Name") },
+                        label = { Text(stringResource(Res.string.label_full_name)) },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading
                     )
@@ -140,7 +154,7 @@ fun ProfileScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text(stringResource(Res.string.label_email)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 )
@@ -148,17 +162,24 @@ fun ProfileScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(Res.string.label_password)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 )
 
                 if (error != null) {
-                    Text(
-                        text = error!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = error!!,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
 
                 Button(
@@ -179,7 +200,7 @@ fun ProfileScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text(if (isSignUp) "Sign Up" else "Sign In")
+                        Text(stringResource(if (isSignUp) Res.string.sign_up else Res.string.sign_in))
                     }
                 }
 
@@ -187,25 +208,43 @@ fun ProfileScreen(
                     onClick = { isSignUp = !isSignUp },
                     enabled = !isLoading
                 ) {
-                    Text(if (isSignUp) "Already have an account? Sign In" else "Don't have an account? Sign Up")
+                    Text(stringResource(if (isSignUp) Res.string.already_have_account else Res.string.dont_have_account))
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 OutlinedButton(
-                    onClick = { triggerGoogleAuth = true },
+                    onClick = { 
+                        scope.launch {
+                            try {
+                                val result = socialAuthManager.signInWithGoogle(platformContext)
+                                if (result != null) {
+                                    viewModel.signInWithGoogle(result.idToken)
+                                }
+                            } catch (_: Exception) {
+                                // Silent for now or handle appropriately in ViewModel
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 ) {
-                    Text("Continue with Google")
+                    Text(stringResource(Res.string.continue_with_google))
                 }
 
-                OutlinedButton(
-                    onClick = { triggerAppleAuth = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading
-                ) {
-                    Text("Continue with Apple")
+                if (socialAuthManager.isAppleSignInSupported) {
+                    OutlinedButton(
+                        onClick = { 
+                            scope.launch {
+                                val result = socialAuthManager.signInWithApple(platformContext)
+                                result?.let { viewModel.signInWithApple(it.idToken, it.rawNonce ?: "") }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
+                    ) {
+                        Text(stringResource(Res.string.continue_with_apple))
+                    }
                 }
                 
                 Spacer(modifier = Modifier.weight(1f))
@@ -218,6 +257,6 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenPreview() {
     JobApplicationTrackerTheme {
-        ProfileScreen(onBack = {})
+        ProfileScreen(onBack = {}, onSubscriptionClick = {})
     }
 }

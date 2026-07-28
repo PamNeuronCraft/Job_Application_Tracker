@@ -1,5 +1,6 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -18,22 +19,23 @@ buildkonfig {
     objectName = "AppBuildKonfig"
     
     defaultConfigs {
-        buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "false")
-        buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "false")
-        buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "false")
+        buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "true")
+        buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "true")
+        buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "true")
+        
+        // Google Web Client IDs
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_DEBUG", "587001402052-idcta36ao4seblo39mas8q57vaabi7l9.apps.googleusercontent.com")
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_RELEASE", "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com")
+        
+        // RevenueCat API Keys
+        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
+        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_RELEASE", "goog_HrWqyESiTxrpzpqsfSlKXUrGmEm")
+        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
+        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder")
         
         // Default to Google Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-9098088729873683~6121804769")
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-9098088729873683/1918835878")
-        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID", "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com")
-    }
-    
-    targetConfigs {
-        create("paid") {
-            buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "true")
-            buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "true")
-            buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "true")
-        }
     }
 }
 
@@ -45,13 +47,12 @@ kotlin {
     }
     
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
-            isStatic = true
+            isStatic = true // Required for RevenueCat SDK
         }
     }
     
@@ -66,6 +67,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             
             implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.room.paging)
             implementation(libs.androidx.sqlite.bundled)
             
             // Using standard Navigation Compose KMP
@@ -84,6 +86,10 @@ kotlin {
             implementation(libs.multiplatform.settings)
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
+            implementation(libs.androidx.paging.common)
+            implementation(libs.androidx.paging.compose)
+            implementation(libs.purchases.core)
+            implementation(libs.uuid)
         }
         
         androidMain.dependencies {
@@ -109,6 +115,9 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.services.auth)
             implementation(libs.googleid)
+            implementation(libs.androidx.biometric)
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.paging.runtime)
         }
         
         iosMain.dependencies {
@@ -120,6 +129,23 @@ kotlin {
 android {
     namespace = "com.pamneuroncraft.jobapplicationtracker"
     compileSdk = 37
+
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(keystorePropertiesFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.pamneuroncraft.jobapplicationtracker"
@@ -134,18 +160,6 @@ android {
         manifestPlaceholders["adMobAppId"] = "ca-app-pub-3940256099942544~3347511713"
     }
 
-    flavorDimensions += listOf("tier")
-    productFlavors {
-        create("free") {
-            dimension = "tier"
-            applicationIdSuffix = ".free"
-        }
-        create("paid") {
-            dimension = "tier"
-            applicationIdSuffix = ".paid"
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
@@ -157,6 +171,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -182,7 +197,15 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "io.grpc") {
+            // Force a stable version that contains InternalGlobalInterceptors
+            useVersion("1.65.1")
+        }
+    }
 }

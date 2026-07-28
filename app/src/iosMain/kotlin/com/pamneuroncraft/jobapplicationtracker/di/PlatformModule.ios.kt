@@ -14,11 +14,18 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationSe
 
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.CommonAppConfig
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.IosBillingManager
+import com.pamneuroncraft.jobapplicationtracker.util.IosSyncManager
 
 actual val platformModule = module {
-    single<AppConfig> { CommonAppConfig() }
+    single<BillingManager> { IosBillingManager(get(), get()) }
+    single<SyncManager> { IosSyncManager() }
+    single<AppConfig> { CommonAppConfig(get(), false) }
     single<JobDatabase> {
         getDatabaseBuilder()
+            .addMigrations(JobDatabase.MIGRATION_3_4, JobDatabase.MIGRATION_4_5, JobDatabase.MIGRATION_5_6)
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()

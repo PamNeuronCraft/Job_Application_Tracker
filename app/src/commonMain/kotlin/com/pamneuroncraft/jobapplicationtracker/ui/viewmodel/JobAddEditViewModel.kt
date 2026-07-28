@@ -43,10 +43,10 @@ class JobAddEditViewModel(
     private val _isAutoExtracting = mutableStateOf(false)
     val isAutoExtracting: State<Boolean> = _isAutoExtracting
 
-    private var currentJobId: Int? = null
+    private var currentJobId: String? = null
 
     fun loadJob(
-        jobId: Int?,
+        jobId: String?,
         prefilledJobName: String? = null,
         prefilledCompanyName: String? = null,
         prefilledDescription: String? = null,
@@ -111,17 +111,30 @@ class JobAddEditViewModel(
 
     fun onSaveJob(onSaved: () -> Unit) {
         viewModelScope.launch {
-            val job = JobApplication(
-                id = currentJobId ?: 0,
-                jobName = _jobName.value,
-                companyName = _companyName.value,
-                description = _description.value,
-                jobType = _jobType.value,
-                compensation = _compensation.value,
-                status = _status.value,
-                interviewDate = _interviewDate.value,
-                reminderDuration = _reminderDuration.value
-            )
+            val job = if (currentJobId != null) {
+                JobApplication(
+                    id = currentJobId!!,
+                    jobName = _jobName.value,
+                    companyName = _companyName.value,
+                    description = _description.value,
+                    jobType = _jobType.value,
+                    compensation = _compensation.value,
+                    status = _status.value,
+                    interviewDate = _interviewDate.value,
+                    reminderDuration = _reminderDuration.value
+                )
+            } else {
+                JobApplication(
+                    jobName = _jobName.value,
+                    companyName = _companyName.value,
+                    description = _description.value,
+                    jobType = _jobType.value,
+                    compensation = _compensation.value,
+                    status = _status.value,
+                    interviewDate = _interviewDate.value,
+                    reminderDuration = _reminderDuration.value
+                )
+            }
             if (currentJobId != null) {
                 jobUseCases.updateJob(job)
             } else {

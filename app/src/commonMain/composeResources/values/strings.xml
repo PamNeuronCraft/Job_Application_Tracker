@@ -1,3 +1,142 @@
 <resources>
     <string name="app_name">Job Application Tracker</string>
+
+    <!-- JobListScreen -->
+    <string name="paid_feature_summary_title">Job Summary</string>
+    <string name="paid_feature_summary_message">The job summary and visual overview feature is only available for paid users. Upgrade now to unlock deep insights into your application progress.</string>
+    <string name="paid_feature_ai_import_title">AI Job Extraction</string>
+    <string name="paid_feature_ai_import_message">AI-powered job extraction is only available for paid users. Upgrade now to automatically fill in job details from URLs.</string>
+    <string name="add_new_application">Add New Application</string>
+    <string name="manual_entry">Manual Entry</string>
+    <string name="import_from_url_ai">Import from URL (AI)</string>
+    <string name="import_from_url">Import from URL</string>
+    <string name="import_from_url_description">Paste the job posting URL below. Gemini AI will try to extract the details for you.</string>
+    <string name="job_url">Job URL</string>
+    <string name="extracting_job_details">Extracting job details...</string>
+    <string name="error_loading_more">Error loading more: %1$s</string>
+    <string name="no_jobs_found">No job applications found.</string>
+    <string name="try_manual_entry">Would you like to try entering the details manually instead?</string>
+    <string name="extract">Extract</string>
+    <string name="enter_manually">Enter Manually</string>
+    <string name="cancel">Cancel</string>
+    <string name="job_applications">Job Applications</string>
+    <string name="summary">Summary</string>
+    <string name="settings">Settings</string>
+    <string name="add_job">Add Job</string>
+    <string name="search_jobs">Search jobs...</string>
+    <string name="clear_search">Clear search</string>
+    <string name="delete">Delete</string>
+
+    <!-- JobDetailScreen -->
+    <string name="job_details">Job Details</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="label_job_name">Job Name</string>
+    <string name="label_company_name">Company Name</string>
+    <string name="label_description">Description</string>
+    <string name="label_job_type">Job Type</string>
+    <string name="label_compensation">Compensation</string>
+    <string name="label_status">Status</string>
+    <string name="label_date_added">Date Added</string>
+    <string name="label_interview_date_time">Interview Date &amp; Time</string>
+    <string name="label_reminder">Reminder</string>
+    <string name="not_set">Not set</string>
+    <string name="no_reminder_set">No reminder set</string>
+    <string name="quick_action_set_interview">Quick Action: Set Interview Date</string>
+    <string name="set_date">Set Date</string>
+    <string name="ok">OK</string>
+
+    <!-- JobAddEditScreen -->
+    <string name="title_add_job">Add Job</string>
+    <string name="title_edit_job">Edit Job</string>
+    <string name="save">Save</string>
+    <string name="no_date_set">No date set</string>
+    <string name="no_time_set">No time set</string>
+    <string name="none">None</string>
+    <string name="interview_date">Interview Date</string>
+    <string name="interview_time">Interview Time</string>
+
+    <!-- SummaryScreen -->
+    <string name="status_breakdown">Status Breakdown</string>
+    <string name="total">Total</string>
+    <string name="status_applied">Applied</string>
+    <string name="status_interview">Interview</string>
+    <string name="status_offered">Offered</string>
+    <string name="status_rejected">Rejected</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile">Profile</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="hello_user">Hello, %1$s</string>
+    <string name="default_user">User</string>
+    <string name="manage_subscription">Manage Subscription</string>
+    <string name="create_account">Create Account</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="label_full_name">Full Name</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+    <string name="dont_have_account">Don\'t have an account? Sign Up</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_apple">Continue with Apple</string>
+
+    <!-- SubscriptionScreen -->
+    <string name="subscription">Subscription</string>
+    <string name="premium_member_title">You are a Premium Member!</string>
+    <string name="upgrade_premium_title">Upgrade to Premium</string>
+    <string name="premium_member_desc">Enjoy all the advanced features to supercharge your job search.</string>
+    <string name="upgrade_premium_desc">Unlock the full potential of Job Application Tracker with our premium features.</string>
+    <string name="benefit_ai_extraction_title">AI Job Extraction</string>
+    <string name="benefit_ai_extraction_desc">Automatically extract job details from any URL.</string>
+    <string name="benefit_visual_insights_title">Visual Insights</string>
+    <string name="benefit_visual_insights_desc">Deep dive into your application statistics.</string>
+    <string name="benefit_cloud_sync_title">Cloud Sync</string>
+    <string name="benefit_cloud_sync_desc">Securely backup and sync data via Google Drive.</string>
+    <string name="benefit_no_ads_title">No Advertisements</string>
+    <string name="benefit_no_ads_desc">Focus on your goals without distractions.</string>
+    <string name="cancel_subscription">Cancel Subscription</string>
+    <string name="subscribe_price">Subscribe for %1$s/month</string>
+    <string name="cancel_anytime">Subscription can be cancelled anytime.</string>
+
+    <!-- OnboardingScreen -->
+    <string name="onboarding_title">Stay on Top of Your Interviews</string>
+    <string name="onboarding_desc">Get timely reminders before your scheduled interviews so you never miss an opportunity.</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- PaidFeatureDialog -->
+    <string name="premium_feature">Premium Feature</string>
+    <string name="premium_feature_default_msg">This feature is only available for paid users. Upgrade now to unlock all premium capabilities.</string>
+    <string name="got_it">Got it</string>
+
+    <!-- PremiumUpsellDialog -->
+    <string name="welcome_to_tracker">Welcome to Tracker!</string>
+    <string name="upsell_desc">Get the most out of your job search with Premium features:</string>
+    <string name="benefit_ai_extraction">AI-powered job extraction from URLs</string>
+    <string name="benefit_visual_analytics">Visual analytics and progress summaries</string>
+    <string name="benefit_google_drive">Google Drive cloud backup and sync</string>
+    <string name="benefit_ad_free">Completely ad-free experience</string>
+    <string name="learn_more">Learn More</string>
+    <string name="maybe_later">Maybe Later</string>
+
+    <!-- PermissionRationaleDialog -->
+    <string name="permission_required_title">Notification Permission Required</string>
+    <string name="permission_required_desc">To schedule interview reminders, the app needs permission to show notifications. Please grant this permission in the system settings.</string>
+    <string name="open_settings">Open Settings</string>
+
+    <!-- Enum Labels -->
+    <string name="job_status_applied">Applied</string>
+    <string name="job_status_interview">Interview</string>
+    <string name="job_status_offer">Offered</string>
+    <string name="job_status_no_offer">Rejected</string>
+
+    <string name="job_type_remote">Remote</string>
+    <string name="job_type_onsite">On-site</string>
+    <string name="job_type_hybrid">Hybrid</string>
+
+    <string name="reminder_one_day">1 day before</string>
+    <string name="reminder_two_hours">2 hours before</string>
+    <string name="reminder_thirty_minutes">30 minutes before</string>
+
 </resources>

@@ -15,6 +15,8 @@ import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
+import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
+import com.pamneuroncraft.jobapplicationtracker.util.createBiometricManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -23,15 +25,28 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SettingsScreen(
     onBack: () -> Unit,
     onProfileClick: () -> Unit,
+    onSubscriptionClick: () -> Unit,
     viewModel: SettingsViewModel = koinViewModel(),
     backupViewModel: BackupViewModel = koinViewModel(),
     appConfig: AppConfig = koinInject()
 ) {
     val themePreference by viewModel.themePreference.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
+    val isPremium by viewModel.isPremium.collectAsState()
+    val biometricManager = createBiometricManager()
     
     var showThemeMenu by remember { mutableStateOf(false) }
     var showPaidFeatureDialog by remember { mutableStateOf(false) }
+    var triggerBiometricVerification by remember { mutableStateOf(false) }
+
+    if (triggerBiometricVerification) {
+        biometricManager.Authenticate { result ->
+            triggerBiometricVerification = false
+            if (result is BiometricResult.Success) {
+                viewModel.onBiometricEnabledChange(true)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -59,7 +74,17 @@ fun SettingsScreen(
                 trailingContent = {
                     Switch(
                         checked = isBiometricEnabled,
-                        onCheckedChange = { viewModel.onBiometricEnabledChange(it) }
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                if (biometricManager.canAuthenticate()) {
+                                    triggerBiometricVerification = true
+                                } else {
+                                    // Handle no biometrics enrolled
+                                }
+                            } else {
+                                viewModel.onBiometricEnabledChange(false)
+                            }
+                        }
                     )
                 }
             )
@@ -68,6 +93,13 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text("Backup and Sync") },
                 leadingContent = { Icon(Icons.Default.CloudSync, contentDescription = null) },
+                trailingContent = {
+                    Text(
+                        text = if (isPremium) "Enabled" else "Disabled",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isPremium) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    )
+                },
                 modifier = Modifier.clickable {
                     if (appConfig.featureGoogleDriveBackup) {
                         if (backupViewModel.isUserSignedIn) {
@@ -79,6 +111,20 @@ fun SettingsScreen(
                         showPaidFeatureDialog = true
                     }
                 }
+            )
+
+            // Subscription
+            ListItem(
+                headlineContent = { Text("Subscription") },
+                leadingContent = { Icon(Icons.Default.Star, contentDescription = null) },
+                trailingContent = {
+                    Text(
+                        text = if (isPremium) "Subscribed" else "Disabled",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isPremium) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    )
+                },
+                modifier = Modifier.clickable { onSubscriptionClick() }
             )
 
             // Theme

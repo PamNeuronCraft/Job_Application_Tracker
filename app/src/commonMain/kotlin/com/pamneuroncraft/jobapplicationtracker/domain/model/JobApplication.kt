@@ -3,10 +3,12 @@ package com.pamneuroncraft.jobapplicationtracker.domain.model
 import kotlinx.serialization.Serializable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import com.benasher44.uuid.uuid4
+import jobapplicationtracker.app.generated.resources.*
 
 @Serializable
 data class JobApplication(
-    val id: Int = 0,
+    val id: String = uuid4().toString(),
     val jobName: String,
     val companyName: String,
     val description: String,
@@ -15,22 +17,45 @@ data class JobApplication(
     val status: JobStatus,
     val dateAdded: Instant = Clock.System.now(),
     val interviewDate: Instant? = null,
-    val reminderDuration: ReminderDuration? = null
+    val reminderDuration: ReminderDuration? = null,
+    val userId: String? = null,
+    val updatedAt: Instant = Clock.System.now(),
+    val isDeleted: Boolean = false,
+    val lastSyncedAt: Instant? = null
 )
 
 @Serializable
 enum class ReminderDuration(val label: String) {
     ONE_DAY("1 day before"),
     TWO_HOURS("2 hours before"),
-    THIRTY_MINUTES("30 minutes before")
+    THIRTY_MINUTES("30 minutes before");
+
+    val labelRes get() = when (this) {
+        ONE_DAY -> Res.string.reminder_one_day
+        TWO_HOURS -> Res.string.reminder_two_hours
+        THIRTY_MINUTES -> Res.string.reminder_thirty_minutes
+    }
 }
 
 @Serializable
 enum class JobType {
-    REMOTE, ONSITE, HYBRID
+    REMOTE, ONSITE, HYBRID;
+
+    val labelRes get() = when (this) {
+        REMOTE -> Res.string.job_type_remote
+        ONSITE -> Res.string.job_type_onsite
+        HYBRID -> Res.string.job_type_hybrid
+    }
 }
 
 @Serializable
 enum class JobStatus {
-    APPLIED, INTERVIEW, OFFER, NO_OFFER
+    APPLIED, INTERVIEW, OFFER, NO_OFFER;
+
+    val labelRes get() = when (this) {
+        APPLIED -> Res.string.job_status_applied
+        INTERVIEW -> Res.string.job_status_interview
+        OFFER -> Res.string.job_status_offer
+        NO_OFFER -> Res.string.job_status_no_offer
+    }
 }

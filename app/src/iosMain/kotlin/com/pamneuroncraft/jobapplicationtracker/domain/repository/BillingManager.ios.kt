@@ -1,0 +1,119 @@
+package com.pamneuroncraft.jobapplicationtracker.domain.repository
+
+import com.revenuecat.purchases.kmp.Purchases
+import com.revenuecat.purchases.kmp.configure
+import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
+import com.pamneuroncraft.jobapplicationtracker.AppBuildKonfig
+import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+class IosBillingManager(
+    private val localSettings: LocalSettings,
+    private val appConfig: com.pamneuroncraft.jobapplicationtracker.AppConfig
+) : BillingManager {
+
+    private val _isPremium = MutableStateFlow(localSettings.isPremium)
+    override val isPremium: StateFlow<Boolean> = _isPremium.asStateFlow()
+
+    override suspend fun initialize() {
+        val apiKey = if (appConfig.isDebug) {
+            AppBuildKonfig.REVENUECAT_API_KEY_IOS_DEBUG
+        } else {
+            AppBuildKonfig.REVENUECAT_API_KEY_IOS_RELEASE
+        }
+        Purchases.configure(apiKey = apiKey) {
+            appUserId = null
+        }
+        updateEntitlementStatus()
+    }
+
+    override suspend fun logIn(uid: String) {
+        suspendCancellableCoroutine { continuation ->
+            Purchases.sharedInstance.logIn(
+                newAppUserID = uid,
+                onError = { continuation.resume(Unit) },
+                onSuccess = { info, _ -> 
+                    _isPremium.value = info.entitlements.active.containsKey("premium")
+                    localSettings.isPremium = _isPremium.value
+                    continuation.resume(Unit)
+                }
+            )
+        }
+    }
+
+    override suspend fun logOut() {
+        suspendCancellableCoroutine { continuation ->
+            Purchases.sharedInstance.logOut(
+                onError = { continuation.resume(Unit) },
+                onSuccess = { info -> 
+                    _isPremium.value = info.entitlements.active.containsKey("premium")
+                    localSettings.isPremium = _isPremium.value
+                    continuation.resume(Unit)
+                }
+            )
+        }
+    }
+
+    private suspend fun updateEntitlementStatus() {
+        try {
+            val hasPremium = suspendCancellableCoroutine { continuation ->
+                Purchases.sharedInstance.getCustomerInfo(
+                    fetchPolicy = CacheFetchPolicy.CACHE_ONLY,
+                    onError = { continuation.resume(false) },
+                    onSuccess = { info -> 
+                        continuation.resume(info.entitlements.active.containsKey("premium"))
+                    }
+                )
+            }
+            _isPremium.value = hasPremium
+            localSettings.isPremium = hasPremium
+        } catch (e: Exception) {
+            // Keep local
+        }
+    }
+
+    override suspend fun purchaseSubscription(): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        Purchases.sharedInstance.getOfferings(
+            onError = { continuation.resume(Result.failure(Exception(it.message))) },
+            onSuccess = { offerings ->
+                val packageToBuy = offerings.current?.monthly
+                if (packageToBuy != null) {
+                    Purchases.sharedInstance.purchase(
+                        packageToBuy,
+                        onError = { error, userCancelled ->
+                            if (userCancelled) {
+                                continuation.resume(Result.failure(Exception("User cancelled")))
+                            } else {
+                                continuation.resume(Result.failure(Exception(error.message)))
+                            }
+                        },
+                        onSuccess = { _, customerInfo ->
+                            val hasPremium = customerInfo.entitlements.active.containsKey("premium")
+                            _isPremium.value = hasPremium
+                            localSettings.isPremium = hasPremium
+                            continuation.resume(Result.success(Unit))
+                        }
+                    )
+                } else {
+                    continuation.resume(Result.failure(Exception("No monthly offering found")))
+                }
+            }
+        )
+    }
+
+    override suspend fun restorePurchases(): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        Purchases.sharedInstance.restorePurchases(
+            onError = { continuation.resume(Result.failure(Exception(it.message))) },
+            onSuccess = { customerInfo ->
+                val hasPremium = customerInfo.entitlements.active.containsKey("premium")
+                _isPremium.value = hasPremium
+                localSettings.isPremium = hasPremium
+                continuation.resume(Result.success(Unit))
+            }
+        )
+    }
+}

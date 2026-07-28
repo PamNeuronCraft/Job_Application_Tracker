@@ -15,54 +15,49 @@ import kotlinx.coroutines.launch
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.BetaInteropApi
 
-class IosSocialAuthManager : SocialAuthManager {
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
-    @Composable
-    override fun RequestGoogleSignIn(onResult: (SocialAuthResult?) -> Unit) {
-        // Requires GoogleSignIn SDK via CocoaPods
-        LaunchedEffect(Unit) {
-            onResult(null)
-        }
+class IosSocialAuthManager : SocialAuthManager {
+    override val isAppleSignInSupported: Boolean = true
+
+    override suspend fun signInWithGoogle(activityContext: Any?): SocialAuthResult? {
+        return null
     }
 
     @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-    @Composable
-    override fun RequestAppleSignIn(onResult: (SocialAuthResult?) -> Unit) {
-        LaunchedEffect(Unit) {
-            val appleIDProvider = ASAuthorizationAppleIDProvider()
-            val request = appleIDProvider.createRequest().apply {
-                requestedScopes = listOf(ASAuthorizationScopeFullName, ASAuthorizationScopeEmail)
-            }
-
-            val controller = ASAuthorizationController(listOf(request))
-            val delegate = object : platform.darwin.NSObject(), ASAuthorizationControllerDelegateProtocol {
-                override fun authorizationController(
-                    controller: ASAuthorizationController,
-                    didCompleteWithAuthorization: ASAuthorization
-                ) {
-                    val appleIDCredential = didCompleteWithAuthorization.credential as? ASAuthorizationAppleIDCredential
-                    val idTokenData = appleIDCredential?.identityToken
-                    if (idTokenData != null) {
-                        val idToken = NSString.create(data = idTokenData, encoding = NSUTF8StringEncoding).toString()
-                        MainScope().launch {
-                            onResult(SocialAuthResult(idToken = idToken))
-                        }
-                    } else {
-                        MainScope().launch { onResult(null) }
-                    }
-                }
-
-                override fun authorizationController(
-                    controller: ASAuthorizationController,
-                    didCompleteWithError: platform.Foundation.NSError
-                ) {
-                    MainScope().launch { onResult(null) }
-                }
-            }
-            
-            controller.delegate = delegate
-            controller.performRequests()
+    override suspend fun signInWithApple(activityContext: Any?): SocialAuthResult? = suspendCancellableCoroutine { continuation ->
+        val appleIDProvider = ASAuthorizationAppleIDProvider()
+        val request = appleIDProvider.createRequest().apply {
+            requestedScopes = listOf(ASAuthorizationScopeFullName, ASAuthorizationScopeEmail)
         }
+
+        val controller = ASAuthorizationController(listOf(request))
+        val delegate = object : platform.darwin.NSObject(), ASAuthorizationControllerDelegateProtocol {
+            override fun authorizationController(
+                controller: ASAuthorizationController,
+                didCompleteWithAuthorization: ASAuthorization
+            ) {
+                val appleIDCredential = didCompleteWithAuthorization.credential as? ASAuthorizationAppleIDCredential
+                val idTokenData = appleIDCredential?.identityToken
+                if (idTokenData != null) {
+                    val idToken = NSString.create(data = idTokenData, encoding = NSUTF8StringEncoding).toString()
+                    continuation.resume(SocialAuthResult(idToken = idToken))
+                } else {
+                    continuation.resume(null)
+                }
+            }
+
+            override fun authorizationController(
+                controller: ASAuthorizationController,
+                didCompleteWithError: platform.Foundation.NSError
+            ) {
+                continuation.resume(null)
+            }
+        }
+        
+        controller.delegate = delegate
+        controller.performRequests()
     }
 }
 

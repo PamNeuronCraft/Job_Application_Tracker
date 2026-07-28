@@ -19,7 +19,7 @@ class JobDetailViewModel(
     private val _job = mutableStateOf<JobApplication?>(null)
     val job: State<JobApplication?> = _job
 
-    fun loadJob(jobId: Int) {
+    fun loadJob(jobId: String) {
         viewModelScope.launch {
             _job.value = jobUseCases.getJobById(jobId)
         }

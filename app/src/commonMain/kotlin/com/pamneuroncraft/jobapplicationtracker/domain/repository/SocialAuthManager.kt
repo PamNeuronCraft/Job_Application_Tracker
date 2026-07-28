@@ -1,18 +1,16 @@
 package com.pamneuroncraft.jobapplicationtracker.domain.repository
 
-import androidx.compose.runtime.Composable
-
 data class SocialAuthResult(
     val idToken: String,
     val rawNonce: String? = null
 )
 
 interface SocialAuthManager {
-    @Composable
-    fun RequestGoogleSignIn(onResult: (SocialAuthResult?) -> Unit)
+    val isAppleSignInSupported: Boolean
+
+    suspend fun signInWithGoogle(activityContext: Any?): SocialAuthResult?
     
-    @Composable
-    fun RequestAppleSignIn(onResult: (SocialAuthResult?) -> Unit)
+    suspend fun signInWithApple(activityContext: Any?): SocialAuthResult?
 }
 
 expect fun createSocialAuthManager(): SocialAuthManager

@@ -68,11 +68,13 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobAddEditScreen(
-    jobId: Int?,
+    jobId: String?,
     prefilledJobName: String? = null,
     prefilledCompanyName: String? = null,
     prefilledDescription: String? = null,
@@ -111,10 +113,10 @@ fun JobAddEditScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(if (jobId == null) "Add Job" else "Edit Job") },
+                title = { Text(stringResource(if (jobId == null) Res.string.title_add_job else Res.string.title_edit_job)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
                 actions = {
@@ -128,7 +130,7 @@ fun JobAddEditScreen(
                         onClick = { viewModel.onSaveJob(onBack) },
                         enabled = !isAutoExtracting
                     ) {
-                        Icon(Icons.Default.Save, contentDescription = "Save")
+                        Icon(Icons.Default.Save, contentDescription = stringResource(Res.string.save))
                     }
                 }
             )
@@ -145,41 +147,41 @@ fun JobAddEditScreen(
             OutlinedTextField(
                 value = jobName,
                 onValueChange = { viewModel.onJobNameChange(it) },
-                label = { Text("Job Name") },
+                label = { Text(stringResource(Res.string.label_job_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = companyName,
                 onValueChange = { viewModel.onCompanyNameChange(it) },
-                label = { Text("Company Name") },
+                label = { Text(stringResource(Res.string.label_company_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = description,
                 onValueChange = { viewModel.onDescriptionChange(it) },
-                label = { Text("Job Description") },
+                label = { Text(stringResource(Res.string.label_description)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
             OutlinedTextField(
                 value = compensation,
                 onValueChange = { viewModel.onCompensationChange(it) },
-                label = { Text("Compensation") },
+                label = { Text(stringResource(Res.string.label_compensation)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text("Job Type", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(Res.string.label_job_type), style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 JobType.entries.forEach { type ->
                     FilterChip(
                         selected = jobType == type,
                         onClick = { viewModel.onJobTypeChange(type) },
-                        label = { Text(type.name) }
+                        label = { Text(stringResource(type.labelRes)) }
                     )
                 }
             }
 
-            Text("Status", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(Res.string.label_status), style = MaterialTheme.typography.titleSmall)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -188,7 +190,7 @@ fun JobAddEditScreen(
                     FilterChip(
                         selected = status == jobStatus,
                         onClick = { viewModel.onStatusChange(jobStatus) },
-                        label = { Text(jobStatus.name.replace("_", " "), style = MaterialTheme.typography.bodySmall) }
+                        label = { Text(stringResource(jobStatus.labelRes), style = MaterialTheme.typography.bodySmall) }
                     )
                 }
             }
@@ -199,12 +201,12 @@ fun JobAddEditScreen(
                 HorizontalDivider()
 
                 ListItem(
-                    headlineContent = { Text("Interview Date") },
+                    headlineContent = { Text(stringResource(Res.string.interview_date)) },
                     supportingContent = {
                         Text(
                             text = interviewDate?.let {
                                 DateFormatter.format(it, "MMM dd, yyyy")
-                            } ?: "No date set"
+                            } ?: stringResource(Res.string.no_date_set)
                         )
                     },
                     leadingContent = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
@@ -212,12 +214,12 @@ fun JobAddEditScreen(
                 )
 
                 ListItem(
-                    headlineContent = { Text("Interview Time") },
+                    headlineContent = { Text(stringResource(Res.string.interview_time)) },
                     supportingContent = {
                         Text(
                             text = interviewDate?.let {
                                 DateFormatter.format(it, "HH:mm")
-                            } ?: "No time set"
+                            } ?: stringResource(Res.string.no_time_set)
                         )
                     },
                     leadingContent = { Icon(Icons.Default.Schedule, contentDescription = null) },
@@ -225,9 +227,9 @@ fun JobAddEditScreen(
                 )
 
                 ListItem(
-                    headlineContent = { Text("Reminder") },
+                    headlineContent = { Text(stringResource(Res.string.label_reminder)) },
                     supportingContent = {
-                        Text(text = reminderDuration?.label ?: "No reminder set")
+                        Text(text = reminderDuration?.let { stringResource(it.labelRes) } ?: stringResource(Res.string.no_reminder_set))
                     },
                     leadingContent = { Icon(Icons.Default.Notifications, contentDescription = null) },
                     trailingContent = {
@@ -240,7 +242,7 @@ fun JobAddEditScreen(
                                 onDismissRequest = { showReminderMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("None") },
+                                    text = { Text(stringResource(Res.string.none)) },
                                     onClick = {
                                         viewModel.onReminderDurationChange(null)
                                         showReminderMenu = false
@@ -248,7 +250,7 @@ fun JobAddEditScreen(
                                 )
                                 ReminderDuration.entries.forEach { duration ->
                                     DropdownMenuItem(
-                                        text = { Text(duration.label) },
+                                        text = { Text(stringResource(duration.labelRes)) },
                                         onClick = {
                                             val state = permissionManager.checkPermission(Permission.NOTIFICATIONS)
                                             if (state == PermissionState.GRANTED) {
@@ -295,12 +297,12 @@ fun JobAddEditScreen(
                     }
                     showDatePicker = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(Res.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         ) {
@@ -330,12 +332,12 @@ fun JobAddEditScreen(
                     viewModel.onInterviewDateChange(updated)
                     showTimePicker = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(Res.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.cancel))
                 }
             },
             text = {

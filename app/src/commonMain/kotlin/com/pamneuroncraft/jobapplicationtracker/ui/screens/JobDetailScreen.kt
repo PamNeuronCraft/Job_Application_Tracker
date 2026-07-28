@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
+import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobDetailViewModel
@@ -25,13 +27,15 @@ import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import kotlinx.datetime.Instant
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobDetailScreen(
-    jobId: Int,
+    jobId: String,
     onBack: () -> Unit,
-    onEditJob: (Int) -> Unit,
+    onEditJob: (String) -> Unit,
     viewModel: JobDetailViewModel = koinViewModel()
 ) {
     LaunchedEffect(jobId) {
@@ -60,35 +64,42 @@ fun JobDetailContent(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
+    val isDark = isSystemInDarkTheme()
+    val containerColor = if (job != null) getJobStatusColor(job.status, isDark) else MaterialTheme.colorScheme.surface
+    val contentColor = contentColorFor(containerColor)
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Job Details") },
+                title = { Text(stringResource(Res.string.job_details)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onEditJob) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.edit))
                     }
                     IconButton(onClick = onDeleteJob) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = Color.Transparent,
+                    titleContentColor = contentColor,
+                    navigationIconContentColor = contentColor,
+                    actionIconContentColor = contentColor
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = containerColor,
+        contentColor = contentColor
     ) { padding ->
         job?.let { currentJob ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(getStatusLightColor(currentJob.status))
                     .padding(padding)
             ) {
                 Column(
@@ -98,46 +109,46 @@ fun JobDetailContent(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    DetailItem(label = "Job Name", value = currentJob.jobName)
-                    DetailItem(label = "Company Name", value = currentJob.companyName)
-                    DetailItem(label = "Description", value = currentJob.description)
-                    DetailItem(label = "Job Type", value = currentJob.jobType.name.replace("_", " "))
-                    DetailItem(label = "Compensation", value = currentJob.compensation)
-                    DetailItem(label = "Status", value = currentJob.status.name.replace("_", " "))
-                    DetailItem(label = "Date Added", value = DateFormatter.format(currentJob.dateAdded, "MMM dd, yyyy"))
+                    DetailItem(label = stringResource(Res.string.label_job_name), value = currentJob.jobName)
+                    DetailItem(label = stringResource(Res.string.label_company_name), value = currentJob.companyName)
+                    DetailItem(label = stringResource(Res.string.label_description), value = currentJob.description)
+                    DetailItem(label = stringResource(Res.string.label_job_type), value = stringResource(currentJob.jobType.labelRes))
+                    DetailItem(label = stringResource(Res.string.label_compensation), value = currentJob.compensation)
+                    DetailItem(label = stringResource(Res.string.label_status), value = stringResource(currentJob.status.labelRes))
+                    DetailItem(label = stringResource(Res.string.label_date_added), value = DateFormatter.format(currentJob.dateAdded, "MMM dd, yyyy"))
 
                     if (currentJob.status == JobStatus.INTERVIEW) {
-                        HorizontalDivider()
+                        HorizontalDivider(color = LocalContentColor.current.copy(alpha = 0.2f))
                         DetailItem(
-                            label = "Interview Date & Time",
+                            label = stringResource(Res.string.label_interview_date_time),
                             value = currentJob.interviewDate?.let {
                                 DateFormatter.format(it, "MMM dd, yyyy HH:mm")
-                            } ?: "Not set"
+                            } ?: stringResource(Res.string.not_set)
                         )
                         DetailItem(
-                            label = "Reminder",
-                            value = currentJob.reminderDuration?.label ?: "No reminder set"
+                            label = stringResource(Res.string.label_reminder),
+                            value = currentJob.reminderDuration?.let { stringResource(it.labelRes) } ?: stringResource(Res.string.no_reminder_set)
                         )
                     }
 
-                    HorizontalDivider()
+                    HorizontalDivider(color = LocalContentColor.current.copy(alpha = 0.2f))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("Quick Action: Set Interview Date", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(Res.string.quick_action_set_interview), style = MaterialTheme.typography.labelMedium)
                             Text(
                                 text = currentJob.interviewDate?.let { 
                                     DateFormatter.format(it, "MMM dd, yyyy")
-                                } ?: "Not set",
+                                } ?: stringResource(Res.string.not_set),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         IconButton(onClick = { showDatePicker = true }) {
-                            Icon(Icons.Default.CalendarMonth, contentDescription = "Set Date")
+                            Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(Res.string.set_date))
                         }
                     }
                 }
@@ -156,12 +167,12 @@ fun JobDetailContent(
                     }
                     showDatePicker = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(Res.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         ) {
@@ -176,7 +187,7 @@ fun JobDetailScreenPreview() {
     JobApplicationTrackerTheme {
         JobDetailContent(
             job = JobApplication(
-                id = 1,
+                id = "1",
                 jobName = "Android Developer",
                 companyName = "Google",
                 description = "Build amazing things.",
@@ -195,16 +206,17 @@ fun JobDetailScreenPreview() {
 @Composable
 fun DetailItem(label: String, value: String) {
     Column {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-        Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+        Text(
+            text = label, 
+            style = MaterialTheme.typography.labelMedium, 
+            color = LocalContentColor.current.copy(alpha = 0.8f)
+        )
+        Text(
+            text = value, 
+            style = MaterialTheme.typography.bodyLarge, 
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
-fun getStatusLightColor(status: JobStatus): Color {
-    return when (status) {
-        JobStatus.APPLIED -> Color(0xFFE3F2FD) // Very Light Blue
-        JobStatus.INTERVIEW -> Color(0xFFFFFDE7) // Very Light Yellow
-        JobStatus.OFFER -> Color(0xFFE8F5E9) // Very Light Green
-        JobStatus.NO_OFFER -> Color(0xFFFFEBEE) // Very Light Red
-    }
-}
+

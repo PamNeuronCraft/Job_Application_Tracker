@@ -14,6 +14,8 @@ import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.util.Permission
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import org.koin.compose.koinInject
+import org.jetbrains.compose.resources.stringResource
+import jobapplicationtracker.app.generated.resources.*
 
 @Composable
 fun OnboardingScreen(
@@ -44,7 +46,7 @@ fun OnboardingScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Stay on Top of Your Interviews",
+                text = stringResource(Res.string.onboarding_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -53,7 +55,7 @@ fun OnboardingScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Get timely reminders before your scheduled interviews so you never miss an opportunity.",
+                text = stringResource(Res.string.onboarding_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -65,7 +67,7 @@ fun OnboardingScreen(
                 onClick = { isRequestingPermission = true },
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text("Get Started")
+                Text(stringResource(Res.string.get_started))
             }
         }
     }
