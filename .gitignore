@@ -24,6 +24,7 @@ local.properties
 *.jks
 *.keystore
 *.p12
+keystore.properties
 
 # Google Services (usually ignored if using multiple projects, but can be kept if desired)
 # google-services.json
