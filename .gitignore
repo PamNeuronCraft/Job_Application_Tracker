@@ -77,3 +77,4 @@ fabric.properties
 # Android Studio backups
 /shelf/
 /workspace.xml
+/.artifacts
