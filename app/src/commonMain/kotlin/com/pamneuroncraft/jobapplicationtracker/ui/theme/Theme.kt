@@ -32,9 +32,14 @@ fun JobApplicationTrackerTheme(
     
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
+    PlatformThemeSideEffects(darkTheme)
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
 }
+
+@Composable
+expect fun PlatformThemeSideEffects(darkTheme: Boolean)

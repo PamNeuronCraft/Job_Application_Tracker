@@ -64,6 +64,30 @@
     <string name="status_offered">Offered</string>
     <string name="status_rejected">Rejected</string>
 
+    <string name="tab_overview">Overview</string>
+    <string name="tab_financials">Financials</string>
+    <string name="tab_timeline">Timeline</string>
+    <string name="tab_distribution">Distribution</string>
+
+    <string name="conversion_funnel">Conversion Funnel</string>
+    <string name="response_rate">Response Rate</string>
+    <string name="offer_rate">Offer Rate</string>
+
+    <string name="salary_stats">Annual Salary Stats</string>
+    <string name="avg_salary">Average</string>
+    <string name="max_salary">Highest</string>
+    <string name="min_salary">Lowest</string>
+    <string name="hourly_annual_ratio">Hourly vs Annual</string>
+    <string name="annual_est_note">* Hourly rates converted to 2080h/yr</string>
+
+    <string name="application_velocity">Application Velocity</string>
+    <string name="this_week">This Week</string>
+    <string name="last_week">Last Week</string>
+    <string name="avg_per_week">Weekly Average</string>
+
+    <string name="top_companies_pipeline">Top Companies Pipeline</string>
+    <string name="job_type_distribution">Job Type Distribution</string>
+
     <!-- ProfileScreen -->
     <string name="profile">Profile</string>
     <string name="sign_out">Sign Out</string>
@@ -78,7 +102,7 @@
     <string name="sign_up">Sign Up</string>
     <string name="sign_in">Sign In</string>
     <string name="already_have_account">Already have an account? Sign In</string>
-    <string name="dont_have_account">Don\'t have an account? Sign Up</string>
+    <string name="dont_have_account">Don’t have an account? Sign Up</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_apple">Continue with Apple</string>
 
@@ -98,7 +122,7 @@
     <string name="benefit_no_ads_desc">Focus on your goals without distractions.</string>
     <string name="cancel_subscription">Cancel Subscription</string>
     <string name="subscribe_price">Subscribe for %1$s/month</string>
-    <string name="cancel_anytime">Subscription can be cancelled anytime.</string>
+    <string name="cancel_anytime">Subscription can be canceled anytime.</string>
 
     <!-- OnboardingScreen -->
     <string name="onboarding_title">Stay on Top of Your Interviews</string>
@@ -138,5 +162,8 @@
     <string name="reminder_one_day">1 day before</string>
     <string name="reminder_two_hours">2 hours before</string>
     <string name="reminder_thirty_minutes">30 minutes before</string>
+
+    <string name="compensation_hourly">Hourly</string>
+    <string name="compensation_annual">Annual</string>
 
 </resources>

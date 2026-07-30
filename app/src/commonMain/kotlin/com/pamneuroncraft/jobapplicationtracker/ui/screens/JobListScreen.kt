@@ -25,6 +25,7 @@ import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
+import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
@@ -474,8 +475,8 @@ fun JobItem(
 fun JobListScreenPreview() {
     val jobs = flow {
         emit(PagingData.from(listOf(
-            JobApplication(id = "1", jobName = "Android Developer", companyName = "Google", description = "", jobType = JobType.REMOTE, compensation = "150k", status = JobStatus.APPLIED),
-            JobApplication(id = "2", jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensation = "140k", status = JobStatus.INTERVIEW)
+            JobApplication(id = "1", jobName = "Android Developer", companyName = "Google", description = "", jobType = JobType.REMOTE, compensationAmount = 150000.0, compensationType = CompensationType.ANNUAL, status = JobStatus.APPLIED),
+            JobApplication(id = "2", jobName = "Kotlin Engineer", companyName = "JetBrains", description = "", jobType = JobType.HYBRID, compensationAmount = 140000.0, compensationType = CompensationType.ANNUAL, status = JobStatus.INTERVIEW)
         )))
     }.collectAsLazyPagingItems()
 

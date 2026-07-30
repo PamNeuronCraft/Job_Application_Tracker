@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
+import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import kotlinx.datetime.Instant
 
@@ -23,7 +24,8 @@ data class JobApplicationEntity(
     val companyName: String,
     val description: String,
     val jobType: String,
-    val compensation: String,
+    val compensationAmount: Double?,
+    val compensationType: String,
     val status: String,
     val dateAdded: Long,
     val interviewDate: Long?,
@@ -40,7 +42,8 @@ data class JobApplicationEntity(
             companyName = companyName,
             description = description,
             jobType = JobType.valueOf(jobType),
-            compensation = compensation,
+            compensationAmount = compensationAmount,
+            compensationType = CompensationType.valueOf(compensationType),
             status = JobStatus.valueOf(status),
             dateAdded = Instant.fromEpochMilliseconds(dateAdded),
             interviewDate = interviewDate?.let { Instant.fromEpochMilliseconds(it) },
@@ -60,7 +63,8 @@ data class JobApplicationEntity(
                 companyName = job.companyName,
                 description = job.description,
                 jobType = job.jobType.name,
-                compensation = job.compensation,
+                compensationAmount = job.compensationAmount,
+                compensationType = job.compensationType.name,
                 status = job.status.name,
                 dateAdded = job.dateAdded.toEpochMilliseconds(),
                 interviewDate = job.interviewDate?.toEpochMilliseconds(),

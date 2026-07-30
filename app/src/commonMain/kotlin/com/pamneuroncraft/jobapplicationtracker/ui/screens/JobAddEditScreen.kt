@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -51,9 +52,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
+import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PermissionRationaleDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
@@ -104,7 +107,8 @@ fun JobAddEditScreen(
     val companyName by viewModel.companyName
     val description by viewModel.description
     val jobType by viewModel.jobType
-    val compensation by viewModel.compensation
+    val compensationAmount by viewModel.compensationAmount
+    val compensationType by viewModel.compensationType
     val status by viewModel.status
     val interviewDate by viewModel.interviewDate
     val reminderDuration by viewModel.reminderDuration
@@ -163,12 +167,31 @@ fun JobAddEditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
-            OutlinedTextField(
-                value = compensation,
-                onValueChange = { viewModel.onCompensationChange(it) },
-                label = { Text(stringResource(Res.string.label_compensation)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = compensationAmount,
+                    onValueChange = { viewModel.onCompensationAmountChange(it) },
+                    label = { Text(stringResource(Res.string.label_compensation)) },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true
+                )
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    CompensationType.entries.forEach { type ->
+                        FilterChip(
+                            selected = compensationType == type,
+                            onClick = { viewModel.onCompensationTypeChange(type) },
+                            label = { Text(stringResource(type.labelRes)) }
+                        )
+                    }
+                }
+            }
 
             Text(stringResource(Res.string.label_job_type), style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

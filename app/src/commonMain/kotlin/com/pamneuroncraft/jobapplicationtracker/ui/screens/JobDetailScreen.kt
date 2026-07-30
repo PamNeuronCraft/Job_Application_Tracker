@@ -113,7 +113,12 @@ fun JobDetailContent(
                     DetailItem(label = stringResource(Res.string.label_company_name), value = currentJob.companyName)
                     DetailItem(label = stringResource(Res.string.label_description), value = currentJob.description)
                     DetailItem(label = stringResource(Res.string.label_job_type), value = stringResource(currentJob.jobType.labelRes))
-                    DetailItem(label = stringResource(Res.string.label_compensation), value = currentJob.compensation)
+                    DetailItem(
+                        label = stringResource(Res.string.label_compensation), 
+                        value = currentJob.compensationAmount?.let { 
+                            "$it / ${if (currentJob.compensationType == com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.HOURLY) "hr" else "yr"}"
+                        } ?: stringResource(Res.string.not_set)
+                    )
                     DetailItem(label = stringResource(Res.string.label_status), value = stringResource(currentJob.status.labelRes))
                     DetailItem(label = stringResource(Res.string.label_date_added), value = DateFormatter.format(currentJob.dateAdded, "MMM dd, yyyy"))
 
@@ -192,7 +197,8 @@ fun JobDetailScreenPreview() {
                 companyName = "Google",
                 description = "Build amazing things.",
                 jobType = JobType.REMOTE,
-                compensation = "150k",
+                compensationAmount = 150000.0,
+                compensationType = com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL,
                 status = JobStatus.INTERVIEW,
             ),
             onBack = {},

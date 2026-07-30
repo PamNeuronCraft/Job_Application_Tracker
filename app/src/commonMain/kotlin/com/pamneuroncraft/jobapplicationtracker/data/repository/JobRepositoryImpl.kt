@@ -92,7 +92,7 @@ class JobRepositoryImpl(
     }
 
     override suspend fun upsertJobFromRemote(job: JobApplication) {
-        val localJob = dao.getJobById(job.id)
+        val localJob = dao.getJobByIdIncludingDeleted(job.id)
         if (localJob == null || job.updatedAt > Instant.fromEpochMilliseconds(localJob.updatedAt)) {
             dao.insertJob(JobApplicationEntity.fromDomainModel(job))
         }

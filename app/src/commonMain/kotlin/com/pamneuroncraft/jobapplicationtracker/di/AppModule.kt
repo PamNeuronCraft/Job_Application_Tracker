@@ -39,6 +39,7 @@ val useCaseModule = module {
     single { SearchJobsUseCase(get()) }
     single { SearchJobsPagedUseCase(get()) }
     single { ExtractJobFromUrlUseCase(get<JobExtractor>()) }
+    single { GetJobAnalyticsUseCase(get()) }
     single { CloudBackupUseCase(get(), get()) }
     single {
         JobUseCases(

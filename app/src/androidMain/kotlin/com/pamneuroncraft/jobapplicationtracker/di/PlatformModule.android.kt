@@ -27,7 +27,12 @@ actual val platformModule = module {
     single<AppConfig> { CommonAppConfig(get(), BuildConfig.DEBUG) }
     single<JobDatabase> {
         getDatabaseBuilder(get())
-            .addMigrations(JobDatabase.MIGRATION_3_4, JobDatabase.MIGRATION_4_5, JobDatabase.MIGRATION_5_6)
+            .addMigrations(
+                JobDatabase.MIGRATION_3_4, 
+                JobDatabase.MIGRATION_4_5, 
+                JobDatabase.MIGRATION_5_6,
+                JobDatabase.MIGRATION_7_8
+            )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()

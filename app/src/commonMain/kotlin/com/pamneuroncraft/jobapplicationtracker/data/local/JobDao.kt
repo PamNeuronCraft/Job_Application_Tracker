@@ -30,6 +30,9 @@ interface JobDao {
     @Query("SELECT * FROM job_applications WHERE id = :id AND isDeleted = 0")
     suspend fun getJobById(id: String): JobApplicationEntity?
 
+    @Query("SELECT * FROM job_applications WHERE id = :id")
+    suspend fun getJobByIdIncludingDeleted(id: String): JobApplicationEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertJob(job: JobApplicationEntity)
 

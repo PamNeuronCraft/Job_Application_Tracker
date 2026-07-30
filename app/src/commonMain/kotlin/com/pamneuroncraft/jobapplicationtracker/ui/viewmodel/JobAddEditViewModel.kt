@@ -28,8 +28,11 @@ class JobAddEditViewModel(
     private val _jobType = mutableStateOf(JobType.REMOTE)
     val jobType: State<JobType> = _jobType
 
-    private val _compensation = mutableStateOf("")
-    val compensation: State<String> = _compensation
+    private val _compensationAmount = mutableStateOf("")
+    val compensationAmount: State<String> = _compensationAmount
+
+    private val _compensationType = mutableStateOf(com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL)
+    val compensationType: State<com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType> = _compensationType
 
     private val _status = mutableStateOf(JobStatus.APPLIED)
     val status: State<JobStatus> = _status
@@ -61,7 +64,8 @@ class JobAddEditViewModel(
                     _companyName.value = job.companyName
                     _description.value = job.description
                     _jobType.value = job.jobType
-                    _compensation.value = job.compensation
+                    _compensationAmount.value = job.compensationAmount?.toString() ?: ""
+                    _compensationType.value = job.compensationType
                     _status.value = job.status
                     _interviewDate.value = job.interviewDate
                     _reminderDuration.value = job.reminderDuration
@@ -71,7 +75,7 @@ class JobAddEditViewModel(
             prefilledJobName?.let { _jobName.value = it }
             prefilledCompanyName?.let { _companyName.value = it }
             prefilledDescription?.let { _description.value = it }
-            prefilledCompensation?.let { _compensation.value = it }
+            prefilledCompensation?.let { parseCompensation(it) }
 
             initialUrl?.let { url ->
                 viewModelScope.launch {
@@ -81,7 +85,7 @@ class JobAddEditViewModel(
                         extracted.jobName?.let { _jobName.value = it }
                         extracted.companyName?.let { _companyName.value = it }
                         extracted.description?.let { _description.value = it }
-                        extracted.compensation?.let { _compensation.value = it }
+                        extracted.compensation?.let { parseCompensation(it) }
                     } catch (e: Exception) {
                         // Silent fail for auto-extract
                     } finally {
@@ -96,7 +100,15 @@ class JobAddEditViewModel(
     fun onCompanyNameChange(value: String) { _companyName.value = value }
     fun onDescriptionChange(value: String) { _description.value = value }
     fun onJobTypeChange(value: JobType) { _jobType.value = value }
-    fun onCompensationChange(value: String) { _compensation.value = value }
+    fun onCompensationAmountChange(value: String) { 
+        // Only allow numeric input (and decimal point)
+        if (value.isEmpty() || value.toDoubleOrNull() != null || value.endsWith(".")) {
+            _compensationAmount.value = value
+        }
+    }
+    fun onCompensationTypeChange(value: com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType) { 
+        _compensationType.value = value 
+    }
     fun onStatusChange(value: JobStatus) { _status.value = value }
     fun onInterviewDateChange(value: kotlinx.datetime.Instant?) { 
         _interviewDate.value = value 
@@ -111,6 +123,7 @@ class JobAddEditViewModel(
 
     fun onSaveJob(onSaved: () -> Unit) {
         viewModelScope.launch {
+            val amount = _compensationAmount.value.toDoubleOrNull()
             val job = if (currentJobId != null) {
                 JobApplication(
                     id = currentJobId!!,
@@ -118,7 +131,8 @@ class JobAddEditViewModel(
                     companyName = _companyName.value,
                     description = _description.value,
                     jobType = _jobType.value,
-                    compensation = _compensation.value,
+                    compensationAmount = amount,
+                    compensationType = _compensationType.value,
                     status = _status.value,
                     interviewDate = _interviewDate.value,
                     reminderDuration = _reminderDuration.value
@@ -129,7 +143,8 @@ class JobAddEditViewModel(
                     companyName = _companyName.value,
                     description = _description.value,
                     jobType = _jobType.value,
-                    compensation = _compensation.value,
+                    compensationAmount = amount,
+                    compensationType = _compensationType.value,
                     status = _status.value,
                     interviewDate = _interviewDate.value,
                     reminderDuration = _reminderDuration.value
@@ -142,6 +157,23 @@ class JobAddEditViewModel(
             }
             notificationService.scheduleInterviewReminder(job)
             onSaved()
+        }
+    }
+
+    private fun parseCompensation(value: String) {
+        // Try to extract a number
+        val numberRegex = """(\d+([.,]\d+)?)""".toRegex()
+        val match = numberRegex.find(value)
+        if (match != null) {
+            _compensationAmount.value = match.value.replace(",", ".")
+        }
+
+        // Try to determine type
+        val lowerValue = value.lowercase()
+        if (lowerValue.contains("hour") || lowerValue.contains("/hr") || lowerValue.contains("/ hr") || lowerValue.contains("hrly")) {
+            _compensationType.value = com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.HOURLY
+        } else {
+            _compensationType.value = com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL
         }
     }
 }

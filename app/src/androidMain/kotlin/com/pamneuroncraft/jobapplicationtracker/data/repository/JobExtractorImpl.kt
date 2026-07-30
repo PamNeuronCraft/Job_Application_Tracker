@@ -19,6 +19,10 @@ class JobExtractorImpl(
         val prompt = """
             Extract job application details from the following text and return ONLY a JSON object with these keys: 
             "jobName", "companyName", "description", "compensation".
+            
+            For "compensation", try to extract the amount and whether it is hourly or annual. 
+            Format it as a string like "50/hr" or "100000/yr". 
+            
             If a value is not found, use null.
             The "description" should be a concise summary of the role.
             

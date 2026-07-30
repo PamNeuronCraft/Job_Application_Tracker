@@ -37,6 +37,8 @@ fun SettingsScreen(
     
     var showThemeMenu by remember { mutableStateOf(false) }
     var showPaidFeatureDialog by remember { mutableStateOf(false) }
+    var paidFeatureDialogTitle by remember { mutableStateOf("") }
+    var paidFeatureDialogMessage by remember { mutableStateOf("") }
     var triggerBiometricVerification by remember { mutableStateOf(false) }
 
     if (triggerBiometricVerification) {
@@ -76,10 +78,16 @@ fun SettingsScreen(
                         checked = isBiometricEnabled,
                         onCheckedChange = { checked ->
                             if (checked) {
-                                if (biometricManager.canAuthenticate()) {
-                                    triggerBiometricVerification = true
+                                if (appConfig.featureBiometrics) {
+                                    if (biometricManager.canAuthenticate()) {
+                                        triggerBiometricVerification = true
+                                    } else {
+                                        // Handle no biometrics enrolled
+                                    }
                                 } else {
-                                    // Handle no biometrics enrolled
+                                    paidFeatureDialogTitle = "Biometric Lock"
+                                    paidFeatureDialogMessage = "Biometric lock is a premium feature. Upgrade now to secure your job applications with fingerprint or face recognition."
+                                    showPaidFeatureDialog = true
                                 }
                             } else {
                                 viewModel.onBiometricEnabledChange(false)
@@ -108,6 +116,8 @@ fun SettingsScreen(
                             onProfileClick()
                         }
                     } else {
+                        paidFeatureDialogTitle = "Cloud Backup"
+                        paidFeatureDialogMessage = "Cloud backup and sync is only available for paid users. Upgrade now to keep your data safe and synced across devices."
                         showPaidFeatureDialog = true
                     }
                 }
@@ -160,8 +170,8 @@ fun SettingsScreen(
     if (showPaidFeatureDialog) {
         PaidFeatureDialog(
             onDismiss = { showPaidFeatureDialog = false },
-            title = "Cloud Backup",
-            message = "Cloud backup and sync is only available for paid users. Upgrade now to keep your data safe and synced across devices."
+            title = paidFeatureDialogTitle,
+            message = paidFeatureDialogMessage
         )
     }
 }
