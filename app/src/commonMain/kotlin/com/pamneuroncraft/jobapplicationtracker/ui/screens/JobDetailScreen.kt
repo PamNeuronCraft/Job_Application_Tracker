@@ -36,6 +36,7 @@ fun JobDetailScreen(
     jobId: String,
     onBack: () -> Unit,
     onEditJob: (String) -> Unit,
+    isPane: Boolean = false,
     viewModel: JobDetailViewModel = koinViewModel()
 ) {
     LaunchedEffect(jobId) {
@@ -49,7 +50,8 @@ fun JobDetailScreen(
         onBack = onBack,
         onEditJob = { onEditJob(jobId) },
         onDeleteJob = { viewModel.onDeleteJob(onBack) },
-        onUpdateInterviewDate = { date, duration -> viewModel.onUpdateInterviewDate(date, duration) }
+        onUpdateInterviewDate = { date, duration -> viewModel.onUpdateInterviewDate(date, duration) },
+        isPane = isPane
     )
 }
 
@@ -60,7 +62,8 @@ fun JobDetailContent(
     onBack: () -> Unit,
     onEditJob: () -> Unit,
     onDeleteJob: () -> Unit,
-    onUpdateInterviewDate: (Instant, ReminderDuration?) -> Unit
+    onUpdateInterviewDate: (Instant, ReminderDuration?) -> Unit,
+    isPane: Boolean = false
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -73,8 +76,10 @@ fun JobDetailContent(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(Res.string.job_details)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    if (!isPane) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        }
                     }
                 },
                 actions = {
