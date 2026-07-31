@@ -59,18 +59,15 @@ enum class PaidFeatureType(val titleRes: StringResource, val messageRes: StringR
 fun JobListScreen(
     onAddJob: (JobAddEditKey) -> Unit,
     onJobClick: (String) -> Unit,
-    onProfileClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     onSummaryClick: () -> Unit,
+    selectedJobId: String? = null,
     showPremiumShareRationale: Boolean = false,
     viewModel: JobListViewModel = koinViewModel(),
     importViewModel: ImportViewModel = koinViewModel(),
-    profileViewModel: ProfileViewModel = koinViewModel(),
     appConfig: AppConfig = koinInject()
 ) {
     val pagedJobs = viewModel.pagedJobs.collectAsLazyPagingItems()
     val searchQuery by viewModel.searchQuery.collectAsState()
-    val user by profileViewModel.currentUser.collectAsState()
     
     var showAddOptions by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
@@ -82,18 +79,9 @@ fun JobListScreen(
         jobs = pagedJobs,
         searchQuery = searchQuery,
         onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
-        userInitial = user?.displayName?.firstOrNull()?.toString() ?: user?.email?.firstOrNull()?.toString() ?: "G",
         onAddJob = { showAddOptions = true },
         onJobClick = onJobClick,
-        onProfileClick = onProfileClick,
-        onSettingsClick = onSettingsClick,
-        onSummaryClick = {
-            if (appConfig.featureSummary) {
-                onSummaryClick()
-            } else {
-                paidFeatureToShow = PaidFeatureType.SUMMARY
-            }
-        },
+        selectedJobId = selectedJobId,
         onDeleteJob = { viewModel.onDeleteJob(it) },
         showAds = !appConfig.featureGoogleDriveBackup
     )
@@ -257,52 +245,16 @@ fun JobListContent(
     jobs: LazyPagingItems<JobApplication>,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    userInitial: String,
     onAddJob: () -> Unit,
     onJobClick: (String) -> Unit,
-    onProfileClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onSummaryClick: () -> Unit,
+    selectedJobId: String? = null,
     onDeleteJob: (JobApplication) -> Unit,
     showAds: Boolean
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(Res.string.job_applications)) },
-                navigationIcon = {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .clickable { onProfileClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = userInitial.uppercase(),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onSummaryClick) {
-                        Icon(
-                            imageVector = Icons.Default.Assessment,
-                            contentDescription = stringResource(Res.string.summary)
-                        )
-                    }
-                    
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(Res.string.settings)
-                        )
-                    }
-                }
+                title = { Text(stringResource(Res.string.job_applications)) }
             )
         },
         floatingActionButton = {
@@ -350,6 +302,7 @@ fun JobListContent(
                     if (job != null) {
                         JobItem(
                             job = job,
+                            isSelected = job.id == selectedJobId,
                             onDelete = { onDeleteJob(job) },
                             onClick = { onJobClick(job.id) }
                         )
@@ -409,6 +362,7 @@ fun JobListContent(
 @Composable
 fun JobItem(
     job: JobApplication,
+    isSelected: Boolean = false,
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
@@ -442,10 +396,13 @@ fun JobItem(
         },
         content = {
             val containerColor = getJobStatusColor(job.status, isSystemInDarkTheme())
+            val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+            
             Card(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, borderColor) else null,
                 colors = CardDefaults.cardColors(
                     containerColor = containerColor,
                     contentColor = contentColorFor(containerColor)
@@ -485,12 +442,8 @@ fun JobListScreenPreview() {
             jobs = jobs,
             searchQuery = "",
             onSearchQueryChange = {},
-            userInitial = "G",
             onAddJob = {},
             onJobClick = {},
-            onProfileClick = {},
-            onSettingsClick = {},
-            onSummaryClick = {},
             onDeleteJob = {},
             showAds = false
         )
