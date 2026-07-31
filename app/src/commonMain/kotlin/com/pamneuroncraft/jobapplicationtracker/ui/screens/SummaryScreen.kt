@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     viewModel: SummaryViewModel = koinViewModel()
 ) {
     val analytics by viewModel.analytics.collectAsState()
@@ -55,8 +55,10 @@ fun SummaryScreen(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(Res.string.summary)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        }
                     }
                 }
             )

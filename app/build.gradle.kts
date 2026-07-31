@@ -90,6 +90,12 @@ kotlin {
             implementation(libs.androidx.paging.compose)
             implementation(libs.purchases.core)
             implementation(libs.uuid)
+            
+            // Adaptive Layout
+            implementation(libs.adaptive)
+            implementation(libs.adaptive.layout)
+            implementation(libs.adaptive.navigation)
+            implementation(libs.adaptive.suite)
         }
         
         androidMain.dependencies {

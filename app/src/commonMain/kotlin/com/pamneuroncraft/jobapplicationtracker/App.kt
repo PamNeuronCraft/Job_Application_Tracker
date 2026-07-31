@@ -2,14 +2,23 @@ package com.pamneuroncraft.jobapplicationtracker
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
@@ -108,7 +117,9 @@ fun MainAppNavigation(initialUrl: String?) {
     val navController = rememberNavController()
     val localSettings: LocalSettings = koinInject()
     val appConfig: AppConfig = koinInject()
-    
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
     val startDestination = if (localSettings.isOnboardingCompleted) {
         if (initialUrl != null && appConfig.featureAiImport) {
             JobAddEditKey(initialUrl = initialUrl)
@@ -119,6 +130,85 @@ fun MainAppNavigation(initialUrl: String?) {
         OnboardingKey
     }
 
+    // Top-level destinations that should show the navigation suite
+    val topLevelDestinations = listOf(
+        JobListKey,
+        SummaryKey,
+        ProfileKey,
+        SettingsKey
+    )
+
+    val showNavigationSuite = currentDestination?.hierarchy?.any { dest ->
+        topLevelDestinations.any { topLevel -> dest.hasRoute(topLevel::class) }
+    } == true
+
+    if (showNavigationSuite) {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                item(
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(JobListKey::class) } == true,
+                    onClick = {
+                        navController.navigate(JobListKey) {
+                            popUpTo(JobListKey) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Work, contentDescription = null) },
+                    label = { Text("Jobs") }
+                )
+                item(
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(SummaryKey::class) } == true,
+                    onClick = {
+                        navController.navigate(SummaryKey) {
+                            popUpTo(JobListKey) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
+                    label = { Text("Summary") }
+                )
+                item(
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(ProfileKey::class) } == true,
+                    onClick = {
+                        navController.navigate(ProfileKey) {
+                            popUpTo(JobListKey) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    label = { Text("Profile") }
+                )
+                item(
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(SettingsKey::class) } == true,
+                    onClick = {
+                        navController.navigate(SettingsKey) {
+                            popUpTo(JobListKey) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    label = { Text("Settings") }
+                )
+            }
+        ) {
+            AppNavHost(navController, startDestination, initialUrl, appConfig)
+        }
+    } else {
+        AppNavHost(navController, startDestination, initialUrl, appConfig)
+    }
+}
+
+@Composable
+private fun AppNavHost(
+    navController: androidx.navigation.NavHostController,
+    startDestination: Any,
+    initialUrl: String?,
+    appConfig: AppConfig
+) {
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -133,11 +223,9 @@ fun MainAppNavigation(initialUrl: String?) {
             )
         }
         composable<JobListKey> {
-            JobListScreen(
+            AdaptiveJobsScreen(
                 onAddJob = { key -> navController.navigate(key) },
-                onJobClick = { jobId -> navController.navigate(JobDetailKey(jobId)) },
-                onProfileClick = { navController.navigate(ProfileKey) },
-                onSettingsClick = { navController.navigate(SettingsKey) },
+                onEditJob = { jobId -> navController.navigate(JobAddEditKey(jobId)) },
                 onSummaryClick = { navController.navigate(SummaryKey) },
                 showPremiumShareRationale = (initialUrl != null && !appConfig.featureAiImport)
             )
