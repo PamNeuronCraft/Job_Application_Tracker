@@ -10,6 +10,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
+import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
@@ -26,6 +27,7 @@ class SyncWorker(
     private val authService: AuthService by inject()
     private val cloudBackupService: CloudBackupService by inject()
     private val appConfig: AppConfig by inject()
+    private val analyticsHelper: AnalyticsHelper by inject()
 
     override suspend fun doWork(): ListenableWorker.Result {
         Log.e("SyncWorker", "Sync starting...")
@@ -79,6 +81,9 @@ class SyncWorker(
             ListenableWorker.Result.success()
         } catch (e: Exception) {
             Log.e("SyncWorker", "Sync failed: ${e.message}", e)
+            analyticsHelper.logNonFatal(e)
+            analyticsHelper.logEvent("sync_failed", mapOf("error" to (e.message ?: "unknown")))
+            
             if (runAttemptCount < 3) {
                 ListenableWorker.Result.retry()
             } else {

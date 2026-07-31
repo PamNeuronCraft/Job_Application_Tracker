@@ -17,11 +17,19 @@ import com.pamneuroncraft.jobapplicationtracker.CommonAppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.IosBillingManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExportManager
 import com.pamneuroncraft.jobapplicationtracker.util.IosSyncManager
 
 actual val platformModule = module {
     single<BillingManager> { IosBillingManager(get(), get()) }
     single<SyncManager> { IosSyncManager() }
+    single<ExportManager> {
+        object : ExportManager {
+            override fun shareCsv(content: String, fileName: String) {
+                // TODO: Implement iOS sharing
+            }
+        }
+    }
     single<AppConfig> { CommonAppConfig(get(), false) }
     single<JobDatabase> {
         getDatabaseBuilder()

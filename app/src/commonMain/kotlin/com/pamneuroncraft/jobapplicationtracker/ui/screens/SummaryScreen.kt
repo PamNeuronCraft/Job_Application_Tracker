@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobAnalytics
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
+import com.pamneuroncraft.jobapplicationtracker.ui.components.EmptyState
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SummaryViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -87,6 +88,12 @@ fun SummaryScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
+            } else if (analytics!!.totalApps == 0) {
+                EmptyState(
+                    imageVector = Icons.Default.QueryStats,
+                    title = stringResource(Res.string.empty_summary_title),
+                    description = stringResource(Res.string.empty_summary_desc)
+                )
             } else {
                 HorizontalPager(
                     state = pagerState,

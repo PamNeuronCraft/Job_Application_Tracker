@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.*
 import com.pamneuroncraft.jobapplicationtracker.ui.screens.*
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
@@ -117,6 +118,7 @@ fun MainAppNavigation(initialUrl: String?) {
     val navController = rememberNavController()
     val localSettings: LocalSettings = koinInject()
     val appConfig: AppConfig = koinInject()
+    val billingManager: BillingManager = koinInject()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -141,6 +143,8 @@ fun MainAppNavigation(initialUrl: String?) {
     val showNavigationSuite = currentDestination?.hierarchy?.any { dest ->
         topLevelDestinations.any { topLevel -> dest.hasRoute(topLevel::class) }
     } == true
+
+    val isPremium by billingManager.isPremium.collectAsState()
 
     if (showNavigationSuite) {
         NavigationSuiteScaffold(
@@ -167,7 +171,14 @@ fun MainAppNavigation(initialUrl: String?) {
                         }
                     },
                     icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                    label = { Text("Summary") }
+                    label = { 
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Summary")
+                            if (!isPremium) {
+                                PremiumBadge(modifier = Modifier.padding(start = 4.dp))
+                            }
+                        }
+                    }
                 )
                 item(
                     selected = currentDestination?.hierarchy?.any { it.hasRoute(ProfileKey::class) } == true,

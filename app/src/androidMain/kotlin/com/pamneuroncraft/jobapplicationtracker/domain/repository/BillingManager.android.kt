@@ -17,7 +17,7 @@ class AndroidBillingManager(
     private val appConfig: com.pamneuroncraft.jobapplicationtracker.AppConfig
 ) : BillingManager, KoinComponent {
 
-    private val _isPremium = MutableStateFlow(localSettings.isPremium)
+    private val _isPremium = MutableStateFlow(localSettings.isPremium || appConfig.isDebug)
     override val isPremium: StateFlow<Boolean> = _isPremium.asStateFlow()
 
     override suspend fun initialize() {
@@ -38,8 +38,9 @@ class AndroidBillingManager(
                 newAppUserID = uid,
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info, _ -> 
-                    _isPremium.value = info.entitlements.active.containsKey("premium")
-                    localSettings.isPremium = _isPremium.value
+                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    _isPremium.value = hasPremium || appConfig.isDebug
+                    localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
                 }
             )
@@ -51,8 +52,9 @@ class AndroidBillingManager(
             Purchases.sharedInstance.logOut(
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info -> 
-                    _isPremium.value = info.entitlements.active.containsKey("premium")
-                    localSettings.isPremium = _isPremium.value
+                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    _isPremium.value = hasPremium || appConfig.isDebug
+                    localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
                 }
             )
@@ -70,7 +72,7 @@ class AndroidBillingManager(
                     }
                 )
             }
-            _isPremium.value = hasPremium
+            _isPremium.value = hasPremium || appConfig.isDebug
             localSettings.isPremium = hasPremium
         } catch (e: Exception) {
             // Keep local
@@ -94,7 +96,7 @@ class AndroidBillingManager(
                         },
                         onSuccess = { _, customerInfo ->
                             val hasPremium = customerInfo.entitlements.active.containsKey("premium")
-                            _isPremium.value = hasPremium
+                            _isPremium.value = hasPremium || appConfig.isDebug
                             localSettings.isPremium = hasPremium
                             continuation.resume(Result.success(Unit))
                         }
@@ -111,7 +113,7 @@ class AndroidBillingManager(
             onError = { continuation.resume(Result.failure(Exception(it.message))) },
             onSuccess = { customerInfo ->
                 val hasPremium = customerInfo.entitlements.active.containsKey("premium")
-                _isPremium.value = hasPremium
+                _isPremium.value = hasPremium || appConfig.isDebug
                 localSettings.isPremium = hasPremium
                 continuation.resume(Result.success(Unit))
             }

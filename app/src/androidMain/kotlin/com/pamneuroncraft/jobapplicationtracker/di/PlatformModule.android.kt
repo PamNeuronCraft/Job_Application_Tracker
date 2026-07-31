@@ -20,10 +20,13 @@ import com.pamneuroncraft.jobapplicationtracker.util.AndroidSyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AndroidBillingManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExportManager
+import com.pamneuroncraft.jobapplicationtracker.util.AndroidExportManager
 
 actual val platformModule = module {
     single<BillingManager> { AndroidBillingManager(get(), get()) }
     single<SyncManager> { AndroidSyncManager(get()) }
+    single<ExportManager> { AndroidExportManager(get()) }
     single<AppConfig> { CommonAppConfig(get(), BuildConfig.DEBUG) }
     single<JobDatabase> {
         getDatabaseBuilder(get())
