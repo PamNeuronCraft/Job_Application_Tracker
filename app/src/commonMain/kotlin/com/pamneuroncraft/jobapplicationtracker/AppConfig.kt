@@ -7,6 +7,7 @@ interface AppConfig {
     val featureGoogleDriveBackup: Boolean
     val featureSummary: Boolean
     val featureBiometrics: Boolean
+    val featureExport: Boolean
     val googleWebClientId: String
     val isDebug: Boolean
 }
@@ -25,6 +26,9 @@ class CommonAppConfig(
         get() = AppBuildKonfig.FEATURE_SUMMARY && (isDebug || localSettings.isPremium)
 
     override val featureBiometrics: Boolean
+        get() = isDebug || localSettings.isPremium
+
+    override val featureExport: Boolean
         get() = isDebug || localSettings.isPremium
 
     override val googleWebClientId: String

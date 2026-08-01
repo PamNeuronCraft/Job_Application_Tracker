@@ -9,6 +9,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.User
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
+import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -19,7 +20,8 @@ class ProfileViewModel(
     private val authService: AuthService,
     private val syncManager: SyncManager,
     private val billingManager: BillingManager,
-    private val jobRepository: JobRepository
+    private val jobRepository: JobRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     val currentUser: StateFlow<User?> = authService.currentUser
@@ -87,6 +89,8 @@ class ProfileViewModel(
                 // Claim ownerless jobs created while signed out
                 jobRepository.updateJobsUserId(user.uid)
                 billingManager.logIn(user.uid)
+                analyticsHelper.setUserId(user.uid)
+                analyticsHelper.logEvent("login_success")
             }
             syncManager.triggerSync()
         }
@@ -95,6 +99,8 @@ class ProfileViewModel(
     fun signOut() {
         viewModelScope.launch {
             billingManager.logOut()
+            analyticsHelper.setUserId(null)
+            analyticsHelper.logEvent("sign_out")
             authService.signOut()
         }
     }

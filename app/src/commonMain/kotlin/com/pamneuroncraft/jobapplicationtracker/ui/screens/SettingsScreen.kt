@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
@@ -71,7 +72,14 @@ fun SettingsScreen(
         ) {
             // Biometrics
             ListItem(
-                headlineContent = { Text("Enable Biometrics") },
+                headlineContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Enable Biometrics")
+                        if (!isPremium) {
+                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                },
                 leadingContent = { Icon(Icons.Default.Fingerprint, contentDescription = null) },
                 trailingContent = {
                     Switch(
@@ -99,7 +107,14 @@ fun SettingsScreen(
 
             // Cloud Backup
             ListItem(
-                headlineContent = { Text("Backup and Sync") },
+                headlineContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Backup and Sync")
+                        if (!isPremium) {
+                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                },
                 leadingContent = { Icon(Icons.Default.CloudSync, contentDescription = null) },
                 trailingContent = {
                     Text(
@@ -135,6 +150,28 @@ fun SettingsScreen(
                     )
                 },
                 modifier = Modifier.clickable { onSubscriptionClick() }
+            )
+
+            // Export Data
+            ListItem(
+                headlineContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Export Data (CSV)")
+                        if (!isPremium) {
+                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                },
+                leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    if (appConfig.featureExport) {
+                        viewModel.exportData()
+                    } else {
+                        paidFeatureDialogTitle = "Export Data"
+                        paidFeatureDialogMessage = "Exporting your job applications to a CSV file is a premium feature. Upgrade now to back up your data locally."
+                        showPaidFeatureDialog = true
+                    }
+                }
             )
 
             // Theme

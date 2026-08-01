@@ -15,14 +15,14 @@ interface JobDao {
 
     @Query("""
         SELECT job_applications.* FROM job_applications
-        JOIN job_search ON job_applications.id = job_search.rowid
+        JOIN job_search ON job_applications.id = job_search.id
         WHERE job_search MATCH :query AND job_applications.isDeleted = 0
     """)
     fun searchJobs(query: String): Flow<List<JobApplicationEntity>>
 
     @Query("""
         SELECT job_applications.* FROM job_applications
-        JOIN job_search ON job_applications.id = job_search.rowid
+        JOIN job_search ON job_applications.id = job_search.id
         WHERE job_search MATCH :query AND job_applications.isDeleted = 0
     """)
     fun searchJobsPaged(query: String): PagingSource<Int, JobApplicationEntity>

@@ -163,6 +163,11 @@
     <string name="reminder_two_hours">2 hours before</string>
     <string name="reminder_thirty_minutes">30 minutes before</string>
 
+    <string name="empty_jobs_title">No applications yet</string>
+    <string name="empty_jobs_desc">Start your journey by adding your first job application. You can enter details manually or use AI to extract them from a link.</string>
+    <string name="empty_summary_title">Analytics will appear here</string>
+    <string name="empty_summary_desc">Once you add some jobs, we’ll show you statistics and trends about your job search.</string>
+
     <string name="compensation_hourly">Hourly</string>
     <string name="compensation_annual">Annual</string>
 

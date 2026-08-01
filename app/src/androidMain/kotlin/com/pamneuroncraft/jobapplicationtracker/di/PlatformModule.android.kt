@@ -20,19 +20,16 @@ import com.pamneuroncraft.jobapplicationtracker.util.AndroidSyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AndroidBillingManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExportManager
+import com.pamneuroncraft.jobapplicationtracker.util.AndroidExportManager
 
 actual val platformModule = module {
     single<BillingManager> { AndroidBillingManager(get(), get()) }
     single<SyncManager> { AndroidSyncManager(get()) }
+    single<ExportManager> { AndroidExportManager(get()) }
     single<AppConfig> { CommonAppConfig(get(), BuildConfig.DEBUG) }
     single<JobDatabase> {
         getDatabaseBuilder(get())
-            .addMigrations(
-                JobDatabase.MIGRATION_3_4, 
-                JobDatabase.MIGRATION_4_5, 
-                JobDatabase.MIGRATION_5_6,
-                JobDatabase.MIGRATION_7_8
-            )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()

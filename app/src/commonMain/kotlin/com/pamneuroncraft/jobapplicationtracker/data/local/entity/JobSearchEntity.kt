@@ -6,6 +6,7 @@ import androidx.room.Fts4
 @Fts4(contentEntity = JobApplicationEntity::class)
 @Entity(tableName = "job_search")
 data class JobSearchEntity(
+    val id: String,
     val jobName: String,
     val companyName: String,
     val description: String
