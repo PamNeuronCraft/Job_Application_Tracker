@@ -37,6 +37,9 @@ purchases-kmp = "3.3.1"
 uuid = "0.8.4"
 composeAdaptive = "1.0.0-alpha03"
 coreSplashscreen = "1.2.0"
+junit = "4.13.2"
+androidxTestExtJunit = "1.1.5"
+espressoCore = "3.5.1"
 
 [libraries]
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
@@ -92,6 +95,9 @@ adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", versi
 adaptive-layout = { module = "org.jetbrains.compose.material3.adaptive:adaptive-layout", version.ref = "composeAdaptive" }
 adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation", version.ref = "composeAdaptive" }
 adaptive-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "composeMultiplatform" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

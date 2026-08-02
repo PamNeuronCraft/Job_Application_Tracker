@@ -131,6 +131,10 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+        
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 
@@ -210,6 +214,10 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
 
 configurations.all {

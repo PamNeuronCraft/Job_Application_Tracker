@@ -25,7 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run Unit Tests
-        run: ./gradlew testReleaseUnitTest
+        run: ./gradlew testDebugUnitTest
 
       - name: Decode Keystore
         run: |
