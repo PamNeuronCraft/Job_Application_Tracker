@@ -2,6 +2,7 @@ package com.pamneuroncraft.jobapplicationtracker
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -12,6 +13,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -170,15 +172,23 @@ fun MainAppNavigation(initialUrl: String?) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                    label = { 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Summary")
-                            if (!isPremium) {
-                                PremiumBadge(modifier = Modifier.padding(start = 4.dp))
+                    icon = { 
+                        BadgedBox(
+                            badge = {
+                                if (!isPremium) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color(0xFFFFD700)
+                                    )
+                                }
                             }
+                        ) {
+                            Icon(Icons.Default.Assessment, contentDescription = null)
                         }
-                    }
+                    },
+                    label = { Text("Summary") }
                 )
                 item(
                     selected = currentDestination?.hierarchy?.any { it.hasRoute(ProfileKey::class) } == true,

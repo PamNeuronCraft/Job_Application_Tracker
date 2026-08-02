@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew :app:assembleRelease
 
       - name: Upload to Firebase App Distribution
-        uses: w9j7/firebase-app-distribution-action@v1
+        uses: FirebaseExtended/action-app-distribution@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID_RELEASE }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
