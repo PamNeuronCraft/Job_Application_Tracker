@@ -1,0 +1,199 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "0036ae2787ee809e29a409f4f368245e",
+    "entities": [
+      {
+        "tableName": "job_applications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `jobName` TEXT NOT NULL, `companyName` TEXT NOT NULL, `description` TEXT NOT NULL, `jobType` TEXT NOT NULL, `compensationAmount` REAL, `compensationType` TEXT NOT NULL, `status` TEXT NOT NULL, `dateAdded` INTEGER NOT NULL, `interviewDate` INTEGER, `reminderDuration` TEXT, `userId` TEXT, `updatedAt` INTEGER NOT NULL, `isDeleted` INTEGER NOT NULL, `lastSyncedAt` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobName",
+            "columnName": "jobName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "companyName",
+            "columnName": "companyName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobType",
+            "columnName": "jobType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "compensationAmount",
+            "columnName": "compensationAmount",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "compensationType",
+            "columnName": "compensationType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateAdded",
+            "columnName": "dateAdded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interviewDate",
+            "columnName": "interviewDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "reminderDuration",
+            "columnName": "reminderDuration",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "isDeleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncedAt",
+            "columnName": "lastSyncedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_job_applications_userId",
+            "unique": false,
+            "columnNames": [
+              "userId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_job_applications_userId` ON `${TABLE_NAME}` (`userId`)"
+          },
+          {
+            "name": "index_job_applications_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_job_applications_status` ON `${TABLE_NAME}` (`status`)"
+          },
+          {
+            "name": "index_job_applications_updatedAt",
+            "unique": false,
+            "columnNames": [
+              "updatedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_job_applications_updatedAt` ON `${TABLE_NAME}` (`updatedAt`)"
+          },
+          {
+            "name": "index_job_applications_dateAdded",
+            "unique": false,
+            "columnNames": [
+              "dateAdded"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_job_applications_dateAdded` ON `${TABLE_NAME}` (`dateAdded`)"
+          }
+        ]
+      },
+      {
+        "tableName": "job_search",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`id` TEXT NOT NULL, `jobName` TEXT NOT NULL, `companyName` TEXT NOT NULL, `description` TEXT NOT NULL, content=`job_applications`)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobName",
+            "columnName": "jobName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "companyName",
+            "columnName": "companyName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "job_applications",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_job_search_BEFORE_UPDATE BEFORE UPDATE ON `job_applications` BEGIN DELETE FROM `job_search` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_job_search_BEFORE_DELETE BEFORE DELETE ON `job_applications` BEGIN DELETE FROM `job_search` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_job_search_AFTER_UPDATE AFTER UPDATE ON `job_applications` BEGIN INSERT INTO `job_search`(`docid`, `id`, `jobName`, `companyName`, `description`) VALUES (NEW.`rowid`, NEW.`id`, NEW.`jobName`, NEW.`companyName`, NEW.`description`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_job_search_AFTER_INSERT AFTER INSERT ON `job_applications` BEGIN INSERT INTO `job_search`(`docid`, `id`, `jobName`, `companyName`, `description`) VALUES (NEW.`rowid`, NEW.`id`, NEW.`jobName`, NEW.`companyName`, NEW.`description`); END"
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0036ae2787ee809e29a409f4f368245e')"
+    ]
+  }
+}

@@ -2,6 +2,7 @@ package com.pamneuroncraft.jobapplicationtracker
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -12,6 +13,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -23,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.*
 import com.pamneuroncraft.jobapplicationtracker.ui.screens.*
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
@@ -117,6 +120,7 @@ fun MainAppNavigation(initialUrl: String?) {
     val navController = rememberNavController()
     val localSettings: LocalSettings = koinInject()
     val appConfig: AppConfig = koinInject()
+    val billingManager: BillingManager = koinInject()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -142,6 +146,8 @@ fun MainAppNavigation(initialUrl: String?) {
         topLevelDestinations.any { topLevel -> dest.hasRoute(topLevel::class) }
     } == true
 
+    val isPremium by billingManager.isPremium.collectAsState()
+
     if (showNavigationSuite) {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -166,7 +172,22 @@ fun MainAppNavigation(initialUrl: String?) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
+                    icon = { 
+                        BadgedBox(
+                            badge = {
+                                if (!isPremium) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color(0xFFFFD700)
+                                    )
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.Assessment, contentDescription = null)
+                        }
+                    },
                     label = { Text("Summary") }
                 )
                 item(

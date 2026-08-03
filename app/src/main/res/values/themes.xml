@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.JobApplicationTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Replace with your actual splash icon resource after manual step -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.JobApplicationTracker</item>
+    </style>
 </resources>

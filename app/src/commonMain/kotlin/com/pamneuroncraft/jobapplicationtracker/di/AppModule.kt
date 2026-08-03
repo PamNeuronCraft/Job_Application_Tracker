@@ -15,6 +15,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.usecase.*
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.*
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import com.pamneuroncraft.jobapplicationtracker.util.createPermissionManager
+import com.pamneuroncraft.jobapplicationtracker.util.createAnalyticsHelper
 import com.russhwolf.settings.Settings
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -24,6 +25,7 @@ val appModule = module {
     single { Settings() }
     single { LocalSettings(get()) }
     single { createPermissionManager() }
+    single { createAnalyticsHelper() }
     single<AuthService> { FirebaseAuthService() }
     single<CloudBackupService> { FirebaseCloudBackupService() }
     single<SocialAuthManager> { createSocialAuthManager() }
@@ -40,6 +42,7 @@ val useCaseModule = module {
     single { SearchJobsPagedUseCase(get()) }
     single { ExtractJobFromUrlUseCase(get<JobExtractor>()) }
     single { GetJobAnalyticsUseCase(get()) }
+    single { ExportJobsToCsvUseCase(get()) }
     single { CloudBackupUseCase(get(), get()) }
     single {
         JobUseCases(

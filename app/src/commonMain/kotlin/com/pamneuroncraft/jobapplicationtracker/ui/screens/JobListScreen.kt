@@ -22,12 +22,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
+import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
+import com.pamneuroncraft.jobapplicationtracker.ui.components.EmptyState
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ImportViewModel
@@ -64,10 +68,12 @@ fun JobListScreen(
     showPremiumShareRationale: Boolean = false,
     viewModel: JobListViewModel = koinViewModel(),
     importViewModel: ImportViewModel = koinViewModel(),
-    appConfig: AppConfig = koinInject()
+    appConfig: AppConfig = koinInject(),
+    billingManager: BillingManager = koinInject()
 ) {
     val pagedJobs = viewModel.pagedJobs.collectAsLazyPagingItems()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val isPremium by billingManager.isPremium.collectAsState()
     
     var showAddOptions by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
@@ -117,16 +123,25 @@ fun JobListScreen(
                         onAddJob(JobAddEditKey())
                     }
                 )
-                if (appConfig.featureAiImport) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(Res.string.import_from_url_ai)) },
-                        leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
-                        modifier = Modifier.clickable {
-                            showAddOptions = false
-                            showImportDialog = true
+                ListItem(
+                    headlineContent = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(Res.string.import_from_url_ai))
+                            if (!isPremium) {
+                                PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                            }
                         }
-                    )
-                }
+                    },
+                    leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        showAddOptions = false
+                        if (appConfig.featureAiImport) {
+                            showImportDialog = true
+                        } else {
+                            paidFeatureToShow = PaidFeatureType.AI_IMPORT
+                        }
+                    }
+                )
             }
         }
     }
@@ -251,6 +266,8 @@ fun JobListContent(
     onDeleteJob: (JobApplication) -> Unit,
     showAds: Boolean
 ) {
+    val isListEmpty = jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -258,8 +275,10 @@ fun JobListContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddJob) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_job))
+            if (!isListEmpty) {
+                FloatingActionButton(onClick = onAddJob) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_job))
+                }
             }
         }
     ) { padding ->
@@ -343,12 +362,13 @@ fun JobListContent(
             }
 
             if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(Res.string.no_jobs_found))
-                }
+                EmptyState(
+                    imageVector = Icons.Default.WorkOutline,
+                    title = stringResource(Res.string.empty_jobs_title),
+                    description = stringResource(Res.string.empty_jobs_desc),
+                    actionButtonText = stringResource(Res.string.add_job),
+                    onActionClick = onAddJob
+                )
             }
             
             if (showAds) {

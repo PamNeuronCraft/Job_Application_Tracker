@@ -15,7 +15,8 @@ import kotlinx.datetime.Instant
     indices = [
         Index(value = ["userId"]),
         Index(value = ["status"]),
-        Index(value = ["updatedAt"])
+        Index(value = ["updatedAt"]),
+        Index(value = ["dateAdded"])
     ]
 )
 data class JobApplicationEntity(

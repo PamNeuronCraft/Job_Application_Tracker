@@ -16,7 +16,7 @@ class IosBillingManager(
     private val appConfig: com.pamneuroncraft.jobapplicationtracker.AppConfig
 ) : BillingManager {
 
-    private val _isPremium = MutableStateFlow(localSettings.isPremium)
+    private val _isPremium = MutableStateFlow(localSettings.isPremium || appConfig.isDebug)
     override val isPremium: StateFlow<Boolean> = _isPremium.asStateFlow()
 
     override suspend fun initialize() {
@@ -37,8 +37,9 @@ class IosBillingManager(
                 newAppUserID = uid,
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info, _ -> 
-                    _isPremium.value = info.entitlements.active.containsKey("premium")
-                    localSettings.isPremium = _isPremium.value
+                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    _isPremium.value = hasPremium || appConfig.isDebug
+                    localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
                 }
             )
@@ -50,8 +51,9 @@ class IosBillingManager(
             Purchases.sharedInstance.logOut(
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info -> 
-                    _isPremium.value = info.entitlements.active.containsKey("premium")
-                    localSettings.isPremium = _isPremium.value
+                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    _isPremium.value = hasPremium || appConfig.isDebug
+                    localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
                 }
             )
@@ -69,7 +71,7 @@ class IosBillingManager(
                     }
                 )
             }
-            _isPremium.value = hasPremium
+            _isPremium.value = hasPremium || appConfig.isDebug
             localSettings.isPremium = hasPremium
         } catch (e: Exception) {
             // Keep local
@@ -93,7 +95,7 @@ class IosBillingManager(
                         },
                         onSuccess = { _, customerInfo ->
                             val hasPremium = customerInfo.entitlements.active.containsKey("premium")
-                            _isPremium.value = hasPremium
+                            _isPremium.value = hasPremium || appConfig.isDebug
                             localSettings.isPremium = hasPremium
                             continuation.resume(Result.success(Unit))
                         }
@@ -110,7 +112,7 @@ class IosBillingManager(
             onError = { continuation.resume(Result.failure(Exception(it.message))) },
             onSuccess = { customerInfo ->
                 val hasPremium = customerInfo.entitlements.active.containsKey("premium")
-                _isPremium.value = hasPremium
+                _isPremium.value = hasPremium || appConfig.isDebug
                 localSettings.isPremium = hasPremium
                 continuation.resume(Result.success(Unit))
             }

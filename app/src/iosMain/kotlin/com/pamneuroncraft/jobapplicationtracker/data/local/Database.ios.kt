@@ -11,7 +11,7 @@ fun getDatabaseBuilder(): RoomDatabase.Builder<JobDatabase> {
     val dbFilePath = documentDirectory() + "/job_tracker.db"
     return Room.databaseBuilder<JobDatabase>(
         name = dbFilePath
-    ).fallbackToDestructiveMigration(true)
+    )
 }
 
 @OptIn(ExperimentalForeignApi::class)

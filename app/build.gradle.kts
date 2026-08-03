@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 buildkonfig {
@@ -102,6 +103,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.core.splashscreen)
             
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
@@ -128,6 +130,10 @@ kotlin {
         
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+        }
+        
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }
@@ -172,7 +178,8 @@ android {
             versionNameSuffix = "-dev"
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -201,10 +208,16 @@ room {
 
 dependencies {
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
 
 configurations.all {
