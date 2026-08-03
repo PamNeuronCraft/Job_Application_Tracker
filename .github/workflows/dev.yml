@@ -34,12 +34,12 @@ jobs:
         run: ./gradlew :app:assembleDebug
 
       - name: Upload to Firebase App Distribution (Debug)
-        run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS=credentials.json
-          npx -y firebase-tools appdistribution:distribute app/build/outputs/apk/debug/app-debug.apk \
-            --app ${{ secrets.FIREBASE_APP_ID_DEBUG }} \
-            --groups testers
+        uses: firebase/app-distribution-github-action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_DEBUG }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          groups: testers
+          file: app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
