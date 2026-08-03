@@ -163,8 +163,13 @@ android {
         applicationId = "com.pamneuroncraft.jobapplicationtracker"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        
+        val versionMajor = 1
+        val versionMinor = 0
+        val buildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toInt() ?: 0
+        
+        versionCode = (versionMajor * 10000) + (versionMinor * 100) + buildNumber
+        versionName = "$versionMajor.$versionMinor.$buildNumber"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
