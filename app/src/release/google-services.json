@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com",
+          "client_id": "621221034219-e7d3l07vimoucs37rq7919m89sttk2ku.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pamneuroncraft.jobapplicationtracker",
+            "certificate_hash": "ba605479c0c7bb540d0fca6c2a6309e653ca997d"
+          }
+        },
+        {
+          "client_id": "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com",
+              "client_id": "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
