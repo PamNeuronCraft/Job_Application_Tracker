@@ -18,6 +18,7 @@ class SettingsViewModel(
 ) : ViewModel() {
 
     val themePreference: StateFlow<ThemePreference> = localSettings.themePreferenceFlow
+    val useDynamicColor: StateFlow<Boolean> = localSettings.useDynamicColorFlow
     val isPremium: StateFlow<Boolean> = billingManager.isPremium
 
     private val _isBiometricEnabled = MutableStateFlow(localSettings.isBiometricEnabled)
@@ -25,6 +26,10 @@ class SettingsViewModel(
 
     fun onThemePreferenceChange(preference: ThemePreference) {
         localSettings.themePreference = preference
+    }
+
+    fun onUseDynamicColorChange(enabled: Boolean) {
+        localSettings.useDynamicColor = enabled
     }
 
     fun onBiometricEnabledChange(enabled: Boolean) {

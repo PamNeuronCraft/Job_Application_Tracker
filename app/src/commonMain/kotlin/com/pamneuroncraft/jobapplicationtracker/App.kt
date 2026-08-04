@@ -32,24 +32,34 @@ import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTh
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
 import com.pamneuroncraft.jobapplicationtracker.util.createBiometricManager
+import com.pamneuroncraft.jobapplicationtracker.util.rememberAppUpdateManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun App(initialUrl: String? = null) {
+fun App(
+    initialUrl: String? = null,
+    initialShortcut: String? = null
+) {
     val localSettings: LocalSettings = koinInject()
     val billingManager: BillingManager = koinInject()
     val settingsViewModel: SettingsViewModel = koinViewModel()
     val themePreference by settingsViewModel.themePreference.collectAsState()
+    val useDynamicColor by settingsViewModel.useDynamicColor.collectAsState()
+    val appUpdateManager = rememberAppUpdateManager()
     
     LaunchedEffect(Unit) {
         billingManager.initialize()
+        appUpdateManager.checkForUpdates()
     }
 
     var isAppLocked by remember { mutableStateOf(localSettings.isBiometricEnabled) }
     var triggerBiometric by remember { mutableStateOf(isAppLocked) }
 
-    JobApplicationTrackerTheme(themePreference = themePreference) {
+    JobApplicationTrackerTheme(
+        themePreference = themePreference,
+        dynamicColor = useDynamicColor
+    ) {
         if (isAppLocked) {
             LockScreen(
                 onUnlockRequested = { triggerBiometric = true },
@@ -60,7 +70,10 @@ fun App(initialUrl: String? = null) {
                 }
             )
         } else {
-            MainAppNavigation(initialUrl = initialUrl)
+            MainAppNavigation(
+                initialUrl = initialUrl,
+                initialShortcut = initialShortcut
+            )
         }
     }
 }
@@ -116,7 +129,10 @@ fun LockScreen(
 }
 
 @Composable
-fun MainAppNavigation(initialUrl: String?) {
+fun MainAppNavigation(
+    initialUrl: String?,
+    initialShortcut: String? = null
+) {
     val navController = rememberNavController()
     val localSettings: LocalSettings = koinInject()
     val appConfig: AppConfig = koinInject()
@@ -125,10 +141,11 @@ fun MainAppNavigation(initialUrl: String?) {
     val currentDestination = navBackStackEntry?.destination
 
     val startDestination = if (localSettings.isOnboardingCompleted) {
-        if (initialUrl != null && appConfig.featureAiImport) {
-            JobAddEditKey(initialUrl = initialUrl)
-        } else {
-            JobListKey
+        when {
+            initialUrl != null && appConfig.featureAiImport -> JobAddEditKey(initialUrl = initialUrl)
+            initialShortcut == "add_job" -> JobAddEditKey()
+            initialShortcut == "summary" -> SummaryKey
+            else -> JobListKey
         }
     } else {
         OnboardingKey
