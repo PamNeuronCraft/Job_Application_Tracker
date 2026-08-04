@@ -20,13 +20,41 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.IosBillingMana
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExportManager
 import com.pamneuroncraft.jobapplicationtracker.util.IosSyncManager
 
+import platform.UIKit.UIActivityViewController
+import platform.UIKit.UIApplication
+import platform.UIKit.UIWindowScene
+import platform.Foundation.*
+import platform.UserNotifications.*
+
 actual val platformModule = module {
     single<BillingManager> { IosBillingManager(get(), get()) }
     single<SyncManager> { IosSyncManager() }
     single<ExportManager> {
         object : ExportManager {
+            @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.BetaInteropApi::class)
             override fun shareCsv(content: String, fileName: String) {
-                // TODO: Implement iOS sharing
+                val tempDir = NSTemporaryDirectory()
+                val fileURL = NSURL.fileURLWithPath(tempDir).URLByAppendingPathComponent(fileName)
+                
+                if (fileURL != null) {
+                    val nsString = NSString.create(string = content)
+                    nsString.writeToURL(fileURL, true, NSUTF8StringEncoding, null)
+                    
+                    val activityController = UIActivityViewController(
+                        activityItems = listOf(fileURL),
+                        applicationActivities = null
+                    )
+                    
+                    val windowScene = UIApplication.sharedApplication.connectedScenes
+                        .mapNotNull { it as? UIWindowScene }
+                        .firstOrNull { it.activationState == platform.UIKit.UISceneActivationStateForegroundActive }
+                    
+                    windowScene?.keyWindow?.rootViewController?.presentViewController(
+                        activityController,
+                        animated = true,
+                        completion = null
+                    )
+                }
             }
         }
     }
@@ -48,7 +76,41 @@ actual val platformModule = module {
 
     single<NotificationService> {
         object : NotificationService {
-            override fun scheduleInterviewReminder(job: com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication) {}
+            override fun scheduleInterviewReminder(job: com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication) {
+                val interviewDate = job.interviewDate ?: return
+                val center = UNUserNotificationCenter.currentNotificationCenter()
+                
+                center.requestAuthorizationWithOptions(
+                    UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
+                ) { granted, _ ->
+                    if (granted) {
+                        val content = UNMutableNotificationContent().apply {
+                            setTitle("Interview Reminder")
+                            setBody("Don't forget: Interview with ${job.companyName} for ${job.jobName}")
+                            setSound(platform.UserNotifications.UNNotificationSound.defaultSound)
+                        }
+
+                        val offsetSeconds = when (job.reminderDuration) {
+                            com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration.ONE_DAY -> 24 * 60 * 60.0
+                            com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration.TWO_HOURS -> 2 * 60 * 60.0
+                            com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration.THIRTY_MINUTES -> 30 * 60.0
+                            null -> 30 * 60.0
+                        }
+
+                        val triggerTime = (interviewDate.toEpochMilliseconds() - kotlinx.datetime.Clock.System.now().toEpochMilliseconds()) / 1000.0 - offsetSeconds
+                        
+                        if (triggerTime > 0) {
+                            val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(triggerTime, false)
+                            val request = UNNotificationRequest.requestWithIdentifier(
+                                job.id,
+                                content,
+                                trigger
+                            )
+                            center.addNotificationRequest(request, null)
+                        }
+                    }
+                }
+            }
         }
     }
 }
