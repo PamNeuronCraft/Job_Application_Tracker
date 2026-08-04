@@ -70,17 +70,37 @@ fun SummaryScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            PrimaryTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
+            Surface(
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                        text = { Text(title, style = MaterialTheme.typography.labelMedium) }
-                    )
+                ScrollableTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    edgePadding = 0.dp,
+                    divider = {} // Divider handled by Surface/Column
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = { 
+                                scope.launch { 
+                                    pagerState.animateScrollToPage(index) 
+                                } 
+                            },
+                            text = { 
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -88,30 +108,33 @@ fun SummaryScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else if (analytics!!.totalApps == 0) {
-                EmptyState(
-                    imageVector = Icons.Default.QueryStats,
-                    title = stringResource(Res.string.empty_summary_title),
-                    description = stringResource(Res.string.empty_summary_desc)
-                )
             } else {
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.Top
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    userScrollEnabled = true
                 ) { page ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        when (page) {
-                            0 -> SummaryOverviewTab(analytics!!)
-                            1 -> SummaryFinancialsTab(analytics!!)
-                            2 -> SummaryTimelineTab(analytics!!)
-                            3 -> SummaryDistributionTab(analytics!!)
+                    if (analytics!!.totalApps == 0) {
+                        EmptyState(
+                            imageVector = Icons.Default.QueryStats,
+                            title = stringResource(Res.string.empty_summary_title),
+                            description = stringResource(Res.string.empty_summary_desc)
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            when (page) {
+                                0 -> SummaryOverviewTab(analytics!!)
+                                1 -> SummaryFinancialsTab(analytics!!)
+                                2 -> SummaryTimelineTab(analytics!!)
+                                3 -> SummaryDistributionTab(analytics!!)
+                            }
                         }
                     }
                 }
