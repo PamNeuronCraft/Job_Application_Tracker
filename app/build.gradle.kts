@@ -26,7 +26,7 @@ buildkonfig {
         
         // Google Web Client IDs
         buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_DEBUG", "587001402052-idcta36ao4seblo39mas8q57vaabi7l9.apps.googleusercontent.com")
-        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_RELEASE", "621221034219-noce836ugbop9po122a2mrnsmgtrpf8n.apps.googleusercontent.com")
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_RELEASE", "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com")
         
         // RevenueCat API Keys
         buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
@@ -34,7 +34,11 @@ buildkonfig {
         buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
         buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder")
         
-        // Default to Google Test IDs
+        // Official Google AdMob Test IDs
+        //buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
+        //buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-3940256099942544/6300978111")
+
+        //AdMob IDS
         buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-9098088729873683~6121804769")
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-9098088729873683/1918835878")
     }
@@ -126,6 +130,12 @@ kotlin {
             implementation(libs.androidx.biometric)
             implementation(libs.androidx.work.runtime.ktx)
             implementation(libs.androidx.paging.runtime)
+            implementation(libs.play.review)
+            implementation(libs.play.review.ktx)
+            implementation(libs.play.update)
+            implementation(libs.play.update.ktx)
+            implementation(libs.androidx.glance.appwidget)
+            implementation(libs.androidx.glance.material3)
         }
         
         iosMain.dependencies {
@@ -155,6 +165,14 @@ android {
                 storePassword = keystoreProperties.getProperty("storePassword")
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+        getByName("debug") {
+            if (keystorePropertiesFile.exists() && keystoreProperties.containsKey("debugStoreFile")) {
+                storeFile = file(keystoreProperties.getProperty("debugStoreFile"))
+                storePassword = keystoreProperties.getProperty("debugStorePassword")
+                keyAlias = keystoreProperties.getProperty("debugKeyAlias")
+                keyPassword = keystoreProperties.getProperty("debugKeyPassword")
             }
         }
     }

@@ -24,6 +24,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Decode Debug Keystore
+        run: |
+          echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 --decode > app/debug.keystore
+
+      - name: Create keystore.properties
+        run: |
+          echo "debugStoreFile=debug.keystore" > keystore.properties
+          echo "debugStorePassword=android" >> keystore.properties
+          echo "debugKeyAlias=androiddebugkey" >> keystore.properties
+          echo "debugKeyPassword=android" >> keystore.properties
+
       - name: Run Lint
         run: ./gradlew lintDebug
 

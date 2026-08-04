@@ -36,6 +36,7 @@ import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ImportViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobListViewModel
+import com.pamneuroncraft.jobapplicationtracker.util.rememberInAppReviewManager
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import org.koin.compose.viewmodel.koinViewModel
@@ -74,7 +75,14 @@ fun JobListScreen(
     val pagedJobs = viewModel.pagedJobs.collectAsLazyPagingItems()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val isPremium by billingManager.isPremium.collectAsState()
+    val reviewManager = rememberInAppReviewManager()
     
+    LaunchedEffect(Unit) {
+        viewModel.shouldRequestReview.collect {
+            reviewManager.requestReview()
+        }
+    }
+
     var showAddOptions by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var paidFeatureToShow by remember { 
@@ -89,7 +97,7 @@ fun JobListScreen(
         onJobClick = onJobClick,
         selectedJobId = selectedJobId,
         onDeleteJob = { viewModel.onDeleteJob(it) },
-        showAds = !appConfig.featureGoogleDriveBackup
+        showAds = !isPremium
     )
 
     paidFeatureToShow?.let { feature ->
@@ -306,69 +314,69 @@ fun JobListContent(
                 singleLine = true
             )
 
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    count = jobs.itemCount,
-                    key = jobs.itemKey { it.id }
-                ) { index ->
-                    val job = jobs[index]
-                    if (job != null) {
-                        JobItem(
-                            job = job,
-                            isSelected = job.id == selectedJobId,
-                            onDelete = { onDeleteJob(job) },
-                            onClick = { onJobClick(job.id) }
-                        )
-                    }
-                }
-
-                when (val state = jobs.loadState.append) {
-                    is LoadState.Loading -> {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                            }
-                        }
-                    }
-                    is LoadState.Error -> {
-                        item {
-                            Text(
-                                text = stringResource(Res.string.error_loading_more, state.error.message ?: ""),
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(16.dp)
+            Box(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(
+                        count = jobs.itemCount,
+                        key = jobs.itemKey { it.id }
+                    ) { index ->
+                        val job = jobs[index]
+                        if (job != null) {
+                            JobItem(
+                                job = job,
+                                isSelected = job.id == selectedJobId,
+                                onDelete = { onDeleteJob(job) },
+                                onClick = { onJobClick(job.id) }
                             )
                         }
                     }
-                    else -> {}
-                }
-            }
 
-            if (jobs.loadState.refresh is LoadState.Loading && jobs.itemCount == 0) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+                    when (val state = jobs.loadState.append) {
+                        is LoadState.Loading -> {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                }
+                            }
+                        }
+                        is LoadState.Error -> {
+                            item {
+                                Text(
+                                    text = stringResource(Res.string.error_loading_more, state.error.message ?: ""),
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                        else -> {}
+                    }
                 }
-            }
 
-            if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
-                EmptyState(
-                    imageVector = Icons.Default.WorkOutline,
-                    title = stringResource(Res.string.empty_jobs_title),
-                    description = stringResource(Res.string.empty_jobs_desc),
-                    actionButtonText = stringResource(Res.string.add_job),
-                    onActionClick = onAddJob
-                )
+                if (jobs.loadState.refresh is LoadState.Loading && jobs.itemCount == 0) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
+                    EmptyState(
+                        imageVector = Icons.Default.WorkOutline,
+                        title = stringResource(Res.string.empty_jobs_title),
+                        description = stringResource(Res.string.empty_jobs_desc),
+                        actionButtonText = stringResource(Res.string.add_job),
+                        onActionClick = onAddJob
+                    )
+                }
             }
             
             if (showAds) {
