@@ -18,9 +18,14 @@ class MainActivity : FragmentActivity() {
             null
         }
 
+        val shortcut = intent.getStringExtra("shortcut")
+
         enableEdgeToEdge()
         setContent {
-            App(initialUrl = sharedUrl)
+            App(
+                initialUrl = sharedUrl,
+                initialShortcut = shortcut
+            )
         }
     }
 }

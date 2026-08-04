@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
@@ -32,6 +33,7 @@ fun SettingsScreen(
     appConfig: AppConfig = koinInject()
 ) {
     val themePreference by viewModel.themePreference.collectAsState()
+    val useDynamicColor by viewModel.useDynamicColor.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
     val biometricManager = createBiometricManager()
@@ -201,6 +203,24 @@ fun SettingsScreen(
                     }
                 }
             )
+
+            // Dynamic Color (Material You)
+            ListItem(
+                headlineContent = { Text("Dynamic Colors") },
+                supportingContent = { Text("Use colors from your wallpaper (Android 12+)") },
+                leadingContent = { Icon(Icons.Default.ColorLens, contentDescription = null) },
+                trailingContent = {
+                    Switch(
+                        checked = useDynamicColor,
+                        onCheckedChange = { viewModel.onUseDynamicColorChange(it) }
+                    )
+                }
+            )
+
+            if (!isPremium) {
+                Spacer(modifier = Modifier.weight(1f))
+                AdBanner(modifier = Modifier.fillMaxWidth())
+            }
         }
     }
 

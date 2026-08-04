@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SocialAuthManager
+import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumUpsellDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.ProfileViewModel
@@ -33,9 +35,11 @@ fun ProfileScreen(
     onBack: () -> Unit,
     onSubscriptionClick: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel(),
-    socialAuthManager: SocialAuthManager = koinInject()
+    socialAuthManager: SocialAuthManager = koinInject(),
+    billingManager: BillingManager = koinInject()
 ) {
     val user by viewModel.currentUser.collectAsState()
+    val isPremium by billingManager.isPremium.collectAsState()
     val isLoading by viewModel.isLoading
     val error by viewModel.error
     val registrationSuccess by viewModel.registrationSuccess
@@ -248,6 +252,10 @@ fun ProfileScreen(
                 }
                 
                 Spacer(modifier = Modifier.weight(1f))
+            }
+
+            if (!isPremium) {
+                AdBanner(modifier = Modifier.fillMaxWidth())
             }
         }
     }

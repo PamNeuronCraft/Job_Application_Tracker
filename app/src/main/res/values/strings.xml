@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Job Application Tracker</string>
+    <string name="shortcut_add_job">Add Job</string>
+    <string name="shortcut_add_job_long">Add New Job Application</string>
+    <string name="shortcut_summary">Summary</string>
+    <string name="shortcut_summary_long">View Applications Summary</string>
 </resources>

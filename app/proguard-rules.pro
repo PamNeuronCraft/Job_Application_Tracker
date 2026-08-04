@@ -1,3 +1,7 @@
+# AdMob
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.** { *; }
+
 # Kotlinx Serialization
 -keepattributes *Annotation*, EnclosingMethod, InnerClasses
 -keepclassmembers class ** {
