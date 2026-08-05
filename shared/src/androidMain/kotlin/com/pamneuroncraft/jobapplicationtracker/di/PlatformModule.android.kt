@@ -5,6 +5,7 @@ import com.pamneuroncraft.jobapplicationtracker.data.local.JobDatabase
 import com.pamneuroncraft.jobapplicationtracker.data.local.getDatabaseBuilder
 import org.koin.dsl.module
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.pamneuroncraft.jobapplicationtracker.AppBuildKonfig
 import kotlinx.coroutines.Dispatchers
 
 import com.pamneuroncraft.jobapplicationtracker.data.repository.JobExtractorImpl
@@ -38,7 +39,7 @@ actual val platformModule = module {
     single {
         GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = "YOUR_GEMINI_API_KEY"
+            apiKey = AppBuildKonfig.GEMINI_API_KEY
         )
     }
 

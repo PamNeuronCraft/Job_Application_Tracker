@@ -40,6 +40,10 @@ jobs:
 
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease
+        env:
+          GEMINI_API_KEY_PROD: ${{ secrets.GEMINI_API_KEY_PROD }}
+          ADMOB_APP_ID_PROD: ${{ secrets.ADMOB_APP_ID_PROD }}
+          ADMOB_BANNER_UNIT_ID_PROD: ${{ secrets.ADMOB_BANNER_UNIT_ID_PROD }}
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1

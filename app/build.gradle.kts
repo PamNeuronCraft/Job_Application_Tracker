@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
+fun getSecret(key: String, default: String): String {
+    return System.getenv(key) ?: project.findProperty(key)?.toString() ?: default
+}
+
 configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "com.pamneuroncraft.jobapplicationtracker"
     compileSdk = 37
@@ -51,14 +55,13 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
         versionName = "$versionMajor.$versionMinor.$buildNumber"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
-        manifestPlaceholders["adMobAppId"] = "ca-app-pub-3940256099942544~3347511713"
     }
 
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
+            manifestPlaceholders["adMobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
             isMinifyEnabled = true
@@ -68,6 +71,7 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
                 "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
+            manifestPlaceholders["adMobAppId"] = getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769")
         }
     }
     compileOptions {
