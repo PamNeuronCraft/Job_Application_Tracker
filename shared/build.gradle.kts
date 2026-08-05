@@ -12,6 +12,10 @@ plugins {
     alias(libs.plugins.android.library)
 }
 
+fun getSecret(key: String, default: String): String {
+    return System.getenv(key) ?: project.findProperty(key)?.toString() ?: default
+}
+
 buildkonfig {
     packageName = "com.pamneuroncraft.jobapplicationtracker"
     objectName = "AppBuildKonfig"
@@ -31,9 +35,18 @@ buildkonfig {
         buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
         buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder")
         
-        // Official Google AdMob Test IDs
+        // Defaults to Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-3940256099942544/6300978111")
+        buildConfigField(STRING, "GEMINI_API_KEY", getSecret("GEMINI_API_KEY_DEV", ""))
+    }
+
+    targetConfigs {
+        create("release") {
+            buildConfigField(STRING, "ADMOB_APP_ID", getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769"))
+            buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", getSecret("ADMOB_BANNER_UNIT_ID_PROD", "ca-app-pub-9098088729873683/1918835878"))
+            buildConfigField(STRING, "GEMINI_API_KEY", getSecret("GEMINI_API_KEY_PROD", ""))
+        }
     }
 }
 
