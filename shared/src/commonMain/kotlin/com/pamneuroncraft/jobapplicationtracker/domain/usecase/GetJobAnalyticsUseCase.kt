@@ -4,7 +4,13 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.*
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.*
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 
 class GetJobAnalyticsUseCase(
     private val repository: JobRepository
@@ -53,7 +59,7 @@ class GetJobAnalyticsUseCase(
             }
             val appsLastWeek = jobs.count { 
                 val date = it.dateAdded.toLocalDateTime(systemTZ).date
-                date >= startOfLastWeek && date < startOfThisWeek
+                date in startOfLastWeek..<startOfThisWeek
             }
             
             // Average apps per week (since first app)

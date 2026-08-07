@@ -9,9 +9,9 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import androidx.paging.*
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class JobRepositoryImpl(
     private val dao: JobDao,

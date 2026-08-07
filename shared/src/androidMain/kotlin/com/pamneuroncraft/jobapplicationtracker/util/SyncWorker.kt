@@ -12,7 +12,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupSer
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
 import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent

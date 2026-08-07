@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -38,7 +37,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -52,28 +50,47 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.Res
+import com.pamneuroncraft.jobapplicationtracker.back
+import com.pamneuroncraft.jobapplicationtracker.cancel
+import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
-import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
+import com.pamneuroncraft.jobapplicationtracker.interview_date
+import com.pamneuroncraft.jobapplicationtracker.interview_time
+import com.pamneuroncraft.jobapplicationtracker.label_company_name
+import com.pamneuroncraft.jobapplicationtracker.label_compensation
+import com.pamneuroncraft.jobapplicationtracker.label_description
+import com.pamneuroncraft.jobapplicationtracker.label_job_name
+import com.pamneuroncraft.jobapplicationtracker.label_job_type
+import com.pamneuroncraft.jobapplicationtracker.label_reminder
+import com.pamneuroncraft.jobapplicationtracker.label_status
+import com.pamneuroncraft.jobapplicationtracker.no_date_set
+import com.pamneuroncraft.jobapplicationtracker.no_reminder_set
+import com.pamneuroncraft.jobapplicationtracker.no_time_set
+import com.pamneuroncraft.jobapplicationtracker.none
+import com.pamneuroncraft.jobapplicationtracker.ok
+import com.pamneuroncraft.jobapplicationtracker.save
+import com.pamneuroncraft.jobapplicationtracker.title_add_job
+import com.pamneuroncraft.jobapplicationtracker.title_edit_job
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PermissionRationaleDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobAddEditViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.Permission
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionState
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -309,7 +326,7 @@ fun JobAddEditScreen(
                     datePickerState.selectedDateMillis?.let { millis ->
                         val current = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault())
                         val newDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
-                        val updated = kotlinx.datetime.LocalDateTime(
+                        val updated = LocalDateTime(
                             newDate.year, newDate.month, newDate.dayOfMonth,
                             current?.hour ?: 9, current?.minute ?: 0
                         ).toInstant(TimeZone.currentSystemDefault())
@@ -348,7 +365,7 @@ fun JobAddEditScreen(
                     val date = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault()) 
                         ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                     
-                    val updated = kotlinx.datetime.LocalDateTime(
+                    val updated = LocalDateTime(
                         date.year, date.month, date.dayOfMonth,
                         timePickerState.hour, timePickerState.minute
                     ).toInstant(TimeZone.currentSystemDefault())

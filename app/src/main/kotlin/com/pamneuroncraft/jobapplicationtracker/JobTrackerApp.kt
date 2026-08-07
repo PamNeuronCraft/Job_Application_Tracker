@@ -10,6 +10,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 class JobTrackerApp : Application() {
     private val billingManager: BillingManager by inject()
@@ -51,7 +52,7 @@ class JobTrackerApp : Application() {
                     // This is a last resort to fix "Internal Error (26.4.1)"
                     // It clears all unsynced local data and forces a fresh sync.
                     FirebaseFirestore.getInstance().clearPersistence()
-                    prefs.edit().putBoolean("cache_cleared_26_4_1", true).apply()
+                    prefs.edit { putBoolean("cache_cleared_26_4_1", true) }
                 } catch (e: Exception) {
                     // Silently fail if persistence can't be cleared (e.g. Firestore not initialized)
                 }

@@ -36,17 +36,14 @@ buildkonfig {
         buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder")
         
         // Defaults to Test IDs
-        buildConfigField(STRING, "ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
-        buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", "ca-app-pub-3940256099942544/6300978111")
-        buildConfigField(STRING, "GEMINI_API_KEY", getSecret("GEMINI_API_KEY_DEV", ""))
-    }
+        buildConfigField(STRING, "ADMOB_APP_ID_DEBUG", "ca-app-pub-3940256099942544~3347511713")
+        buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID_DEBUG", "ca-app-pub-3940256099942544/6300978111")
+        buildConfigField(STRING, "GEMINI_API_KEY_DEBUG", getSecret("GEMINI_API_KEY_DEV", ""))
 
-    targetConfigs {
-        create("release") {
-            buildConfigField(STRING, "ADMOB_APP_ID", getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769"))
-            buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID", getSecret("ADMOB_BANNER_UNIT_ID_PROD", "ca-app-pub-9098088729873683/1918835878"))
-            buildConfigField(STRING, "GEMINI_API_KEY", getSecret("GEMINI_API_KEY_PROD", ""))
-        }
+        // Release IDs
+        buildConfigField(STRING, "ADMOB_APP_ID_RELEASE", getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769"))
+        buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID_RELEASE", getSecret("ADMOB_BANNER_UNIT_ID_PROD", "ca-app-pub-9098088729873683/1918835878"))
+        buildConfigField(STRING, "GEMINI_API_KEY_RELEASE", getSecret("GEMINI_API_KEY_PROD", ""))
     }
 }
 
@@ -76,7 +73,8 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            
+            implementation(compose.preview)
+
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.room.paging)
             implementation(libs.androidx.sqlite.bundled)
@@ -173,7 +171,7 @@ room {
 dependencies {
     implementation(platform(libs.firebase.bom))
     
-    add("kspCommonMainMetadata", libs.androidx.room.compiler)
+    //add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)

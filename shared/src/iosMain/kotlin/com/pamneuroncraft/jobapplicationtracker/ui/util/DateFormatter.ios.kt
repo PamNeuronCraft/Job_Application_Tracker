@@ -1,7 +1,9 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.util
 
-import kotlinx.datetime.Instant
-import platform.Foundation.*
+import platform.Foundation.NSDate
+import platform.Foundation.NSDateFormatter
+import platform.Foundation.dateWithTimeIntervalSince1970
+import kotlin.time.Instant
 
 actual object DateFormatter {
     actual fun format(instant: Instant, pattern: String): String {

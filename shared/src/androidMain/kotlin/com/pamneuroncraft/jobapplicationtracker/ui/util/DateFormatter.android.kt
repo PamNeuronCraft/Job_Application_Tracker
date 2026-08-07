@@ -1,6 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.util
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import java.text.SimpleDateFormat
 import java.util.*
 
