@@ -327,7 +327,7 @@ fun JobAddEditScreen(
                         val current = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault())
                         val newDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
                         val updated = LocalDateTime(
-                            newDate.year, newDate.month, newDate.dayOfMonth,
+                            newDate.year, newDate.month, newDate.day,
                             current?.hour ?: 9, current?.minute ?: 0
                         ).toInstant(TimeZone.currentSystemDefault())
                         
@@ -366,7 +366,7 @@ fun JobAddEditScreen(
                         ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                     
                     val updated = LocalDateTime(
-                        date.year, date.month, date.dayOfMonth,
+                        date.year, date.month, date.day,
                         timePickerState.hour, timePickerState.minute
                     ).toInstant(TimeZone.currentSystemDefault())
                     

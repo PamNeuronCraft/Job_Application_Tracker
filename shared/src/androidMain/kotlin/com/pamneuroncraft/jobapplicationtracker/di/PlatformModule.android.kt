@@ -16,7 +16,6 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationSe
 
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.CommonAppConfig
-import com.pamneuroncraft.jobapplicationtracker.shared.BuildConfig
 import com.pamneuroncraft.jobapplicationtracker.util.AndroidSyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
@@ -28,7 +27,7 @@ actual val platformModule = module {
     single<BillingManager> { AndroidBillingManager(get(), get()) }
     single<SyncManager> { AndroidSyncManager(get()) }
     single<ExportManager> { AndroidExportManager(get()) }
-    single<AppConfig> { CommonAppConfig(get(), BuildConfig.DEBUG) }
+    single<AppConfig> { CommonAppConfig(get(), AppBuildKonfig.IS_DEBUG) }
     single<JobDatabase> {
         getDatabaseBuilder(get())
             .setDriver(BundledSQLiteDriver())
@@ -39,7 +38,7 @@ actual val platformModule = module {
     single {
         GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = if (BuildConfig.DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
+            apiKey = if (AppBuildKonfig.IS_DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
         )
     }
 
