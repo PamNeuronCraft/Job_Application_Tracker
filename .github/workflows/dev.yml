@@ -45,6 +45,9 @@ jobs:
         run: ./gradlew :app:assembleDebug
         env:
           GEMINI_API_KEY_DEV: ${{ secrets.GEMINI_API_KEY_DEV }}
+          REVENUECAT_API_KEY_ANDROID_DEBUG: ${{ secrets.REVENUECAT_API_KEY_ANDROID_DEBUG }}
+          GOOGLE_WEB_CLIENT_ID_DEBUG: ${{ secrets.GOOGLE_WEB_CLIENT_ID_DEBUG }}
+          IS_DEBUG: "true"
 
       - name: Upload to Firebase App Distribution (Debug)
         uses: wzieba/Firebase-Distribution-Github-Action@v1
