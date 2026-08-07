@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildkonfig)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform)
 }
 
 fun getSecret(key: String, default: String): String {
@@ -21,6 +21,7 @@ buildkonfig {
     objectName = "AppBuildKonfig"
     
     defaultConfigs {
+        buildConfigField(BOOLEAN, "IS_DEBUG", "true")
         buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "true")
         buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "true")
         buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "true")
@@ -48,7 +49,15 @@ buildkonfig {
 }
 
 kotlin {
-    androidTarget {
+    android {
+        namespace = "com.pamneuroncraft.jobapplicationtracker.shared"
+        compileSdk = 37
+        minSdk = 24
+        
+        androidResources {
+            enable = true
+        }
+        
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
@@ -66,14 +75,14 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.preview)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.material.icons.extended)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.components.ui.tooling.preview)
+            implementation(libs.compose.ui.tooling.preview)
 
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.room.paging)
@@ -106,6 +115,7 @@ kotlin {
         }
         
         androidMain.dependencies {
+            implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.auth)
@@ -144,33 +154,11 @@ kotlin {
     }
 }
 
-configure<com.android.build.api.dsl.LibraryExtension> {
-    namespace = "com.pamneuroncraft.jobapplicationtracker.shared"
-    compileSdk = 37
-    defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        buildConfig = true
-    }
-    buildTypes {
-        getByName("release") {
-            consumerProguardFiles("consumer-rules.pro")
-        }
-    }
-}
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
-    implementation(platform(libs.firebase.bom))
-    
     //add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
@@ -178,5 +166,5 @@ dependencies {
 }
 
 compose.resources {
-    packageOfResClass = "com.pamneuroncraft.jobapplicationtracker"
+    packageOfResClass = "com.pamneuroncraft.jobapplicationtracker.shared"
 }

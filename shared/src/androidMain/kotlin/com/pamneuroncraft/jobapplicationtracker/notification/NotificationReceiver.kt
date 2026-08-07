@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.pamneuroncraft.jobapplicationtracker.shared.R
 
 class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -26,8 +25,10 @@ class NotificationReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val iconRes = context.resources.getIdentifier("ic_launcher_foreground", "drawable", context.packageName)
+
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Use default icon
+            .setSmallIcon(if (iconRes != 0) iconRes else android.R.drawable.ic_dialog_info)
             .setContentTitle("Interview Reminder")
             .setContentText("You have an interview for $jobName at $companyName")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

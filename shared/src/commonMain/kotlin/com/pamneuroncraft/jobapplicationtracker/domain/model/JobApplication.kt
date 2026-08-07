@@ -1,20 +1,9 @@
 package com.pamneuroncraft.jobapplicationtracker.domain.model
 
 import com.benasher44.uuid.uuid4
-import com.pamneuroncraft.jobapplicationtracker.Res
-import com.pamneuroncraft.jobapplicationtracker.job_status_applied
-import com.pamneuroncraft.jobapplicationtracker.job_status_interview
-import com.pamneuroncraft.jobapplicationtracker.job_status_no_offer
-import com.pamneuroncraft.jobapplicationtracker.job_status_offer
-import com.pamneuroncraft.jobapplicationtracker.job_type_hybrid
-import com.pamneuroncraft.jobapplicationtracker.job_type_onsite
-import com.pamneuroncraft.jobapplicationtracker.job_type_remote
-import com.pamneuroncraft.jobapplicationtracker.reminder_one_day
-import com.pamneuroncraft.jobapplicationtracker.reminder_thirty_minutes
-import com.pamneuroncraft.jobapplicationtracker.reminder_two_hours
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Serializable
 
 @Serializable

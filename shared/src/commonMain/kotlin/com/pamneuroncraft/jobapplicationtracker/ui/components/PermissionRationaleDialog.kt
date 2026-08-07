@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import org.koin.compose.koinInject
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 
 @Composable
 fun PermissionRationaleDialog(

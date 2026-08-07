@@ -24,6 +24,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.EmptyState
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
@@ -387,17 +388,15 @@ fun JobItem(
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
-    val swipeState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it != SwipeToDismissBoxValue.Settled) {
-                onDelete()
-            }
-            false // Item will be removed by the list update, so we don't need to transition to 'dismissed'
-        }
-    )
+    val swipeState = rememberSwipeToDismissBoxState()
 
     SwipeToDismissBox(
         state = swipeState,
+        onDismiss = {
+            if (it != SwipeToDismissBoxValue.Settled) {
+                onDelete()
+            }
+        },
         backgroundContent = {
             val color = when (swipeState.dismissDirection) {
                 SwipeToDismissBoxValue.StartToEnd -> Color.Red.copy(alpha = 0.5f)

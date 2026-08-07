@@ -52,38 +52,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.pamneuroncraft.jobapplicationtracker.Res
-import com.pamneuroncraft.jobapplicationtracker.back
-import com.pamneuroncraft.jobapplicationtracker.cancel
 import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
-import com.pamneuroncraft.jobapplicationtracker.interview_date
-import com.pamneuroncraft.jobapplicationtracker.interview_time
-import com.pamneuroncraft.jobapplicationtracker.label_company_name
-import com.pamneuroncraft.jobapplicationtracker.label_compensation
-import com.pamneuroncraft.jobapplicationtracker.label_description
-import com.pamneuroncraft.jobapplicationtracker.label_job_name
-import com.pamneuroncraft.jobapplicationtracker.label_job_type
-import com.pamneuroncraft.jobapplicationtracker.label_reminder
-import com.pamneuroncraft.jobapplicationtracker.label_status
-import com.pamneuroncraft.jobapplicationtracker.no_date_set
-import com.pamneuroncraft.jobapplicationtracker.no_reminder_set
-import com.pamneuroncraft.jobapplicationtracker.no_time_set
-import com.pamneuroncraft.jobapplicationtracker.none
-import com.pamneuroncraft.jobapplicationtracker.ok
-import com.pamneuroncraft.jobapplicationtracker.save
-import com.pamneuroncraft.jobapplicationtracker.title_add_job
-import com.pamneuroncraft.jobapplicationtracker.title_edit_job
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PermissionRationaleDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobAddEditViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.Permission
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionManager
 import com.pamneuroncraft.jobapplicationtracker.util.PermissionState
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -91,6 +70,8 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -327,7 +308,7 @@ fun JobAddEditScreen(
                         val current = interviewDate?.toLocalDateTime(TimeZone.currentSystemDefault())
                         val newDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
                         val updated = LocalDateTime(
-                            newDate.year, newDate.month, newDate.dayOfMonth,
+                            newDate.year, newDate.month, newDate.day,
                             current?.hour ?: 9, current?.minute ?: 0
                         ).toInstant(TimeZone.currentSystemDefault())
                         
@@ -366,7 +347,7 @@ fun JobAddEditScreen(
                         ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                     
                     val updated = LocalDateTime(
-                        date.year, date.month, date.dayOfMonth,
+                        date.year, date.month, date.day,
                         timePickerState.hour, timePickerState.minute
                     ).toInstant(TimeZone.currentSystemDefault())
                     

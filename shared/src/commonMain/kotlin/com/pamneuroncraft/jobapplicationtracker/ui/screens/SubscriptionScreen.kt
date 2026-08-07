@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SubscriptionViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
