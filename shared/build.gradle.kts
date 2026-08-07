@@ -21,20 +21,20 @@ buildkonfig {
     objectName = "AppBuildKonfig"
     
     defaultConfigs {
-        buildConfigField(BOOLEAN, "IS_DEBUG", "true")
+        buildConfigField(BOOLEAN, "IS_DEBUG", getSecret("IS_DEBUG", "true"))
         buildConfigField(BOOLEAN, "FEATURE_AI_IMPORT", "true")
         buildConfigField(BOOLEAN, "FEATURE_GOOGLE_DRIVE_BACKUP", "true")
         buildConfigField(BOOLEAN, "FEATURE_SUMMARY", "true")
         
         // Google Web Client IDs
-        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_DEBUG", "587001402052-idcta36ao4seblo39mas8q57vaabi7l9.apps.googleusercontent.com")
-        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_RELEASE", "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com")
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_DEBUG", getSecret("GOOGLE_WEB_CLIENT_ID_DEBUG", "587001402052-idcta36ao4seblo39mas8q57vaabi7l9.apps.googleusercontent.com"))
+        buildConfigField(STRING, "GOOGLE_WEB_CLIENT_ID_RELEASE", getSecret("GOOGLE_WEB_CLIENT_ID_RELEASE", "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com"))
         
         // RevenueCat API Keys
-        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
-        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_RELEASE", "goog_HrWqyESiTxrpzpqsfSlKXUrGmEm")
-        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN")
-        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder")
+        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_DEBUG", getSecret("REVENUECAT_API_KEY_ANDROID_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN"))
+        buildConfigField(STRING, "REVENUECAT_API_KEY_ANDROID_RELEASE", getSecret("REVENUECAT_API_KEY_ANDROID_RELEASE", "goog_HrWqyESiTxrpzpqsfSlKXUrGmEm"))
+        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_DEBUG", getSecret("REVENUECAT_API_KEY_IOS_DEBUG", "test_yIMjzBcWtbQriwjXQEvrlZYHJZN"))
+        buildConfigField(STRING, "REVENUECAT_API_KEY_IOS_RELEASE", getSecret("REVENUECAT_API_KEY_IOS_RELEASE", "appl_placeholder"))
         
         // Defaults to Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID_DEBUG", "ca-app-pub-3940256099942544~3347511713")
