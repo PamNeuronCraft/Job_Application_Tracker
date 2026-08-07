@@ -169,7 +169,7 @@ fun MainAppNavigation(
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 item(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(JobListKey::class) } == true,
+                    selected = currentDestination.hierarchy.any { it.hasRoute(JobListKey::class) },
                     onClick = {
                         navController.navigate(JobListKey) {
                             popUpTo(JobListKey) { saveState = true }
@@ -181,7 +181,7 @@ fun MainAppNavigation(
                     label = { Text("Jobs") }
                 )
                 item(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(SummaryKey::class) } == true,
+                    selected = currentDestination.hierarchy.any { it.hasRoute(SummaryKey::class) },
                     onClick = {
                         navController.navigate(SummaryKey) {
                             popUpTo(JobListKey) { saveState = true }
@@ -208,7 +208,7 @@ fun MainAppNavigation(
                     label = { Text("Summary") }
                 )
                 item(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(ProfileKey::class) } == true,
+                    selected = currentDestination.hierarchy.any { it.hasRoute(ProfileKey::class) },
                     onClick = {
                         navController.navigate(ProfileKey) {
                             popUpTo(JobListKey) { saveState = true }
@@ -220,7 +220,7 @@ fun MainAppNavigation(
                     label = { Text("Profile") }
                 )
                 item(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(SettingsKey::class) } == true,
+                    selected = currentDestination.hierarchy.any { it.hasRoute(SettingsKey::class) },
                     onClick = {
                         navController.navigate(SettingsKey) {
                             popUpTo(JobListKey) { saveState = true }

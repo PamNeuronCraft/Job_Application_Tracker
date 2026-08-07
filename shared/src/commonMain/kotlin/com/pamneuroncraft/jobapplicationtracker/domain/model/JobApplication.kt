@@ -1,10 +1,21 @@
 package com.pamneuroncraft.jobapplicationtracker.domain.model
 
-import kotlinx.serialization.Serializable
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import com.benasher44.uuid.uuid4
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.Res
+import com.pamneuroncraft.jobapplicationtracker.job_status_applied
+import com.pamneuroncraft.jobapplicationtracker.job_status_interview
+import com.pamneuroncraft.jobapplicationtracker.job_status_no_offer
+import com.pamneuroncraft.jobapplicationtracker.job_status_offer
+import com.pamneuroncraft.jobapplicationtracker.job_type_hybrid
+import com.pamneuroncraft.jobapplicationtracker.job_type_onsite
+import com.pamneuroncraft.jobapplicationtracker.job_type_remote
+import com.pamneuroncraft.jobapplicationtracker.reminder_one_day
+import com.pamneuroncraft.jobapplicationtracker.reminder_thirty_minutes
+import com.pamneuroncraft.jobapplicationtracker.reminder_two_hours
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class JobApplication(
@@ -16,12 +27,16 @@ data class JobApplication(
     val compensationAmount: Double?,
     val compensationType: CompensationType = CompensationType.ANNUAL,
     val status: JobStatus,
+    @Serializable(with = DateSerializer::class)
     val dateAdded: Instant = Clock.System.now(),
+    @Serializable(with = DateSerializer::class)
     val interviewDate: Instant? = null,
     val reminderDuration: ReminderDuration? = null,
     val userId: String? = null,
+    @Serializable(with = DateSerializer::class)
     val updatedAt: Instant = Clock.System.now(),
     val isDeleted: Boolean = false,
+    @Serializable(with = DateSerializer::class)
     val lastSyncedAt: Instant? = null
 )
 

@@ -10,6 +10,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.JobUseCases
 import kotlinx.coroutines.launch
+import kotlin.time.Instant
 
 class JobAddEditViewModel(
     private val jobUseCases: JobUseCases,
@@ -37,8 +38,8 @@ class JobAddEditViewModel(
     private val _status = mutableStateOf(JobStatus.APPLIED)
     val status: State<JobStatus> = _status
 
-    private val _interviewDate = mutableStateOf<kotlinx.datetime.Instant?>(null)
-    val interviewDate: State<kotlinx.datetime.Instant?> = _interviewDate
+    private val _interviewDate = mutableStateOf<Instant?>(null)
+    val interviewDate: State<Instant?> = _interviewDate
 
     private val _reminderDuration = mutableStateOf<com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration?>(null)
     val reminderDuration: State<com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration?> = _reminderDuration
@@ -110,7 +111,7 @@ class JobAddEditViewModel(
         _compensationType.value = value 
     }
     fun onStatusChange(value: JobStatus) { _status.value = value }
-    fun onInterviewDateChange(value: kotlinx.datetime.Instant?) { 
+    fun onInterviewDateChange(value: Instant?) { 
         _interviewDate.value = value 
         if (value == null) {
             _reminderDuration.value = null

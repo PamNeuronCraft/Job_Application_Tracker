@@ -39,7 +39,7 @@ actual val platformModule = module {
     single {
         GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = AppBuildKonfig.GEMINI_API_KEY
+            apiKey = if (BuildConfig.DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
         )
     }
 

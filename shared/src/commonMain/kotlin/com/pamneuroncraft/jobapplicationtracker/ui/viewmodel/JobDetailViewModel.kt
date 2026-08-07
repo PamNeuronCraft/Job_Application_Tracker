@@ -9,7 +9,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.JobUseCases
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 class JobDetailViewModel(
     private val jobUseCases: JobUseCases,

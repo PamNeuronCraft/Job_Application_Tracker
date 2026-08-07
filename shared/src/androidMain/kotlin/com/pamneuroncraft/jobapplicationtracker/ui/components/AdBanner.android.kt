@@ -13,6 +13,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.google.firebase.BuildConfig
 import com.pamneuroncraft.jobapplicationtracker.AppBuildKonfig
 
 @Composable
@@ -25,7 +26,7 @@ actual fun AdBanner(modifier: Modifier) {
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.BANNER)
-                adUnitId = AppBuildKonfig.ADMOB_BANNER_UNIT_ID
+                adUnitId = if(BuildConfig.DEBUG) AppBuildKonfig.ADMOB_BANNER_UNIT_ID_DEBUG else AppBuildKonfig.ADMOB_BANNER_UNIT_ID_RELEASE
                 adListener = object : AdListener() {
                     override fun onAdFailedToLoad(error: LoadAdError) {
                         android.util.Log.e("AdMob", "Ad failed to load: ${error.message} (Code: ${error.code})")

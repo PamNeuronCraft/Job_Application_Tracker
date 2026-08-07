@@ -30,7 +30,7 @@ class FirebaseCloudBackupService : CloudBackupService {
         chunks.forEach { chunk ->
             val batch = firestore.batch()
             chunk.forEach { job ->
-                val doc = userJobsCollection.document(job.id.toString())
+                val doc = userJobsCollection.document(job.id)
                 if (job.isDeleted) {
                     batch.delete(doc)
                 } else {

@@ -23,8 +23,23 @@ import com.pamneuroncraft.jobapplicationtracker.util.IosSyncManager
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIWindowScene
-import platform.Foundation.*
-import platform.UserNotifications.*
+import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSURL
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.NSDate
+import platform.Foundation.create
+import platform.Foundation.writeToURL
+import platform.UserNotifications.UNUserNotificationCenter
+import platform.UserNotifications.UNAuthorizationOptionAlert
+import platform.UserNotifications.UNAuthorizationOptionSound
+import platform.UserNotifications.UNAuthorizationOptionBadge
+import platform.UserNotifications.UNMutableNotificationContent
+import platform.UserNotifications.UNNotificationSound
+import platform.UserNotifications.UNTimeIntervalNotificationTrigger
+import platform.UserNotifications.UNNotificationRequest
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 actual val platformModule = module {
     single<BillingManager> { IosBillingManager(get(), get()) }
@@ -97,7 +112,8 @@ actual val platformModule = module {
                             null -> 30 * 60.0
                         }
 
-                        val triggerTime = (interviewDate.toEpochMilliseconds() - kotlinx.datetime.Clock.System.now().toEpochMilliseconds()) / 1000.0 - offsetSeconds
+                        val now = Clock.System.now()
+                        val triggerTime = (interviewDate.toEpochMilliseconds() - now.toEpochMilliseconds()).toDouble() / 1000.0 - offsetSeconds
                         
                         if (triggerTime > 0) {
                             val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(triggerTime, false)

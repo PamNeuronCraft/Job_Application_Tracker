@@ -16,11 +16,13 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -31,6 +33,7 @@ fun AdaptiveJobsScreen(
     showPremiumShareRationale: Boolean = false
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val scope = rememberCoroutineScope()
 
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
@@ -39,22 +42,26 @@ fun AdaptiveJobsScreen(
             JobListScreen(
                 onAddJob = onAddJob,
                 onJobClick = { jobId ->
-                    navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, jobId)
+                    scope.launch {
+                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, jobId)
+                    }
                 },
                 onSummaryClick = onSummaryClick,
                 showPremiumShareRationale = showPremiumShareRationale,
-                selectedJobId = navigator.currentDestination?.content
+                selectedJobId = navigator.currentDestination?.contentKey
             )
         },
         detailPane = {
-            val jobId = navigator.currentDestination?.content
+            val jobId = navigator.currentDestination?.contentKey
             if (jobId != null) {
                 val isListVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
                 JobDetailScreen(
                     jobId = jobId,
                     onBack = {
                         if (navigator.canNavigateBack()) {
-                            navigator.navigateBack()
+                            scope.launch {
+                                navigator.navigateBack()
+                            }
                         }
                     },
                     onEditJob = onEditJob,
