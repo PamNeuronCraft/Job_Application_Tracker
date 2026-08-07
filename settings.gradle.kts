@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "JobApplicationTracker"
 include(":app")
+include(":shared")
