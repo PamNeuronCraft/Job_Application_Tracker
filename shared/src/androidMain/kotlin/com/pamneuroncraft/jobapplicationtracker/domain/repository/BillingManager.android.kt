@@ -38,7 +38,7 @@ class AndroidBillingManager(
                 newAppUserID = uid,
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info, _ -> 
-                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -52,7 +52,7 @@ class AndroidBillingManager(
             Purchases.sharedInstance.logOut(
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info -> 
-                    val hasPremium = info.entitlements.active.containsKey("premium")
+                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -68,7 +68,7 @@ class AndroidBillingManager(
                     fetchPolicy = CacheFetchPolicy.CACHE_ONLY,
                     onError = { continuation.resume(false) },
                     onSuccess = { info -> 
-                        continuation.resume(info.entitlements.active.containsKey("premium"))
+                        continuation.resume(info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro"))
                     }
                 )
             }
@@ -95,7 +95,7 @@ class AndroidBillingManager(
                             }
                         },
                         onSuccess = { _, customerInfo ->
-                            val hasPremium = customerInfo.entitlements.active.containsKey("premium")
+                            val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
                             _isPremium.value = hasPremium || appConfig.isDebug
                             localSettings.isPremium = hasPremium
                             continuation.resume(Result.success(Unit))
@@ -112,7 +112,7 @@ class AndroidBillingManager(
         Purchases.sharedInstance.restorePurchases(
             onError = { continuation.resume(Result.failure(Exception(it.message))) },
             onSuccess = { customerInfo ->
-                val hasPremium = customerInfo.entitlements.active.containsKey("premium")
+                val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
                 _isPremium.value = hasPremium || appConfig.isDebug
                 localSettings.isPremium = hasPremium
                 continuation.resume(Result.success(Unit))
