@@ -26,6 +26,7 @@ import com.pamneuroncraft.jobapplicationtracker.shared.*
 @Composable
 fun SubscriptionScreen(
     onBack: () -> Unit,
+    onSignInClick: () -> Unit,
     viewModel: SubscriptionViewModel = koinViewModel()
 ) {
     val isPremium by viewModel.isPremium.collectAsState()
@@ -106,7 +107,13 @@ fun SubscriptionScreen(
                 )
             } else {
                 Button(
-                    onClick = { viewModel.subscribe() },
+                    onClick = { 
+                        if (viewModel.isUserSignedIn) {
+                            viewModel.subscribe()
+                        } else {
+                            onSignInClick()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
                     contentPadding = PaddingValues(16.dp)
@@ -119,7 +126,13 @@ fun SubscriptionScreen(
                 }
                 
                 TextButton(
-                    onClick = { viewModel.restorePurchases() },
+                    onClick = { 
+                        if (viewModel.isUserSignedIn) {
+                            viewModel.restorePurchases()
+                        } else {
+                            onSignInClick()
+                        }
+                    },
                     enabled = !isLoading
                 ) {
                     Text("Restore Purchases")

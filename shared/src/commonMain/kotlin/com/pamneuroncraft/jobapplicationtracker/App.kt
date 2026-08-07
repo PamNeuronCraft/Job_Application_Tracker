@@ -308,7 +308,8 @@ private fun AppNavHost(
         }
         composable<SubscriptionKey> {
             SubscriptionScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onSignInClick = { navController.navigate(ProfileKey) }
             )
         }
     }
