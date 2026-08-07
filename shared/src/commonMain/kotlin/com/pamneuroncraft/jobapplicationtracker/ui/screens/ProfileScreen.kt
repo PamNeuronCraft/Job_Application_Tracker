@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

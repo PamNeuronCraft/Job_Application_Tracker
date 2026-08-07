@@ -3,7 +3,7 @@ package com.pamneuroncraft.jobapplicationtracker.ui.components
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 
 @Composable
 fun PaidFeatureDialog(

@@ -31,7 +31,7 @@ import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SummaryViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.*
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +75,7 @@ fun SummaryScreen(
                 shadowElevation = 2.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                ScrollableTabRow(
+                PrimaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary,
