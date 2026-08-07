@@ -2,6 +2,7 @@ package com.pamneuroncraft.jobapplicationtracker.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,10 +10,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class SubscriptionViewModel(
-    private val billingManager: BillingManager
+    private val billingManager: BillingManager,
+    private val authService: AuthService
 ) : ViewModel() {
 
     val isPremium: StateFlow<Boolean> = billingManager.isPremium
+    
+    val isUserSignedIn: Boolean get() = authService.isUserSignedIn()
     
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
