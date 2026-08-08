@@ -38,6 +38,9 @@ jobs:
           echo "keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}" >> keystore.properties
           echo "keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}" >> keystore.properties
 
+      - name: Verify SHA-1
+        run: ./gradlew :app:signingReport
+
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease
         env:
