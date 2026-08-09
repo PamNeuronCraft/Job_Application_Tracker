@@ -12,9 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
+import com.pamneuroncraft.jobapplicationtracker.ui.util.rememberPlatformContext
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
@@ -35,8 +37,11 @@ fun SettingsScreen(
     val themePreference by viewModel.themePreference.collectAsState()
     val useDynamicColor by viewModel.useDynamicColor.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
+    val isEmailSyncEnabled by viewModel.isEmailSyncEnabled.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
     val biometricManager = createBiometricManager()
+    
+    val platformContext = rememberPlatformContext()
     
     var showThemeMenu by remember { mutableStateOf(false) }
     var showPaidFeatureDialog by remember { mutableStateOf(false) }
@@ -101,6 +106,38 @@ fun SettingsScreen(
                                 }
                             } else {
                                 viewModel.onBiometricEnabledChange(false)
+                            }
+                        }
+                    )
+                }
+            )
+
+            // Email Status Sync
+            ListItem(
+                headlineContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Email Status Sync (Gmail)")
+                        if (!isPremium) {
+                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                },
+                supportingContent = { Text("Auto-update application status from emails") },
+                leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
+                trailingContent = {
+                    Switch(
+                        checked = isEmailSyncEnabled,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                if (appConfig.featureEmailSync) {
+                                    viewModel.onEmailSyncEnabledChange(true, platformContext)
+                                } else {
+                                    paidFeatureDialogTitle = "Email Status Sync"
+                                    paidFeatureDialogMessage = "Automatically tracking job status from your emails is a premium feature. Upgrade now to save time!"
+                                    showPaidFeatureDialog = true
+                                }
+                            } else {
+                                viewModel.onEmailSyncEnabledChange(false, null)
                             }
                         }
                     )

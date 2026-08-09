@@ -9,6 +9,7 @@ import kotlinx.coroutines.IO
 
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExtractedJob
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobExtractor
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.EmailSyncService
 
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 
@@ -86,8 +87,14 @@ actual val platformModule = module {
             override suspend fun extractFromUrl(url: String): ExtractedJob {
                 return ExtractedJob(description = "URL extraction not supported on iOS yet")
             }
+
+            override suspend fun extractStatusUpdate(emailBody: String, subject: String): com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate? {
+                return null
+            }
         }
     }
+
+    single<EmailSyncService> { com.pamneuroncraft.jobapplicationtracker.data.repository.IosEmailSyncService() }
 
     single<NotificationService> {
         object : NotificationService {

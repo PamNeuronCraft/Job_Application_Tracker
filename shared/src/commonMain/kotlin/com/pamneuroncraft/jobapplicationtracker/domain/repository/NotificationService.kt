@@ -4,4 +4,5 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 
 interface NotificationService {
     fun scheduleInterviewReminder(job: JobApplication)
+    fun showNotification(title: String, body: String)
 }

@@ -59,6 +59,11 @@ class IosSocialAuthManager : SocialAuthManager {
         controller.delegate = delegate
         controller.performRequests()
     }
+
+    override suspend fun requestEmailScope(provider: com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider, activityContext: Any?): Boolean {
+        // TODO: Implement Gmail/Outlook scope request for iOS
+        return false
+    }
 }
 
 actual fun createSocialAuthManager(): SocialAuthManager = IosSocialAuthManager()

@@ -142,6 +142,11 @@ kotlin {
             implementation(libs.play.review.ktx)
             implementation(libs.play.update)
             implementation(libs.play.update.ktx)
+            
+            implementation(libs.google.gmail)
+            implementation(libs.google.api.client)
+            implementation(libs.google.auth.oauth2)
+            implementation(libs.gms.play.services.auth)
         }
         
         iosMain.dependencies {
