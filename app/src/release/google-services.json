@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "621221034219-eqfp9v84pjo0q4qvfhh97fi45rda776g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pamneuroncraft.jobapplicationtracker",
+            "certificate_hash": "314f1e0cfa72e20ac34c641c0a414f7484a78ca6"
+          }
+        },
+        {
+          "client_id": "621221034219-uetiua9t0rgecg8n28f5nsniulvt2k09.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pamneuroncraft.jobapplicationtracker",
+            "certificate_hash": "d4ba0bfe390c35f1e31e575b695652d35ae1cca4"
+          }
+        },
+        {
           "client_id": "621221034219-9ue6l7p9v1gfeqrppgbtf884470jt91q.apps.googleusercontent.com",
           "client_type": 3
         }
