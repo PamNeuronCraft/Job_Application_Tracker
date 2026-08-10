@@ -1,0 +1,9 @@
+platform :ios, '16.0'
+
+target 'iosApp' do
+  use_frameworks!
+
+  # This links the shared Kotlin code as a development pod.
+  # The name here must match the .podspec file name (shared.podspec)
+  pod 'shared', :path => '../shared'
+end

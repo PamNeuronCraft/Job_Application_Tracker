@@ -61,7 +61,26 @@ class IosSocialAuthManager : SocialAuthManager {
     }
 
     override suspend fun requestEmailScope(provider: com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider, activityContext: Any?): Boolean {
-        // TODO: Implement Gmail/Outlook scope request for iOS
+        // Note: This requires the GoogleSignIn CocoaPod/SPM dependency to be fully configured.
+        // The implementation below assumes GIDSignIn is available via cinterop.
+        /*
+        if (provider != EmailProvider.GMAIL) return false
+        
+        return suspendCancellableCoroutine { continuation ->
+            val gmailScope = "https://www.googleapis.com/auth/gmail.readonly"
+            val currentUser = platform.GoogleSignIn.GIDSignIn.sharedInstance.currentUser
+            
+            if (currentUser == null) {
+                continuation.resume(false)
+                return@suspendCancellableCoroutine
+            }
+
+            currentUser.addScopes(listOf(gmailScope), null) { result, error ->
+                continuation.resume(error == null && result != null)
+            }
+        }
+        */
+        // For now, returning false as we need to verify the cinterop for GoogleSignIn on iOS
         return false
     }
 }
