@@ -72,10 +72,10 @@ compose-components-ui-tooling-preview = { module = "org.jetbrains.compose.compon
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
-koin-core = { group = "io.insert-koin", name = "koin-core" }
-koin-android = { group = "io.insert-koin", name = "koin-android" }
-koin-compose = { group = "io.insert-koin", name = "koin-compose" }
-koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin-bom" }
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin-bom" }
+koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin-bom" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin-bom" }
 
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
