@@ -27,4 +27,30 @@ class AndroidSyncManager(private val context: Context) : SyncManager {
             syncRequest
         )
     }
+
+    override fun scheduleEmailSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val emailSyncRequest = PeriodicWorkRequestBuilder<EmailSyncWorker>(
+            12, TimeUnit.HOURS,
+            1, TimeUnit.HOURS // 1 hour flex interval
+        )
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            )
+            .addTag("EmailSyncWorker")
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "EmailStatusSync",
+            ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
+            emailSyncRequest
+        )
+    }
 }

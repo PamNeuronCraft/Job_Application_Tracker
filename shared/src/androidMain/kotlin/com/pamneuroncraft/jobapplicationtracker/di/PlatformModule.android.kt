@@ -3,6 +3,7 @@ package com.pamneuroncraft.jobapplicationtracker.di
 import com.google.ai.client.generativeai.GenerativeModel
 import com.pamneuroncraft.jobapplicationtracker.data.local.JobDatabase
 import com.pamneuroncraft.jobapplicationtracker.data.local.getDatabaseBuilder
+import android.content.Context
 import org.koin.dsl.module
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.pamneuroncraft.jobapplicationtracker.AppBuildKonfig
@@ -10,12 +11,14 @@ import kotlinx.coroutines.Dispatchers
 
 import com.pamneuroncraft.jobapplicationtracker.data.repository.JobExtractorImpl
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobExtractor
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.EmailSyncService
 
 import com.pamneuroncraft.jobapplicationtracker.notification.AndroidNotificationService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.CommonAppConfig
+import com.pamneuroncraft.jobapplicationtracker.data.repository.AndroidEmailSyncService
 import com.pamneuroncraft.jobapplicationtracker.util.AndroidSyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
@@ -44,4 +47,5 @@ actual val platformModule = module {
 
     single<JobExtractor> { JobExtractorImpl(get()) }
     single<NotificationService> { AndroidNotificationService(get()) }
+    single<EmailSyncService> { AndroidEmailSyncService(get<Context>()) }
 }

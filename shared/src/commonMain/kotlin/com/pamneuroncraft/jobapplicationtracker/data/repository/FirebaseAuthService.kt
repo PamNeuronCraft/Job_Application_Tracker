@@ -1,6 +1,8 @@
 package com.pamneuroncraft.jobapplicationtracker.data.repository
 
+import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SocialAuthManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.User
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.GoogleAuthProvider
@@ -9,7 +11,9 @@ import dev.gitlive.firebase.auth.auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class FirebaseAuthService : AuthService {
+class FirebaseAuthService(
+    private val socialAuthManager: SocialAuthManager
+) : AuthService {
     private val auth = Firebase.auth
 
     override val currentUser: Flow<User?> = auth.authStateChanged.map { firebaseUser ->
@@ -71,5 +75,13 @@ class FirebaseAuthService : AuthService {
 
     override fun isUserSignedIn(): Boolean {
         return auth.currentUser != null
+    }
+
+    override suspend fun requestEmailScope(provider: EmailProvider, context: Any?): Result<Unit> {
+        return if (socialAuthManager.requestEmailScope(provider, context)) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Failed to grant email scope"))
+        }
     }
 }

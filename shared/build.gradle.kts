@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.android.kotlin.multiplatform)
+    kotlin("native.cocoapods")
 }
 
 fun getSecret(key: String, default: String): String {
@@ -62,16 +63,28 @@ kotlin {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
-    
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+
+    cocoapods {
+        summary = "Shared logic for Job Application Tracker"
+        homepage = "https://github.com/PamNeuronCraft/Job_Application_Tracker"
+        version = "1.0"
+        ios.deploymentTarget = "16.0"
+        framework {
             baseName = "ComposeApp"
             isStatic = true
         }
+
+        // Add the Firebase pods here
+        pod("FirebaseAuth")
+        pod("FirebaseFirestore")
+        pod("FirebaseAnalytics")
+
+        // Add Google Sign-In for the Email Sync feature
+        pod("GoogleSignIn")
     }
+    
+    iosArm64()
+    iosSimulatorArm64()
     
     sourceSets {
         commonMain.dependencies {
@@ -90,9 +103,13 @@ kotlin {
             
             implementation(libs.navigation.compose)
             
+            implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
             
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
@@ -142,6 +159,11 @@ kotlin {
             implementation(libs.play.review.ktx)
             implementation(libs.play.update)
             implementation(libs.play.update.ktx)
+            
+            implementation(libs.google.gmail)
+            implementation(libs.google.api.client)
+            implementation(libs.google.auth.oauth2)
+            implementation(libs.gms.play.services.auth)
         }
         
         iosMain.dependencies {
@@ -159,7 +181,6 @@ room {
 }
 
 dependencies {
-    //add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)

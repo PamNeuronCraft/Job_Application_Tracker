@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExportManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.ExportJobsToCsvUseCase
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,6 +16,8 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val localSettings: LocalSettings,
     private val billingManager: BillingManager,
+    private val authService: AuthService,
+    private val syncManager: SyncManager,
     private val exportJobsToCsvUseCase: ExportJobsToCsvUseCase,
     private val exportManager: ExportManager
 ) : ViewModel() {
@@ -23,6 +28,15 @@ class SettingsViewModel(
 
     private val _isBiometricEnabled = MutableStateFlow(localSettings.isBiometricEnabled)
     val isBiometricEnabled: StateFlow<Boolean> = _isBiometricEnabled.asStateFlow()
+
+    private val _isEmailSyncEnabled = MutableStateFlow(localSettings.isEmailSyncEnabled)
+    val isEmailSyncEnabled: StateFlow<Boolean> = _isEmailSyncEnabled.asStateFlow()
+
+    init {
+        if (localSettings.isEmailSyncEnabled) {
+            syncManager.scheduleEmailSync()
+        }
+    }
 
     fun onThemePreferenceChange(preference: ThemePreference) {
         localSettings.themePreference = preference
@@ -35,6 +49,22 @@ class SettingsViewModel(
     fun onBiometricEnabledChange(enabled: Boolean) {
         localSettings.isBiometricEnabled = enabled
         _isBiometricEnabled.value = enabled
+    }
+
+    fun onEmailSyncEnabledChange(enabled: Boolean, context: Any?, provider: EmailProvider = EmailProvider.GMAIL) {
+        viewModelScope.launch {
+            if (enabled) {
+                val result = authService.requestEmailScope(provider, context)
+                if (result.isSuccess) {
+                    localSettings.isEmailSyncEnabled = true
+                    _isEmailSyncEnabled.value = true
+                    syncManager.scheduleEmailSync()
+                }
+            } else {
+                localSettings.isEmailSyncEnabled = false
+                _isEmailSyncEnabled.value = false
+            }
+        }
     }
 
     fun exportData() {

@@ -18,6 +18,8 @@ class LocalSettings(private val settings: Settings) {
         private const val KEY_IS_PREMIUM = "is_premium"
         private const val KEY_USE_DYNAMIC_COLOR = "use_dynamic_color"
         private const val KEY_REVIEW_REQUESTED = "review_requested"
+        private const val KEY_EMAIL_SYNC_ENABLED = "email_sync_enabled"
+        private const val KEY_LAST_EMAIL_SYNC_TIME = "last_email_sync_time"
     }
 
     private val _themePreferenceFlow = MutableStateFlow(getInitialTheme())
@@ -68,4 +70,12 @@ class LocalSettings(private val settings: Settings) {
     var isPremium: Boolean
         get() = settings.getBoolean(KEY_IS_PREMIUM, false)
         set(value) = settings.putBoolean(KEY_IS_PREMIUM, value)
+
+    var isEmailSyncEnabled: Boolean
+        get() = settings.getBoolean(KEY_EMAIL_SYNC_ENABLED, false)
+        set(value) = settings.putBoolean(KEY_EMAIL_SYNC_ENABLED, value)
+
+    var lastEmailSyncTime: Long
+        get() = settings.getLong(KEY_LAST_EMAIL_SYNC_TIME, 0L)
+        set(value) = settings.putLong(KEY_LAST_EMAIL_SYNC_TIME, value)
 }

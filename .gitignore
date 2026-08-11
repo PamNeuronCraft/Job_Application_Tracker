@@ -63,7 +63,25 @@ xcuserdata/
 *.hmap
 *.ipa
 *.xcuserstate
-iosApp/iosApp.xcworkspace/xcuserdata/
+*.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+iosApp/*.xcodeproj/project.xcworkspace/
+!iosApp/*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+iosApp/*.xcodeproj/xcuserdata/
+
+# CocoaPods
+iosApp/Pods/
+iosApp/.bundle/
+iosApp/Podfile.lock
+iosApp/build/
+
+
+# Kotlin Multiplatform / Xcode integration
+shared/shared.podspec
+shared/build/
+.artifacts/
+
+
 
 # Crashlytics
 com_crashlytics_export_strings.xml
@@ -77,4 +95,4 @@ fabric.properties
 # Android Studio backups
 /shelf/
 /workspace.xml
-/.artifacts
+
