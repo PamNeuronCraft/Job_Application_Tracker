@@ -1,5 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.domain.repository
 
+import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import kotlinx.coroutines.flow.Flow
 
 data class User(
@@ -16,4 +17,10 @@ interface AuthService {
     suspend fun signInWithApple(idToken: String, rawNonce: String): Result<Unit>
     suspend fun signOut()
     fun isUserSignedIn(): Boolean
+
+    /**
+     * Requests additional permissions to read emails from the specified provider.
+     * @param context The platform-specific context (e.g., Activity on Android)
+     */
+    suspend fun requestEmailScope(provider: EmailProvider, context: Any?): Result<Unit>
 }

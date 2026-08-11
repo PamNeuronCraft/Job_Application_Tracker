@@ -111,6 +111,35 @@ class AndroidSocialAuthManager : SocialAuthManager, KoinComponent {
     override suspend fun signInWithApple(activityContext: Any?): SocialAuthResult? {
         return null
     }
+
+    override suspend fun requestEmailScope(provider: com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider, activityContext: Any?): Boolean {
+        if (provider != com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider.GMAIL) return false
+        
+        val context = activityContext as? Context ?: return false
+        val activity = findActivity(context) ?: return false
+        
+        val gmailScope = "https://www.googleapis.com/auth/gmail.readonly"
+        val scope = com.google.android.gms.common.api.Scope(gmailScope)
+        
+        val account = com.google.android.gms.auth.api.signin.GoogleSignIn.getLastSignedInAccount(activity) ?: return false
+        
+        if (com.google.android.gms.auth.api.signin.GoogleSignIn.hasPermissions(account, scope)) {
+            return true
+        }
+
+        // Trigger incremental authorization
+        com.google.android.gms.auth.api.signin.GoogleSignIn.requestPermissions(
+            activity,
+            1001, // Request code
+            account,
+            scope
+        )
+        
+        // Note: In a real app, you'd need to handle the activity result.
+        // For simplicity in this backbone, we assume the user might need to retry or 
+        // we'll handle the result in the next iteration.
+        return false 
+    }
 }
 
 actual fun createSocialAuthManager(): SocialAuthManager = AndroidSocialAuthManager()

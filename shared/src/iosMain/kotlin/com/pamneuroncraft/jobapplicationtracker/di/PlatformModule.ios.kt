@@ -9,6 +9,7 @@ import kotlinx.coroutines.IO
 
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.ExtractedJob
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobExtractor
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.EmailSyncService
 
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 
@@ -38,12 +39,20 @@ import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationSound
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNNotificationRequest
+import io.ktor.serialization.kotlinx.json.json
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 actual val platformModule = module {
     single<BillingManager> { IosBillingManager(get(), get()) }
     single<SyncManager> { IosSyncManager() }
+    single {
+        io.ktor.client.HttpClient(io.ktor.client.engine.darwin.Darwin) {
+            install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true })
+            }
+        }
+    }
     single<ExportManager> {
         object : ExportManager {
             @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.BetaInteropApi::class)
@@ -86,12 +95,19 @@ actual val platformModule = module {
             override suspend fun extractFromUrl(url: String): ExtractedJob {
                 return ExtractedJob(description = "URL extraction not supported on iOS yet")
             }
+
+            override suspend fun extractStatusUpdate(emailBody: String, subject: String): com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate? {
+                return null
+            }
         }
     }
+
+    single<EmailSyncService> { com.pamneuroncraft.jobapplicationtracker.data.repository.IosEmailSyncService(get()) }
 
     single<NotificationService> {
         object : NotificationService {
             override fun scheduleInterviewReminder(job: com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication) {
+                // ... (Existing reminder code)
                 val interviewDate = job.interviewDate ?: return
                 val center = UNUserNotificationCenter.currentNotificationCenter()
                 
@@ -124,6 +140,28 @@ actual val platformModule = module {
                             )
                             center.addNotificationRequest(request, null)
                         }
+                    }
+                }
+            }
+
+            override fun showNotification(title: String, body: String) {
+                val center = UNUserNotificationCenter.currentNotificationCenter()
+                center.requestAuthorizationWithOptions(
+                    UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
+                ) { granted, _ ->
+                    if (granted) {
+                        val content = UNMutableNotificationContent().apply {
+                            setTitle(title)
+                            setBody(body)
+                            setSound(platform.UserNotifications.UNNotificationSound.defaultSound)
+                        }
+                        
+                        val request = UNNotificationRequest.requestWithIdentifier(
+                            Clock.System.now().toEpochMilliseconds().toString(),
+                            content,
+                            null // Trigger immediately
+                        )
+                        center.addNotificationRequest(request, null)
                     }
                 }
             }

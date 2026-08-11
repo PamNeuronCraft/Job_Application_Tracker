@@ -8,6 +8,7 @@ interface AppConfig {
     val featureSummary: Boolean
     val featureBiometrics: Boolean
     val featureExport: Boolean
+    val featureEmailSync: Boolean
     val googleWebClientId: String
     val isDebug: Boolean
 }
@@ -29,6 +30,9 @@ class CommonAppConfig(
         get() = isDebug || localSettings.isPremium
 
     override val featureExport: Boolean
+        get() = isDebug || localSettings.isPremium
+
+    override val featureEmailSync: Boolean
         get() = isDebug || localSettings.isPremium
 
     override val googleWebClientId: String

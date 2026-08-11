@@ -40,4 +40,35 @@ class JobExtractorImpl(
         
         json.decodeFromString<ExtractedJob>(jsonString)
     }
+
+    override suspend fun extractStatusUpdate(emailBody: String, subject: String): com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate? {
+        val prompt = """
+            Analyze the following email subject and body related to a job application.
+            Determine if it indicates a status change.
+            
+            Return ONLY a JSON object with these keys:
+            "companyName": The name of the company.
+            "jobTitle": The title of the position (if found).
+            "newStatus": One of: "APPLIED", "INTERVIEW", "OFFER", "REJECTED".
+            "confidence": A value from 0.0 to 1.0.
+            
+            If it's not a clear job status update, return null.
+            
+            Subject: $subject
+            Body: $emailBody
+        """.trimIndent()
+
+        return try {
+            val response = generativeModel.generateContent(content { text(prompt) })
+            val jsonString = response.text?.substringAfter("```json")?.substringBefore("```")?.trim() 
+                ?: response.text?.trim() 
+                ?: return null
+            
+            if (jsonString.lowercase().contains("null")) return null
+            
+            json.decodeFromString<com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate>(jsonString)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

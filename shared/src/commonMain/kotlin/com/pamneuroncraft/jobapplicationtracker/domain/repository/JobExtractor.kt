@@ -12,4 +12,5 @@ data class ExtractedJob(
 
 interface JobExtractor {
     suspend fun extractFromUrl(url: String): ExtractedJob
+    suspend fun extractStatusUpdate(emailBody: String, subject: String): com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate?
 }

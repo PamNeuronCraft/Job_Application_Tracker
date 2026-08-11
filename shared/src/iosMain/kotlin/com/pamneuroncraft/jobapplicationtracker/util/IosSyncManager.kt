@@ -6,4 +6,8 @@ class IosSyncManager : SyncManager {
     override fun triggerSync() {
         // iOS background sync not implemented yet
     }
+
+    override fun scheduleEmailSync() {
+        // iOS background fetch not implemented yet
+    }
 }
