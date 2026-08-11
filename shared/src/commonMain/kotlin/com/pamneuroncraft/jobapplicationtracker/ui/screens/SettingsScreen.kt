@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.util.isAndroid
 import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
@@ -24,7 +25,7 @@ import com.pamneuroncraft.jobapplicationtracker.util.createBiometricManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -80,10 +81,16 @@ fun SettingsScreen(
             // Biometrics
             ListItem(
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Enable Biometrics")
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Enable Biometrics",
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
                         if (!isPremium) {
-                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                            PremiumBadge(modifier = Modifier.align(Alignment.CenterVertically))
                         }
                     }
                 },
@@ -115,10 +122,16 @@ fun SettingsScreen(
             // Email Status Sync
             ListItem(
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Email Status Sync (Gmail)")
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Email Status Sync (Gmail)",
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
                         if (!isPremium) {
-                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                            PremiumBadge(modifier = Modifier.align(Alignment.CenterVertically))
                         }
                     }
                 },
@@ -147,10 +160,16 @@ fun SettingsScreen(
             // Cloud Backup
             ListItem(
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Backup and Sync")
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Backup and Sync",
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
                         if (!isPremium) {
-                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                            PremiumBadge(modifier = Modifier.align(Alignment.CenterVertically))
                         }
                     }
                 },
@@ -194,10 +213,16 @@ fun SettingsScreen(
             // Export Data
             ListItem(
                 headlineContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Export Data (CSV)")
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Export Data (CSV)",
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
                         if (!isPremium) {
-                            PremiumBadge(modifier = Modifier.padding(start = 8.dp))
+                            PremiumBadge(modifier = Modifier.align(Alignment.CenterVertically))
                         }
                     }
                 },
@@ -242,17 +267,19 @@ fun SettingsScreen(
             )
 
             // Dynamic Color (Material You)
-            ListItem(
-                headlineContent = { Text("Dynamic Colors") },
-                supportingContent = { Text("Use colors from your wallpaper (Android 12+)") },
-                leadingContent = { Icon(Icons.Default.ColorLens, contentDescription = null) },
-                trailingContent = {
-                    Switch(
-                        checked = useDynamicColor,
-                        onCheckedChange = { viewModel.onUseDynamicColorChange(it) }
-                    )
-                }
-            )
+            if (isAndroid) {
+                ListItem(
+                    headlineContent = { Text("Dynamic Colors") },
+                    supportingContent = { Text("Use colors from your wallpaper (Android 12+)") },
+                    leadingContent = { Icon(Icons.Default.ColorLens, contentDescription = null) },
+                    trailingContent = {
+                        Switch(
+                            checked = useDynamicColor,
+                            onCheckedChange = { viewModel.onUseDynamicColorChange(it) }
+                        )
+                    }
+                )
+            }
 
             if (!isPremium) {
                 Spacer(modifier = Modifier.weight(1f))
