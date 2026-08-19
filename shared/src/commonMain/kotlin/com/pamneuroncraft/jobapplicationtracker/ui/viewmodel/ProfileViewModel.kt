@@ -10,11 +10,14 @@ import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
 import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class ProfileViewModel(
     private val authService: AuthService,
@@ -33,19 +36,35 @@ class ProfileViewModel(
     private val _error = mutableStateOf<String?>(null)
     val error: State<String?> = _error
 
+    private var errorJob: Job? = null
+
     private val _registrationSuccess = mutableStateOf(false)
     val registrationSuccess: State<Boolean> = _registrationSuccess
+
+    private val _passwordResetSent = mutableStateOf(false)
+    val passwordResetSent: State<Boolean> = _passwordResetSent
+
+    private fun showError(message: String?) {
+        _error.value = message
+        errorJob?.cancel()
+        if (message != null) {
+            errorJob = viewModelScope.launch {
+                delay(5000.milliseconds)
+                _error.value = null
+            }
+        }
+    }
 
     fun signUp(email: String, password: String, name: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
+            showError(null)
             authService.signUp(email, password, name)
                 .onSuccess { 
                     _registrationSuccess.value = true
                     onAuthSuccess()
                 }
-                .onFailure { _error.value = it.message }
+                .onFailure { showError(it.message) }
             _isLoading.value = false
         }
     }
@@ -53,10 +72,10 @@ class ProfileViewModel(
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
+            showError(null)
             authService.signIn(email, password)
                 .onSuccess { onAuthSuccess() }
-                .onFailure { _error.value = it.message }
+                .onFailure { showError(it.message) }
             _isLoading.value = false
         }
     }
@@ -64,10 +83,10 @@ class ProfileViewModel(
     fun signInWithGoogle(idToken: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
+            showError(null)
             authService.signInWithGoogle(idToken)
                 .onSuccess { onAuthSuccess() }
-                .onFailure { _error.value = it.message }
+                .onFailure { showError(it.message) }
             _isLoading.value = false
         }
     }
@@ -75,10 +94,23 @@ class ProfileViewModel(
     fun signInWithApple(idToken: String, rawNonce: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
+            showError(null)
             authService.signInWithApple(idToken, rawNonce)
                 .onSuccess { onAuthSuccess() }
-                .onFailure { _error.value = it.message }
+                .onFailure { showError(it.message) }
+            _isLoading.value = false
+        }
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            showError(null)
+            authService.sendPasswordResetEmail(email)
+                .onSuccess { 
+                    _passwordResetSent.value = true
+                }
+                .onFailure { showError(it.message) }
             _isLoading.value = false
         }
     }
@@ -107,5 +139,13 @@ class ProfileViewModel(
     
     fun resetRegistrationState() {
         _registrationSuccess.value = false
+    }
+
+    fun resetPasswordState() {
+        _passwordResetSent.value = false
+    }
+
+    fun showValidationError(message: String) {
+        showError(message)
     }
 }
