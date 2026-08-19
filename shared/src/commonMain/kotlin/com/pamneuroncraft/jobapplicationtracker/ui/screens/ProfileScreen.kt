@@ -43,6 +43,7 @@ fun ProfileScreen(
     val isLoading by viewModel.isLoading
     val error by viewModel.error
     val registrationSuccess by viewModel.registrationSuccess
+    val passwordResetSent by viewModel.passwordResetSent
     
     val scope = rememberCoroutineScope()
     val platformContext = rememberPlatformContext()
@@ -52,10 +53,25 @@ fun ProfileScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
 
+    val emailRequiredMessage = stringResource(Res.string.error_email_required_reset)
+
     if (registrationSuccess) {
         PremiumUpsellDialog(
             onDismiss = { viewModel.resetRegistrationState() },
             onNavigateToSubscription = onSubscriptionClick
+        )
+    }
+
+    if (passwordResetSent) {
+        AlertDialog(
+            onDismissRequest = { viewModel.resetPasswordState() },
+            title = { Text("Check your email") },
+            text = { Text("A password reset link has been sent to $email. Please check your inbox.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.resetPasswordState() }) {
+                    Text(stringResource(Res.string.ok))
+                }
+            }
         )
     }
 
@@ -170,6 +186,23 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 )
+
+                if (!isSignUp) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(
+                            onClick = {
+                                if (email.isNotBlank()) {
+                                    viewModel.resetPassword(email)
+                                } else {
+                                    viewModel.showValidationError(emailRequiredMessage)
+                                }
+                            },
+                            enabled = !isLoading
+                        ) {
+                            Text(stringResource(Res.string.forgot_password))
+                        }
+                    }
+                }
 
                 if (error != null) {
                     Surface(

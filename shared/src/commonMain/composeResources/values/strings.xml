@@ -105,6 +105,8 @@
     <string name="dont_have_account">Don’t have an account? Sign Up</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_apple">Continue with Apple</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="error_email_required_reset">Please enter your email to proceed with the reset process.</string>
 
     <!-- SubscriptionScreen -->
     <string name="subscription">Subscription</string>
