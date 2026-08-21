@@ -5,9 +5,12 @@ import com.revenuecat.purchases.kmp.configure
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
 import com.pamneuroncraft.jobapplicationtracker.AppBuildKonfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.component.KoinComponent
 import kotlin.coroutines.resume
@@ -17,6 +20,7 @@ class AndroidBillingManager(
     private val appConfig: com.pamneuroncraft.jobapplicationtracker.AppConfig
 ) : BillingManager, KoinComponent {
 
+    private val mainScope = CoroutineScope(Dispatchers.Main)
     private val _isPremium = MutableStateFlow(localSettings.isPremium || appConfig.isDebug)
     override val isPremium: StateFlow<Boolean> = _isPremium.asStateFlow()
 
@@ -29,6 +33,7 @@ class AndroidBillingManager(
         Purchases.configure(apiKey = apiKey) {
             appUserId = null 
         }
+
         updateEntitlementStatus()
     }
 
@@ -36,9 +41,13 @@ class AndroidBillingManager(
         suspendCancellableCoroutine { continuation ->
             Purchases.sharedInstance.logIn(
                 newAppUserID = uid,
-                onError = { continuation.resume(Unit) },
+                onError = { 
+                    android.util.Log.e("BillingManager", "Login failed: ${it.message}")
+                    continuation.resume(Unit) 
+                },
                 onSuccess = { info, _ -> 
-                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                    val hasPremium = info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
+                    android.util.Log.d("BillingManager", "Login Success - Has Premium: $hasPremium")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -50,9 +59,13 @@ class AndroidBillingManager(
     override suspend fun logOut() {
         suspendCancellableCoroutine { continuation ->
             Purchases.sharedInstance.logOut(
-                onError = { continuation.resume(Unit) },
+                onError = { 
+                    android.util.Log.e("BillingManager", "Logout failed: ${it.message}")
+                    continuation.resume(Unit) 
+                },
                 onSuccess = { info -> 
-                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                    val hasPremium = info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
+                    android.util.Log.d("BillingManager", "Logout Success - Has Premium: $hasPremium")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -65,37 +78,59 @@ class AndroidBillingManager(
         try {
             val hasPremium = suspendCancellableCoroutine { continuation ->
                 Purchases.sharedInstance.getCustomerInfo(
-                    fetchPolicy = CacheFetchPolicy.CACHE_ONLY,
-                    onError = { continuation.resume(false) },
+                    fetchPolicy = CacheFetchPolicy.FETCH_CURRENT,
+                    onError = { 
+                        android.util.Log.e("BillingManager", "Fetch Customer Info Error: ${it.message}")
+                        continuation.resume(false) 
+                    },
                     onSuccess = { info -> 
-                        continuation.resume(info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro"))
+                        val keys = info.entitlements.active.keys
+                        android.util.Log.d("BillingManager", "Active Entitlements found: $keys")
+                        continuation.resume(info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro"))
                     }
                 )
             }
             _isPremium.value = hasPremium || appConfig.isDebug
             localSettings.isPremium = hasPremium
         } catch (e: Exception) {
-            // Keep local
+            android.util.Log.e("BillingManager", "Exception updating status: ${e.message}")
         }
     }
 
     override suspend fun purchaseSubscription(): Result<Unit> = suspendCancellableCoroutine { continuation ->
         Purchases.sharedInstance.getOfferings(
-            onError = { continuation.resume(Result.failure(Exception(it.message))) },
+            onError = { 
+                android.util.Log.e("BillingManager", "Get Offerings Error: ${it.message}")
+                continuation.resume(Result.failure(Exception(it.message))) 
+            },
             onSuccess = { offerings ->
                 val packageToBuy = offerings.current?.monthly
                 if (packageToBuy != null) {
                     Purchases.sharedInstance.purchase(
                         packageToBuy,
                         onError = { error, userCancelled ->
+                            android.util.Log.e("BillingManager", "Purchase Error: ${error.message}")
                             if (userCancelled) {
                                 continuation.resume(Result.failure(Exception("User cancelled")))
                             } else {
-                                continuation.resume(Result.failure(Exception(error.message)))
+                                // If already active, try to refresh status
+                                if (error.message.contains("already active", ignoreCase = true)) {
+                                    mainScope.launch {
+                                        updateEntitlementStatus()
+                                        continuation.resume(Result.success(Unit))
+                                    }
+                                } else {
+                                    continuation.resume(Result.failure(Exception(error.message)))
+                                }
                             }
                         },
                         onSuccess = { _, customerInfo ->
-                            val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                            val keys = customerInfo.entitlements.active.keys
+                            android.util.Log.d("BillingManager", "Purchase Success. Active Entitlement Keys: $keys")
+                            
+                            val hasPremium = customerInfo.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
+                            android.util.Log.d("BillingManager", "Match attempt for 'com․pamneuroncraft․jobapplicationtracker Pro': $hasPremium")
+                            
                             _isPremium.value = hasPremium || appConfig.isDebug
                             localSettings.isPremium = hasPremium
                             continuation.resume(Result.success(Unit))
@@ -112,7 +147,7 @@ class AndroidBillingManager(
         Purchases.sharedInstance.restorePurchases(
             onError = { continuation.resume(Result.failure(Exception(it.message))) },
             onSuccess = { customerInfo ->
-                val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                val hasPremium = customerInfo.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
                 _isPremium.value = hasPremium || appConfig.isDebug
                 localSettings.isPremium = hasPremium
                 continuation.resume(Result.success(Unit))

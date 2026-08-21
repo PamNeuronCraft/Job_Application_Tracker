@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -58,6 +61,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.shared.*
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PermissionRationaleDialog
+import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobAddEditViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.Permission
@@ -208,11 +212,24 @@ fun JobAddEditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                val isDark = isSystemInDarkTheme()
                 JobStatus.entries.forEach { jobStatus ->
+                    val isSelected = status == jobStatus
+                    val chipColors = if (jobId == null && isSelected) {
+                        val statusColor = getJobStatusColor(jobStatus, isDark)
+                        FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = statusColor,
+                            selectedLabelColor = contentColorFor(statusColor)
+                        )
+                    } else {
+                        FilterChipDefaults.filterChipColors()
+                    }
+                    
                     FilterChip(
-                        selected = status == jobStatus,
+                        selected = isSelected,
                         onClick = { viewModel.onStatusChange(jobStatus) },
-                        label = { Text(stringResource(jobStatus.labelRes), style = MaterialTheme.typography.bodySmall) }
+                        label = { Text(stringResource(jobStatus.labelRes), style = MaterialTheme.typography.bodySmall) },
+                        colors = chipColors
                     )
                 }
             }

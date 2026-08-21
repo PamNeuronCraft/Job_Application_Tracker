@@ -107,6 +107,10 @@
     <string name="continue_with_apple">Continue with Apple</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="error_email_required_reset">Please enter your email to proceed with the reset process.</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_confirmation_title">Delete Account?</string>
+    <string name="delete_account_confirmation_message">This action is permanent and will delete all your job applications and account data. Are you sure?</string>
+    <string name="delete_account_warning">Permanently delete your account and data</string>
 
     <!-- SubscriptionScreen -->
     <string name="subscription">Subscription</string>

@@ -1,5 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.domain.usecase
 
+import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.EmailSyncService
@@ -11,10 +12,11 @@ class SyncJobStatusesFromEmailUseCase(
     private val emailSyncService: EmailSyncService,
     private val jobExtractor: JobExtractor,
     private val jobRepository: JobRepository,
-    private val localSettings: LocalSettings
+    private val localSettings: LocalSettings,
+    private val appConfig: AppConfig
 ) {
     suspend operator fun invoke(): Result<Int> {
-        if (!localSettings.isEmailSyncEnabled) return Result.success(0)
+        if (!appConfig.featureEmailSync || !localSettings.isEmailSyncEnabled) return Result.success(0)
 
         // Currently only supporting Gmail
         val provider = EmailProvider.GMAIL

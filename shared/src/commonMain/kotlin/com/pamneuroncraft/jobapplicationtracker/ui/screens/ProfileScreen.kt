@@ -52,6 +52,7 @@ fun ProfileScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     val emailRequiredMessage = stringResource(Res.string.error_email_required_reset)
 
@@ -75,6 +76,30 @@ fun ProfileScreen(
         )
     }
 
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text(stringResource(Res.string.delete_account_confirmation_title)) },
+            text = { Text(stringResource(Res.string.delete_account_confirmation_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        viewModel.deleteAccount()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(Res.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -92,6 +117,11 @@ fun ProfileScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (!isPremium) {
+                AdBanner(modifier = Modifier.fillMaxWidth())
+            }
         }
     ) { padding ->
         Column(
@@ -153,6 +183,14 @@ fun ProfileScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text(stringResource(Res.string.sign_out))
+                }
+
+                TextButton(
+                    onClick = { showDeleteConfirmation = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f))
+                ) {
+                    Text(stringResource(Res.string.delete_account))
                 }
             } else {
                 Text(
@@ -285,10 +323,6 @@ fun ProfileScreen(
                 }
                 
                 Spacer(modifier = Modifier.weight(1f))
-            }
-
-            if (!isPremium) {
-                AdBanner(modifier = Modifier.fillMaxWidth())
             }
         }
     }

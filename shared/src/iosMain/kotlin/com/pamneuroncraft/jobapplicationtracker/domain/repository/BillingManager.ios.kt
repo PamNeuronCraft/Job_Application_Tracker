@@ -37,7 +37,7 @@ class IosBillingManager(
                 newAppUserID = uid,
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info, _ -> 
-                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                    val hasPremium = info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -51,7 +51,7 @@ class IosBillingManager(
             Purchases.sharedInstance.logOut(
                 onError = { continuation.resume(Unit) },
                 onSuccess = { info -> 
-                    val hasPremium = info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                    val hasPremium = info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
                     _isPremium.value = hasPremium || appConfig.isDebug
                     localSettings.isPremium = hasPremium
                     continuation.resume(Unit)
@@ -67,7 +67,7 @@ class IosBillingManager(
                     fetchPolicy = CacheFetchPolicy.CACHE_ONLY,
                     onError = { continuation.resume(false) },
                     onSuccess = { info -> 
-                        continuation.resume(info.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro"))
+                        continuation.resume(info.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro"))
                     }
                 )
             }
@@ -94,7 +94,7 @@ class IosBillingManager(
                             }
                         },
                         onSuccess = { _, customerInfo ->
-                            val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                            val hasPremium = customerInfo.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
                             _isPremium.value = hasPremium || appConfig.isDebug
                             localSettings.isPremium = hasPremium
                             continuation.resume(Result.success(Unit))
@@ -111,7 +111,7 @@ class IosBillingManager(
         Purchases.sharedInstance.restorePurchases(
             onError = { continuation.resume(Result.failure(Exception(it.message))) },
             onSuccess = { customerInfo ->
-                val hasPremium = customerInfo.entitlements.active.containsKey("com.pamneuroncraft.jobapplicationtracker Pro")
+                val hasPremium = customerInfo.entitlements.active.containsKey("com․pamneuroncraft․jobapplicationtracker Pro")
                 _isPremium.value = hasPremium || appConfig.isDebug
                 localSettings.isPremium = hasPremium
                 continuation.resume(Result.success(Unit))

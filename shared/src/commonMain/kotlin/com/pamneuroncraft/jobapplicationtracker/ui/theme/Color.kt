@@ -15,7 +15,7 @@ fun getJobStatusColor(status: JobStatus, isDark: Boolean): Color {
     return if (isDark) {
         when (status) {
             JobStatus.APPLIED -> Color(0xFF1976D2) // Darker Blue
-            JobStatus.INTERVIEW -> Color(0xFFFBC02D) // Darker Yellow/Amber
+            JobStatus.INTERVIEW -> Color(0xFFB8860B) // Dark Goldenrod
             JobStatus.OFFER -> Color(0xFF388E3C) // Darker Green
             JobStatus.NO_OFFER -> Color(0xFFD32F2F) // Darker Red
         }

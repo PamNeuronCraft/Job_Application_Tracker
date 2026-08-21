@@ -33,9 +33,23 @@ class SettingsViewModel(
     val isEmailSyncEnabled: StateFlow<Boolean> = _isEmailSyncEnabled.asStateFlow()
 
     init {
+        // Sync email if enabled on start
         if (localSettings.isEmailSyncEnabled) {
             syncManager.scheduleEmailSync()
         }
+
+        // Reconcile premium settings if subscription expires
+        isPremium.onEach { premium ->
+            if (!premium) {
+                if (_isBiometricEnabled.value) {
+                    onBiometricEnabledChange(false)
+                }
+                if (_isEmailSyncEnabled.value) {
+                    localSettings.isEmailSyncEnabled = false
+                    _isEmailSyncEnabled.value = false
+                }
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun onThemePreferenceChange(preference: ThemePreference) {

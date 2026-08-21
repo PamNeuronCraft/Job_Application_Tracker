@@ -69,6 +69,11 @@ fun SettingsScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (!isPremium) {
+                AdBanner(modifier = Modifier.fillMaxWidth())
+            }
         }
     ) { padding ->
         Column(
@@ -279,11 +284,6 @@ fun SettingsScreen(
                         )
                     }
                 )
-            }
-
-            if (!isPremium) {
-                Spacer(modifier = Modifier.weight(1f))
-                AdBanner(modifier = Modifier.fillMaxWidth())
             }
         }
     }

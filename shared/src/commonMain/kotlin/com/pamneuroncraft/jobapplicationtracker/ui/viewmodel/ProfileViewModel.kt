@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.User
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
@@ -24,6 +25,7 @@ class ProfileViewModel(
     private val syncManager: SyncManager,
     private val billingManager: BillingManager,
     private val jobRepository: JobRepository,
+    private val cloudBackupService: CloudBackupService,
     private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
@@ -134,6 +136,30 @@ class ProfileViewModel(
             analyticsHelper.setUserId(null)
             analyticsHelper.logEvent("sign_out")
             authService.signOut()
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            showError(null)
+
+            // 1. Delete remote data
+            cloudBackupService.deleteAllUserData()
+
+            // 2. Delete local data
+            jobRepository.deleteAllJobs()
+
+            // 3. Delete auth account
+            authService.deleteAccount()
+                .onSuccess {
+                    billingManager.logOut()
+                    analyticsHelper.setUserId(null)
+                    analyticsHelper.logEvent("account_deleted")
+                }
+                .onFailure { showError(it.message) }
+
+            _isLoading.value = false
         }
     }
     

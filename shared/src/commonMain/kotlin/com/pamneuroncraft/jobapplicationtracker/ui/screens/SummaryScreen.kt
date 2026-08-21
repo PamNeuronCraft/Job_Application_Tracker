@@ -24,11 +24,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobAnalytics
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.ui.components.EmptyState
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SummaryViewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
 import com.pamneuroncraft.jobapplicationtracker.shared.*
@@ -38,8 +41,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun SummaryScreen(
     onBack: (() -> Unit)? = null,
-    viewModel: SummaryViewModel = koinViewModel()
+    viewModel: SummaryViewModel = koinViewModel(),
+    appConfig: AppConfig = koinInject()
 ) {
+    if (!appConfig.featureSummary) {
+        PaidFeatureDialog(
+            onDismiss = { onBack?.invoke() },
+            title = stringResource(Res.string.paid_feature_summary_title),
+            message = stringResource(Res.string.paid_feature_summary_message)
+        )
+    }
+
     val analytics by viewModel.analytics.collectAsState()
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState { 4 }
@@ -155,20 +167,25 @@ fun SummaryOverviewTab(analytics: JobAnalytics) {
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxWidth().height(240.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        DonutChart(analytics.statusCounts, analytics.totalApps)
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = analytics.totalApps.toString(),
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(Res.string.total),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Box(
+            modifier = Modifier.size(240.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            DonutChart(analytics.statusCounts, analytics.totalApps)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = analytics.totalApps.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(Res.string.total),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 
@@ -482,19 +499,19 @@ fun DonutChart(
 ) {
     val isDark = isSystemInDarkTheme()
     if (total == 0) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             drawArc(
                 color = Color.LightGray.copy(alpha = 0.2f),
                 startAngle = 0f,
                 sweepAngle = 360f,
                 useCenter = false,
-                style = Stroke(width = 30.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
             )
         }
         return
     }
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         var startAngle = -90f
         
         JobStatus.entries.forEach { status ->
@@ -506,7 +523,7 @@ fun DonutChart(
                     startAngle = startAngle,
                     sweepAngle = sweepAngle,
                     useCenter = false,
-                    style = Stroke(width = 30.dp.toPx(), cap = StrokeCap.Round)
+                    style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
                 )
                 startAngle += sweepAngle
             }
