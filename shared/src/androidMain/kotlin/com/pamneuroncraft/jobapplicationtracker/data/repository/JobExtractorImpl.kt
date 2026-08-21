@@ -33,12 +33,22 @@ class JobExtractorImpl(
             ${pageText.take(5000)}
         """.trimIndent()
 
-        val response = generativeModel.generateContent(content { text(prompt) })
+        val response = try {
+            generativeModel.generateContent(content { text(prompt) })
+        } catch (e: Exception) {
+            android.util.Log.e("JobExtractor", "Gemini API Error: ${e.message}")
+            throw e
+        }
         val jsonString = response.text?.substringAfter("```json")?.substringBefore("```")?.trim() 
             ?: response.text?.trim() 
             ?: "{}"
         
-        json.decodeFromString<ExtractedJob>(jsonString)
+        try {
+            json.decodeFromString<ExtractedJob>(jsonString)
+        } catch (e: Exception) {
+            android.util.Log.e("JobExtractor", "Failed to parse AI response: $jsonString")
+            throw Exception("Failed to parse job details from AI response")
+        }
     }
 
     override suspend fun extractStatusUpdate(emailBody: String, subject: String): com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatusUpdate? {

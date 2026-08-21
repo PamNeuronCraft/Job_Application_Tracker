@@ -39,9 +39,13 @@ actual val platformModule = module {
     }
     
     single {
+        val apiKey = if (AppBuildKonfig.IS_DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
+        if (apiKey.isBlank()) {
+            android.util.Log.e("PlatformModule", "Gemini API Key is BLANK! AI features will fail. Check your build configuration.")
+        }
         GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = if (AppBuildKonfig.IS_DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
+            apiKey = apiKey
         )
     }
 
