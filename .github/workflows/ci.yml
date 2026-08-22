@@ -38,8 +38,8 @@ jobs:
           echo "keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}" >> keystore.properties
           echo "keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}" >> keystore.properties
 
-      - name: Build Release APK
-        run: ./gradlew :app:assembleRelease
+      - name: Build Release Bundle (AAB)
+        run: ./gradlew :app:bundleRelease
         env:
           GEMINI_API_KEY_PROD: ${{ secrets.GEMINI_API_KEY_PROD }}
           ADMOB_APP_ID_PROD: ${{ secrets.ADMOB_APP_ID_PROD }}
@@ -54,10 +54,19 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID_RELEASE }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           groups: testers
-          file: app/build/outputs/apk/release/app-release.apk
+          file: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload to Google Play (Internal Testing)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.pamneuroncraft.jobapplicationtracker
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: app/build/outputs/apk/release/*.apk
+          name: release-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
