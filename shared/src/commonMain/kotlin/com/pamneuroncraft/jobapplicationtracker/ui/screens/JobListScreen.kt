@@ -282,6 +282,11 @@ fun JobListContent(
                     Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add_job))
                 }
             }
+        },
+        bottomBar = {
+            if (showAds) {
+                AdBanner(modifier = Modifier.fillMaxWidth())
+            }
         }
     ) { padding ->
         Column(
@@ -371,10 +376,6 @@ fun JobListContent(
                         onActionClick = onAddJob
                     )
                 }
-            }
-            
-            if (showAds) {
-                AdBanner(modifier = Modifier.fillMaxWidth())
             }
         }
     }

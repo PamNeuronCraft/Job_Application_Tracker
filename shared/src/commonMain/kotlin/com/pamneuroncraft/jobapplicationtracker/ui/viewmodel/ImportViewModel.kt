@@ -29,7 +29,14 @@ class ImportViewModel(
                 val extractedJob = jobUseCases.extractJobFromUrl(url)
                 _importState.value = ImportState.Success(extractedJob)
             } catch (e: Exception) {
-                _importState.value = ImportState.Error(e.message ?: "Failed to extract job details")
+                val message = when {
+                    e.message?.contains("403") == true -> "AI extraction service is not configured correctly. Please contact support."
+                    e.message?.contains("404") == true -> "The job URL could not be found."
+                    e.message?.contains("429") == true -> "Too many requests. Please try again later."
+                    e.message?.contains("Method doesn't allow unregistered callers") == true -> "AI service access denied. Configuration error."
+                    else -> "Failed to extract job details. Please try manual entry."
+                }
+                _importState.value = ImportState.Error(message)
             }
         }
     }

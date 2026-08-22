@@ -4,4 +4,5 @@ interface CloudBackupService {
     val isUserSignedIn: Boolean
     suspend fun backup(json: String)
     suspend fun restore(): String?
+    suspend fun deleteAllUserData(): Result<Unit>
 }

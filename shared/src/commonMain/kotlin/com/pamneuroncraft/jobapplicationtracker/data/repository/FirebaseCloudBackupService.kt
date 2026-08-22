@@ -65,4 +65,30 @@ class FirebaseCloudBackupService : CloudBackupService {
             null
         }
     }
+
+    override suspend fun deleteAllUserData(): Result<Unit> = withContext(Dispatchers.IO) {
+        val uid = auth.currentUser?.uid ?: return@withContext Result.failure(Exception("Not signed in"))
+        val userJobsCollection = firestore.collection("users").document(uid).collection("jobs")
+        
+        try {
+            val snapshot = userJobsCollection.get()
+            val chunks = snapshot.documents.chunked(500)
+            
+            chunks.forEach { chunk ->
+                val batch = firestore.batch()
+                chunk.forEach { doc ->
+                    batch.delete(doc.reference)
+                }
+                batch.commit()
+            }
+            
+            // Also delete the user document itself
+            firestore.collection("users").document(uid).delete()
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            println("FirebaseCloudBackupService: Delete all data failed: ${e.message}")
+            Result.failure(e)
+        }
+    }
 }

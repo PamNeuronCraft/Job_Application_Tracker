@@ -78,6 +78,15 @@ class FirebaseAuthService(
         }
     }
 
+    override suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            auth.currentUser?.delete()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun signOut() {
         auth.signOut()
     }

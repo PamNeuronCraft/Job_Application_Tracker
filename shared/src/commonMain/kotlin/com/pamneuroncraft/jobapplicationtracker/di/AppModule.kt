@@ -44,7 +44,7 @@ val useCaseModule = module {
     single { GetJobAnalyticsUseCase(get()) }
     single { ExportJobsToCsvUseCase(get()) }
     single { CloudBackupUseCase(get(), get()) }
-    single { SyncJobStatusesFromEmailUseCase(get(), get(), get(), get()) }
+    single { SyncJobStatusesFromEmailUseCase(get(), get(), get(), get(), get()) }
     single {
         JobUseCases(
             getJobs = get(),

@@ -16,6 +16,7 @@ interface AuthService {
     suspend fun signInWithGoogle(idToken: String): Result<Unit>
     suspend fun signInWithApple(idToken: String, rawNonce: String): Result<Unit>
     suspend fun sendPasswordResetEmail(email: String): Result<Unit>
+    suspend fun deleteAccount(): Result<Unit>
     suspend fun signOut()
     fun isUserSignedIn(): Boolean
 

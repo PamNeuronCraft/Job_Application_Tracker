@@ -43,6 +43,7 @@ fun App(
 ) {
     val localSettings: LocalSettings = koinInject()
     val billingManager: BillingManager = koinInject()
+    val appConfig: AppConfig = koinInject()
     val settingsViewModel: SettingsViewModel = koinViewModel()
     val themePreference by settingsViewModel.themePreference.collectAsState()
     val useDynamicColor by settingsViewModel.useDynamicColor.collectAsState()
@@ -53,7 +54,20 @@ fun App(
         appUpdateManager.checkForUpdates()
     }
 
-    var isAppLocked by remember { mutableStateOf(localSettings.isBiometricEnabled) }
+    // Reconcile premium features when subscription status changes
+    val isPremiumState by billingManager.isPremium.collectAsState()
+    LaunchedEffect(isPremiumState) {
+        if (!isPremiumState && !appConfig.isDebug) {
+            if (localSettings.isBiometricEnabled) {
+                localSettings.isBiometricEnabled = false
+            }
+            if (localSettings.isEmailSyncEnabled) {
+                localSettings.isEmailSyncEnabled = false
+            }
+        }
+    }
+
+    var isAppLocked by remember { mutableStateOf(localSettings.isBiometricEnabled && appConfig.featureBiometrics) }
     var triggerBiometric by remember { mutableStateOf(isAppLocked) }
 
     JobApplicationTrackerTheme(
