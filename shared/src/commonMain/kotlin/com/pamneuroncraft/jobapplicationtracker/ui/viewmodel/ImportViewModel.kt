@@ -30,10 +30,11 @@ class ImportViewModel(
                 _importState.value = ImportState.Success(extractedJob)
             } catch (e: Exception) {
                 val message = when {
-                    e.message?.contains("403") == true -> "AI extraction service is not configured correctly. Please contact support."
-                    e.message?.contains("404") == true -> "The job URL could not be found."
+                    e.message?.contains("403") == true -> "AI service access denied. Configuration error."
+                    e.message?.contains("404") == true -> "AI model not found. This can happen if the API key is invalid."
                     e.message?.contains("429") == true -> "Too many requests. Please try again later."
-                    e.message?.contains("Method doesn't allow unregistered callers") == true -> "AI service access denied. Configuration error."
+                    e.message?.contains("Field 'details' is required") == true -> "AI service connection error. Please verify your internet and try again."
+                    e.message?.contains("Method doesn't allow unregistered callers") == true -> "AI service identity error. API key may be missing."
                     else -> "Failed to extract job details. Please try manual entry."
                 }
                 _importState.value = ImportState.Error(message)
