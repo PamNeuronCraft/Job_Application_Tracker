@@ -45,7 +45,7 @@ actual val platformModule = module {
             android.util.Log.e("PlatformModule", "Gemini API Key is BLANK! AI features will fail.")
         }
         GenerativeModel(
-            modelName = "gemini-2-flash",
+            modelName = "gemini-2.5-flash",
             apiKey = apiKey
         )
     }
