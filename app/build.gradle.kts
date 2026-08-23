@@ -47,7 +47,7 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
         targetSdk = 37
         
         val versionMajor = 1
-        val versionMinor = 0
+        val versionMinor = 5
         val buildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toInt() ?: 0
         
         versionCode = (versionMajor * 10000) + (versionMinor * 100) + buildNumber
