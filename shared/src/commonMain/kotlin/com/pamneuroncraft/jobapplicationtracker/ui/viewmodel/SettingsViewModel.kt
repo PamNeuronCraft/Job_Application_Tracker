@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
@@ -24,6 +25,7 @@ class SettingsViewModel(
 
     val themePreference: StateFlow<ThemePreference> = localSettings.themePreferenceFlow
     val useDynamicColor: StateFlow<Boolean> = localSettings.useDynamicColorFlow
+    val preferredCurrency: StateFlow<AppCurrency> = localSettings.preferredCurrencyFlow
     val isPremium: StateFlow<Boolean> = billingManager.isPremium
 
     private val _isBiometricEnabled = MutableStateFlow(localSettings.isBiometricEnabled)
@@ -58,6 +60,10 @@ class SettingsViewModel(
 
     fun onUseDynamicColorChange(enabled: Boolean) {
         localSettings.useDynamicColor = enabled
+    }
+
+    fun onCurrencyChange(currency: AppCurrency) {
+        localSettings.preferredCurrency = currency
     }
 
     fun onBiometricEnabledChange(enabled: Boolean) {

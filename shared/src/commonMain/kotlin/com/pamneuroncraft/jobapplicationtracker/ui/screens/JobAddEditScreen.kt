@@ -51,10 +51,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
@@ -95,7 +97,7 @@ fun JobAddEditScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var showReminderMenu by remember { mutableStateOf(false) }
 
-    LaunchedEffect(jobId) {
+    LaunchedEffect(jobId, prefilledJobName, prefilledCompanyName, prefilledDescription, prefilledCompensation, initialUrl) {
         viewModel.loadJob(
             jobId = jobId,
             prefilledJobName = prefilledJobName,
@@ -112,6 +114,7 @@ fun JobAddEditScreen(
     val jobType by viewModel.jobType
     val compensationAmount by viewModel.compensationAmount
     val compensationType by viewModel.compensationType
+    val preferredCurrency by viewModel.preferredCurrency.collectAsState()
     val status by viewModel.status
     val interviewDate by viewModel.interviewDate
     val reminderDuration by viewModel.reminderDuration
@@ -179,7 +182,7 @@ fun JobAddEditScreen(
                 OutlinedTextField(
                     value = compensationAmount,
                     onValueChange = { viewModel.onCompensationAmountChange(it) },
-                    label = { Text(stringResource(Res.string.label_compensation)) },
+                    label = { Text("${stringResource(Res.string.label_compensation)} (${preferredCurrency.symbol})") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true

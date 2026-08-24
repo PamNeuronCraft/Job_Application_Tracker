@@ -1,5 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.data.local
 
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ class LocalSettings(private val settings: Settings) {
         private const val KEY_REVIEW_REQUESTED = "review_requested"
         private const val KEY_EMAIL_SYNC_ENABLED = "email_sync_enabled"
         private const val KEY_LAST_EMAIL_SYNC_TIME = "last_email_sync_time"
+        private const val KEY_PREFERRED_CURRENCY = "preferred_currency"
     }
 
     private val _themePreferenceFlow = MutableStateFlow(getInitialTheme())
@@ -27,6 +29,9 @@ class LocalSettings(private val settings: Settings) {
 
     private val _useDynamicColorFlow = MutableStateFlow(getInitialUseDynamicColor())
     val useDynamicColorFlow: StateFlow<Boolean> = _useDynamicColorFlow.asStateFlow()
+
+    private val _preferredCurrencyFlow = MutableStateFlow(getInitialCurrency())
+    val preferredCurrencyFlow: StateFlow<AppCurrency> = _preferredCurrencyFlow.asStateFlow()
 
     var isOnboardingCompleted: Boolean
         get() = settings.getBoolean(KEY_ONBOARDING_COMPLETED, false)
@@ -57,6 +62,18 @@ class LocalSettings(private val settings: Settings) {
         set(value) {
             settings.putBoolean(KEY_USE_DYNAMIC_COLOR, value)
             _useDynamicColorFlow.value = value
+        }
+
+    private fun getInitialCurrency(): AppCurrency {
+        val code = settings.getString(KEY_PREFERRED_CURRENCY, AppCurrency.USD.code)
+        return AppCurrency.fromCode(code)
+    }
+
+    var preferredCurrency: AppCurrency
+        get() = _preferredCurrencyFlow.value
+        set(value) {
+            settings.putString(KEY_PREFERRED_CURRENCY, value.code)
+            _preferredCurrencyFlow.value = value
         }
 
     var isReviewRequested: Boolean
