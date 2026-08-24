@@ -4,17 +4,21 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.JobUseCases
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
 
 class JobAddEditViewModel(
     private val jobUseCases: JobUseCases,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val localSettings: LocalSettings
 ) : ViewModel() {
 
     private val _jobName = mutableStateOf("")
@@ -34,6 +38,8 @@ class JobAddEditViewModel(
 
     private val _compensationType = mutableStateOf(com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL)
     val compensationType: State<com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType> = _compensationType
+
+    val preferredCurrency: StateFlow<AppCurrency> = localSettings.preferredCurrencyFlow
 
     private val _status = mutableStateOf(JobStatus.APPLIED)
     val status: State<JobStatus> = _status
@@ -57,6 +63,7 @@ class JobAddEditViewModel(
         prefilledCompensation: String? = null,
         initialUrl: String? = null
     ) {
+        println("JobAddEditViewModel: loadJob called with jobId=$jobId, prefilledJobName=$prefilledJobName")
         if (jobId != null) {
             viewModelScope.launch {
                 jobUseCases.getJobById(jobId)?.let { job ->
@@ -73,6 +80,19 @@ class JobAddEditViewModel(
                 }
             }
         } else {
+            // Reset state for new job entry
+            _jobName.value = ""
+            _companyName.value = ""
+            _description.value = ""
+            _jobType.value = JobType.REMOTE
+            _compensationAmount.value = ""
+            _compensationType.value = com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL
+            _status.value = JobStatus.APPLIED
+            _interviewDate.value = null
+            _reminderDuration.value = null
+            _isAutoExtracting.value = false
+            currentJobId = null
+
             prefilledJobName?.let { _jobName.value = it }
             prefilledCompanyName?.let { _companyName.value = it }
             prefilledDescription?.let { _description.value = it }
@@ -162,11 +182,20 @@ class JobAddEditViewModel(
     }
 
     private fun parseCompensation(value: String) {
-        // Try to extract a number
+        println("JobAddEditViewModel: Parsing compensation from value: $value")
+        
+        // Try to extract a number or a range
         val numberRegex = """(\d+([.,]\d+)?)""".toRegex()
-        val match = numberRegex.find(value)
-        if (match != null) {
-            _compensationAmount.value = match.value.replace(",", ".")
+        val matches = numberRegex.findAll(value).toList()
+        
+        if (matches.size >= 2) {
+            // Likely a range, calculate the average
+            val val1 = matches[0].value.replace(",", ".").toDoubleOrNull() ?: 0.0
+            val val2 = matches[1].value.replace(",", ".").toDoubleOrNull() ?: 0.0
+            val average = (val1 + val2) / 2
+            _compensationAmount.value = average.toString().removeSuffix(".0")
+        } else if (matches.size == 1) {
+            _compensationAmount.value = matches[0].value.replace(",", ".")
         }
 
         // Try to determine type

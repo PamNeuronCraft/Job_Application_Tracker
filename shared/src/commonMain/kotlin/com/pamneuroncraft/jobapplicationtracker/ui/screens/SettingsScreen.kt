@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.util.isAndroid
 import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
@@ -37,6 +38,7 @@ fun SettingsScreen(
 ) {
     val themePreference by viewModel.themePreference.collectAsState()
     val useDynamicColor by viewModel.useDynamicColor.collectAsState()
+    val preferredCurrency by viewModel.preferredCurrency.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
     val isEmailSyncEnabled by viewModel.isEmailSyncEnabled.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
@@ -45,6 +47,7 @@ fun SettingsScreen(
     val platformContext = rememberPlatformContext()
     
     var showThemeMenu by remember { mutableStateOf(false) }
+    var showCurrencyMenu by remember { mutableStateOf(false) }
     var showPaidFeatureDialog by remember { mutableStateOf(false) }
     var paidFeatureDialogTitle by remember { mutableStateOf("") }
     var paidFeatureDialogMessage by remember { mutableStateOf("") }
@@ -263,6 +266,34 @@ fun SettingsScreen(
                                     onClick = {
                                         viewModel.onThemePreferenceChange(preference)
                                         showThemeMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            )
+
+            // Preferred Currency
+            ListItem(
+                headlineContent = { Text("Currency") },
+                leadingContent = { Icon(Icons.Default.Payments, contentDescription = null) },
+                trailingContent = {
+                    Box {
+                        TextButton(onClick = { showCurrencyMenu = true }) {
+                            Text("${preferredCurrency.code} (${preferredCurrency.symbol})")
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                        }
+                        DropdownMenu(
+                            expanded = showCurrencyMenu,
+                            onDismissRequest = { showCurrencyMenu = false }
+                        ) {
+                            AppCurrency.entries.forEach { currency ->
+                                DropdownMenuItem(
+                                    text = { Text("${currency.code} (${currency.symbol})") },
+                                    onClick = {
+                                        viewModel.onCurrencyChange(currency)
+                                        showCurrencyMenu = false
                                     }
                                 )
                             }

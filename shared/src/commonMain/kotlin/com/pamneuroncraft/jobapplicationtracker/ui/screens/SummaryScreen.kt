@@ -25,11 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobAnalytics
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.ui.components.EmptyState
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
+import com.pamneuroncraft.jobapplicationtracker.ui.util.CurrencyFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SummaryViewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -53,6 +55,7 @@ fun SummaryScreen(
     }
 
     val analytics by viewModel.analytics.collectAsState()
+    val preferredCurrency by viewModel.preferredCurrency.collectAsState()
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState { 4 }
     
@@ -143,7 +146,7 @@ fun SummaryScreen(
                         ) {
                             when (page) {
                                 0 -> SummaryOverviewTab(analytics!!)
-                                1 -> SummaryFinancialsTab(analytics!!)
+                                1 -> SummaryFinancialsTab(analytics!!, preferredCurrency)
                                 2 -> SummaryTimelineTab(analytics!!)
                                 3 -> SummaryDistributionTab(analytics!!)
                             }
@@ -232,7 +235,7 @@ fun SummaryOverviewTab(analytics: JobAnalytics) {
 }
 
 @Composable
-fun SummaryFinancialsTab(analytics: JobAnalytics) {
+fun SummaryFinancialsTab(analytics: JobAnalytics, preferredCurrency: AppCurrency) {
     Text(
         text = stringResource(Res.string.salary_stats),
         style = MaterialTheme.typography.titleLarge,
@@ -242,19 +245,19 @@ fun SummaryFinancialsTab(analytics: JobAnalytics) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FinancialCard(
             label = stringResource(Res.string.avg_salary),
-            value = analytics.averageAnnualSalary?.formatCurrency() ?: "-",
+            value = analytics.averageAnnualSalary?.let { CurrencyFormatter.format(it, preferredCurrency) } ?: "-",
             color = MaterialTheme.colorScheme.primaryContainer
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FinancialCard(
                 label = stringResource(Res.string.max_salary),
-                value = analytics.maxAnnualSalary?.formatCurrency() ?: "-",
+                value = analytics.maxAnnualSalary?.let { CurrencyFormatter.format(it, preferredCurrency) } ?: "-",
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.weight(1f)
             )
             FinancialCard(
                 label = stringResource(Res.string.min_salary),
-                value = analytics.minAnnualSalary?.formatCurrency() ?: "-",
+                value = analytics.minAnnualSalary?.let { CurrencyFormatter.format(it, preferredCurrency) } ?: "-",
                 color = MaterialTheme.colorScheme.tertiaryContainer,
                 modifier = Modifier.weight(1f)
             )
@@ -567,9 +570,5 @@ fun SummaryCard(
 // Extensions
 fun Double.format(digits: Int) = this.toString().substringBefore(".") + "." + this.toString().substringAfter(".").take(digits)
 
-fun Double.formatCurrency(): String {
-    // Simple placeholder for multiplatform currency formatting
-    return if (this >= 1000) "${(this / 1000).format(1)}k" else this.format(0)
-}
 
 

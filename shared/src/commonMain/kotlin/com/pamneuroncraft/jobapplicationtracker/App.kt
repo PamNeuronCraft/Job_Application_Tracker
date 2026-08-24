@@ -24,7 +24,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pamneuroncraft.jobapplicationtracker.data.local.LocalSettings
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.BillingManager
+import com.pamneuroncraft.jobapplicationtracker.domain.repository.SyncManager
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.*
 import com.pamneuroncraft.jobapplicationtracker.ui.screens.*
@@ -42,7 +44,9 @@ fun App(
     initialShortcut: String? = null
 ) {
     val localSettings: LocalSettings = koinInject()
+    val authService: AuthService = koinInject()
     val billingManager: BillingManager = koinInject()
+    val syncManager: SyncManager = koinInject()
     val appConfig: AppConfig = koinInject()
     val settingsViewModel: SettingsViewModel = koinViewModel()
     val themePreference by settingsViewModel.themePreference.collectAsState()
@@ -52,6 +56,11 @@ fun App(
     LaunchedEffect(Unit) {
         billingManager.initialize()
         appUpdateManager.checkForUpdates()
+        
+        // Trigger initial sync on startup if user is signed in and has premium sync enabled
+        if (authService.isUserSignedIn() && appConfig.featureGoogleDriveBackup) {
+            syncManager.triggerSync()
+        }
     }
 
     // Reconcile premium features when subscription status changes

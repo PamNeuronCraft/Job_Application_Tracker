@@ -36,11 +36,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
@@ -48,6 +50,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.shared.*
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.JobApplicationTrackerTheme
 import com.pamneuroncraft.jobapplicationtracker.ui.theme.getJobStatusColor
+import com.pamneuroncraft.jobapplicationtracker.ui.util.CurrencyFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.util.DateFormatter
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.JobDetailViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -68,9 +71,11 @@ fun JobDetailScreen(
     }
 
     val job by viewModel.job
+    val preferredCurrency by viewModel.preferredCurrency.collectAsState()
     
     JobDetailContent(
         job = job,
+        preferredCurrency = preferredCurrency,
         onBack = onBack,
         onEditJob = { onEditJob(jobId) },
         onDeleteJob = { viewModel.onDeleteJob(onBack) },
@@ -83,6 +88,7 @@ fun JobDetailScreen(
 @Composable
 fun JobDetailContent(
     job: JobApplication?,
+    preferredCurrency: AppCurrency,
     onBack: () -> Unit,
     onEditJob: () -> Unit,
     onDeleteJob: () -> Unit,
@@ -144,8 +150,9 @@ fun JobDetailContent(
                     DetailItem(label = stringResource(Res.string.label_job_type), value = stringResource(currentJob.jobType.labelRes))
                     DetailItem(
                         label = stringResource(Res.string.label_compensation), 
-                        value = currentJob.compensationAmount?.let { 
-                            "$it / ${if (currentJob.compensationType == com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.HOURLY) "hr" else "yr"}"
+                        value = currentJob.compensationAmount?.let { amount ->
+                            val formatted = CurrencyFormatter.format(amount, preferredCurrency)
+                            "$formatted / ${if (currentJob.compensationType == com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.HOURLY) "hr" else "yr"}"
                         } ?: stringResource(Res.string.not_set)
                     )
                     DetailItem(label = stringResource(Res.string.label_status), value = stringResource(currentJob.status.labelRes))
@@ -230,6 +237,7 @@ fun JobDetailScreenPreview() {
                 compensationType = com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType.ANNUAL,
                 status = JobStatus.INTERVIEW,
             ),
+            preferredCurrency = AppCurrency.USD,
             onBack = {},
             onEditJob = {},
             onDeleteJob = {},

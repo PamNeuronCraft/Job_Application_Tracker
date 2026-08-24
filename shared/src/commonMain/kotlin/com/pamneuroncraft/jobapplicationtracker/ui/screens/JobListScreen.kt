@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +69,7 @@ fun JobListScreen(
 ) {
     val pagedJobs = viewModel.pagedJobs.collectAsLazyPagingItems()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isPremium by billingManager.isPremium.collectAsState()
     val reviewManager = rememberInAppReviewManager()
     
@@ -86,6 +88,8 @@ fun JobListScreen(
     JobListContent(
         jobs = pagedJobs,
         searchQuery = searchQuery,
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.onRefresh() },
         onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
         onAddJob = { showAddOptions = true },
         onJobClick = onJobClick,
@@ -156,6 +160,7 @@ fun JobListScreen(
                 importViewModel.resetState()
             },
             onImportSuccess = { extractedJob ->
+                println("JobListScreen: Import success, navigating with: $extractedJob")
                 showImportDialog = false
                 importViewModel.resetState()
                 onAddJob(
@@ -261,6 +266,8 @@ fun ImportFromUrlDialog(
 fun JobListContent(
     jobs: LazyPagingItems<JobApplication>,
     searchQuery: String,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onAddJob: () -> Unit,
     onJobClick: (String) -> Unit,
@@ -289,92 +296,96 @@ fun JobListContent(
             }
         }
     ) { padding ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(Res.string.search_jobs)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = stringResource(Res.string.clear_search))
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true
-            )
-
-            Box(modifier = Modifier.weight(1f)) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        count = jobs.itemCount,
-                        key = jobs.itemKey { it.id }
-                    ) { index ->
-                        val job = jobs[index]
-                        if (job != null) {
-                            JobItem(
-                                job = job,
-                                isSelected = job.id == selectedJobId,
-                                onDelete = { onDeleteJob(job) },
-                                onClick = { onJobClick(job.id) }
-                            )
-                        }
-                    }
-
-                    when (val state = jobs.loadState.append) {
-                        is LoadState.Loading -> {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                }
+            Column(modifier = Modifier.fillMaxSize()) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text(stringResource(Res.string.search_jobs)) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchQueryChange("") }) {
+                                Icon(Icons.Default.Clear, contentDescription = stringResource(Res.string.clear_search))
                             }
                         }
-                        is LoadState.Error -> {
-                            item {
-                                Text(
-                                    text = stringResource(Res.string.error_loading_more, state.error.message ?: ""),
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(16.dp)
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+
+                Box(modifier = Modifier.weight(1f)) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            count = jobs.itemCount,
+                            key = jobs.itemKey { it.id }
+                        ) { index ->
+                            val job = jobs[index]
+                            if (job != null) {
+                                JobItem(
+                                    job = job,
+                                    isSelected = job.id == selectedJobId,
+                                    onDelete = { onDeleteJob(job) },
+                                    onClick = { onJobClick(job.id) }
                                 )
                             }
                         }
-                        else -> {}
-                    }
-                }
 
-                if (jobs.loadState.refresh is LoadState.Loading && jobs.itemCount == 0) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+                        when (val state = jobs.loadState.append) {
+                            is LoadState.Loading -> {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    }
+                                }
+                            }
+                            is LoadState.Error -> {
+                                item {
+                                    Text(
+                                        text = stringResource(Res.string.error_loading_more, state.error.message ?: ""),
+                                        color = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                            else -> {}
+                        }
                     }
-                }
 
-                if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
-                    EmptyState(
-                        imageVector = Icons.Default.WorkOutline,
-                        title = stringResource(Res.string.empty_jobs_title),
-                        description = stringResource(Res.string.empty_jobs_desc),
-                        actionButtonText = stringResource(Res.string.add_job),
-                        onActionClick = onAddJob
-                    )
+                    if (jobs.loadState.refresh is LoadState.Loading && jobs.itemCount == 0) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    if (jobs.loadState.refresh is LoadState.NotLoading && jobs.itemCount == 0) {
+                        EmptyState(
+                            imageVector = Icons.Default.WorkOutline,
+                            title = stringResource(Res.string.empty_jobs_title),
+                            description = stringResource(Res.string.empty_jobs_desc),
+                            actionButtonText = stringResource(Res.string.add_job),
+                            onActionClick = onAddJob
+                        )
+                    }
                 }
             }
         }
@@ -462,6 +473,8 @@ fun JobListScreenPreview() {
         JobListContent(
             jobs = jobs,
             searchQuery = "",
+            isRefreshing = false,
+            onRefresh = {},
             onSearchQueryChange = {},
             onAddJob = {},
             onJobClick = {},
