@@ -107,6 +107,16 @@
 -dontwarn io.grpc.**
 
 # =========================================================
+# WorkManager
+# =========================================================
+-keep class androidx.work.** { *; }
+-keep class * extends androidx.work.ListenableWorker {
+    <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+-keep class androidx.work.OverwritingInputMerger { *; }
+-keep class androidx.work.ArrayCreatingInputMerger { *; }
+
+# =========================================================
 # multiplatform-settings
 # =========================================================
 -dontwarn com.russhwolf.settings.**
