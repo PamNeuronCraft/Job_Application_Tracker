@@ -28,6 +28,11 @@ class SyncWorker(
     private val cloudBackupService: CloudBackupService by inject()
     private val appConfig: AppConfig by inject()
     private val analyticsHelper: AnalyticsHelper by inject()
+    
+    private val json = Json { 
+        ignoreUnknownKeys = true 
+        coerceInputValues = true
+    }
 
     override suspend fun doWork(): ListenableWorker.Result {
         Log.e("SyncWorker", "Sync starting...")
@@ -50,7 +55,7 @@ class SyncWorker(
             val remoteJson = cloudBackupService.restore()
             if (remoteJson != null) {
                 try {
-                    val remoteJobs = Json.decodeFromString<List<JobApplication>>(remoteJson)
+                    val remoteJobs = json.decodeFromString<List<JobApplication>>(remoteJson)
                     remoteJobs.forEach { job ->
                         jobRepository.upsertJobFromRemote(job)
                     }
@@ -65,7 +70,7 @@ class SyncWorker(
             val unsyncedJobs = jobRepository.getUnsyncedJobs(uid)
             
             if (unsyncedJobs.isNotEmpty()) {
-                val diffJson = Json.encodeToString(unsyncedJobs)
+                val diffJson = json.encodeToString(unsyncedJobs)
                 cloudBackupService.backup(diffJson)
                 
                 val timestamp = Clock.System.now().toEpochMilliseconds()
