@@ -3,20 +3,17 @@ package com.pamneuroncraft.jobapplicationtracker.util
 import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
-import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.JobRepository
-import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
 import kotlinx.coroutines.flow.first
-import kotlin.time.Clock
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
 
 class SyncWorker(
     context: Context,
@@ -28,27 +25,27 @@ class SyncWorker(
     private val cloudBackupService: CloudBackupService by inject()
     private val appConfig: AppConfig by inject()
     private val analyticsHelper: AnalyticsHelper by inject()
-    
+
     private val json = Json { 
         ignoreUnknownKeys = true 
         coerceInputValues = true
     }
 
-    override suspend fun doWork(): ListenableWorker.Result {
+    override suspend fun doWork(): Result {
         Log.e("SyncWorker", "Sync starting...")
 
         if (!appConfig.featureGoogleDriveBackup) {
             Log.e("SyncWorker", "Sync skipped: Feature disabled in config")
-            return ListenableWorker.Result.success()
+            return Result.success()
         }
 
         if (!authService.isUserSignedIn()) {
             Log.e("SyncWorker", "Sync skipped: User not signed in")
-            return ListenableWorker.Result.success()
+            return Result.success()
         }
 
         return try {
-            val uid = authService.currentUser.first()?.uid ?: return ListenableWorker.Result.success()
+            val uid = authService.currentUser.first()?.uid ?: return Result.success()
 
             // 1. Pull Phase: Download remote changes
             Log.e("SyncWorker", "Pull phase starting...")
@@ -83,16 +80,16 @@ class SyncWorker(
             jobRepository.cleanupDeletedJobs(uid)
             
             Log.e("SyncWorker", "Full sync completed successfully")
-            ListenableWorker.Result.success()
+            Result.success()
         } catch (e: Exception) {
             Log.e("SyncWorker", "Sync failed: ${e.message}", e)
             analyticsHelper.logNonFatal(e)
             analyticsHelper.logEvent("sync_failed", mapOf("error" to (e.message ?: "unknown")))
             
             if (runAttemptCount < 3) {
-                ListenableWorker.Result.retry()
+                Result.retry()
             } else {
-                ListenableWorker.Result.failure()
+                Result.failure()
             }
         }
     }

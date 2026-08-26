@@ -132,6 +132,9 @@ class ProfileViewModel(
 
     fun signOut() {
         viewModelScope.launch {
+            // Clear local data on sign out to prevent data leakage between accounts
+            jobRepository.deleteAllJobs()
+            
             billingManager.logOut()
             analyticsHelper.setUserId(null)
             analyticsHelper.logEvent("sign_out")
