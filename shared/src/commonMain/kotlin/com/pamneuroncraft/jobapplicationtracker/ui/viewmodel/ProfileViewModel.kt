@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.CloudBackupService
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.User
@@ -26,7 +27,8 @@ class ProfileViewModel(
     private val billingManager: BillingManager,
     private val jobRepository: JobRepository,
     private val cloudBackupService: CloudBackupService,
-    private val analyticsHelper: AnalyticsHelper
+    private val analyticsHelper: AnalyticsHelper,
+    private val appConfig: AppConfig
 ) : ViewModel() {
 
     val currentUser: StateFlow<User?> = authService.currentUser
@@ -105,6 +107,10 @@ class ProfileViewModel(
     }
 
     fun resetPassword(email: String) {
+        if (appConfig.isFirebaseTestLab) {
+            // Silently ignore during automated testing to prevent spam
+            return
+        }
         viewModelScope.launch {
             _isLoading.value = true
             showError(null)

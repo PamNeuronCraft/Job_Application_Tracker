@@ -30,7 +30,10 @@ actual val platformModule = module {
     single<BillingManager> { AndroidBillingManager(get(), get()) }
     single<SyncManager> { AndroidSyncManager(get()) }
     single<ExportManager> { AndroidExportManager(get()) }
-    single<AppConfig> { CommonAppConfig(get(), AppBuildKonfig.IS_DEBUG) }
+    single<AppConfig> { 
+        val isTestLab = android.provider.Settings.System.getString(get<Context>().contentResolver, "firebase.test.lab") == "true"
+        CommonAppConfig(get(), AppBuildKonfig.IS_DEBUG, isTestLab) 
+    }
     single<JobDatabase> {
         getDatabaseBuilder(get())
             .setDriver(BundledSQLiteDriver())
