@@ -2,6 +2,8 @@ package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -9,12 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.data.local.ThemePreference
 import com.pamneuroncraft.jobapplicationtracker.domain.model.AppCurrency
-import com.pamneuroncraft.jobapplicationtracker.util.isAndroid
-import com.pamneuroncraft.jobapplicationtracker.domain.model.EmailProvider
+import com.pamneuroncraft.jobapplicationtracker.shared.*
 import com.pamneuroncraft.jobapplicationtracker.ui.components.AdBanner
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
 import com.pamneuroncraft.jobapplicationtracker.ui.components.PremiumBadge
@@ -23,8 +25,10 @@ import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.BackupViewModel
 import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
 import com.pamneuroncraft.jobapplicationtracker.util.createBiometricManager
+import com.pamneuroncraft.jobapplicationtracker.util.isAndroid
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -43,6 +47,7 @@ fun SettingsScreen(
     val isEmailSyncEnabled by viewModel.isEmailSyncEnabled.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
     val biometricManager = createBiometricManager()
+    val uriHandler = LocalUriHandler.current
     
     val platformContext = rememberPlatformContext()
     
@@ -65,10 +70,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(Res.string.settings)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )
@@ -83,7 +88,8 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Biometrics
@@ -102,6 +108,7 @@ fun SettingsScreen(
                         }
                     }
                 },
+                supportingContent = { Text(stringResource(Res.string.settings_biometrics_desc)) },
                 leadingContent = { Icon(Icons.Default.Fingerprint, contentDescription = null) },
                 trailingContent = {
                     Switch(
@@ -143,7 +150,7 @@ fun SettingsScreen(
                         }
                     }
                 },
-                supportingContent = { Text("Auto-update application status from emails") },
+                supportingContent = { Text(stringResource(Res.string.settings_email_sync_desc)) },
                 leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
                 trailingContent = {
                     Switch(
@@ -181,6 +188,7 @@ fun SettingsScreen(
                         }
                     }
                 },
+                supportingContent = { Text(stringResource(Res.string.settings_backup_desc)) },
                 leadingContent = { Icon(Icons.Default.CloudSync, contentDescription = null) },
                 trailingContent = {
                     Text(
@@ -207,6 +215,7 @@ fun SettingsScreen(
             // Subscription
             ListItem(
                 headlineContent = { Text("Subscription") },
+                supportingContent = { Text(stringResource(Res.string.settings_subscription_desc)) },
                 leadingContent = { Icon(Icons.Default.Star, contentDescription = null) },
                 trailingContent = {
                     Text(
@@ -234,6 +243,7 @@ fun SettingsScreen(
                         }
                     }
                 },
+                supportingContent = { Text(stringResource(Res.string.settings_export_desc)) },
                 leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
                 modifier = Modifier.clickable {
                     if (appConfig.featureExport) {
@@ -249,6 +259,7 @@ fun SettingsScreen(
             // Theme
             ListItem(
                 headlineContent = { Text("Theme") },
+                supportingContent = { Text(stringResource(Res.string.settings_theme_desc)) },
                 leadingContent = { Icon(Icons.Default.Palette, contentDescription = null) },
                 trailingContent = {
                     Box {
@@ -277,6 +288,7 @@ fun SettingsScreen(
             // Preferred Currency
             ListItem(
                 headlineContent = { Text("Currency") },
+                supportingContent = { Text(stringResource(Res.string.settings_currency_desc)) },
                 leadingContent = { Icon(Icons.Default.Payments, contentDescription = null) },
                 trailingContent = {
                     Box {
@@ -306,7 +318,7 @@ fun SettingsScreen(
             if (isAndroid) {
                 ListItem(
                     headlineContent = { Text("Dynamic Colors") },
-                    supportingContent = { Text("Use colors from your wallpaper (Android 12+)") },
+                    supportingContent = { Text(stringResource(Res.string.settings_dynamic_color_desc)) },
                     leadingContent = { Icon(Icons.Default.ColorLens, contentDescription = null) },
                     trailingContent = {
                         Switch(
@@ -316,6 +328,36 @@ fun SettingsScreen(
                     }
                 )
             }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // About
+            Text(
+                text = stringResource(Res.string.settings_about),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.settings_version, appConfig.appVersion)) },
+                leadingContent = { Icon(Icons.Default.Info, contentDescription = null) }
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.settings_contact_support)) },
+                supportingContent = { Text(stringResource(Res.string.settings_contact_support_desc)) },
+                leadingContent = { Icon(Icons.Default.QuestionAnswer, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    val subject = "Support Request: Job Application Tracker (${appConfig.appVersion})"
+                    val body = "\n\n--- Device Info ---\nPlatform: ${if (isAndroid) "Android" else "iOS"}\nVersion: ${appConfig.appVersion}"
+                    
+                    val encodedSubject = subject.replace(" ", "%20")
+                    val encodedBody = body.replace(" ", "%20").replace("\n", "%0A")
+                    
+                    uriHandler.openUri("mailto:pamneuroncraft@gmail.com?subject=$encodedSubject&body=$encodedBody")
+                }
+            )
         }
     }
 

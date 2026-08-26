@@ -12,12 +12,14 @@ interface AppConfig {
     val googleWebClientId: String
     val isDebug: Boolean
     val isFirebaseTestLab: Boolean
+    val appVersion: String
 }
 
 class CommonAppConfig(
     private val localSettings: LocalSettings,
     override val isDebug: Boolean,
-    override val isFirebaseTestLab: Boolean = false
+    override val isFirebaseTestLab: Boolean = false,
+    override val appVersion: String = "1.0.0"
 ) : AppConfig {
     override val featureAiImport: Boolean 
         get() = AppBuildKonfig.FEATURE_AI_IMPORT && (isDebug || localSettings.isPremium)
