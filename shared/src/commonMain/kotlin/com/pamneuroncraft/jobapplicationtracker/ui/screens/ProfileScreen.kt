@@ -28,7 +28,37 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
-import com.pamneuroncraft.jobapplicationtracker.shared.*
+import com.pamneuroncraft.jobapplicationtracker.shared.Res
+import com.pamneuroncraft.jobapplicationtracker.shared.already_have_account
+import com.pamneuroncraft.jobapplicationtracker.shared.back
+import com.pamneuroncraft.jobapplicationtracker.shared.cancel
+import com.pamneuroncraft.jobapplicationtracker.shared.continue_with_apple
+import com.pamneuroncraft.jobapplicationtracker.shared.continue_with_google
+import com.pamneuroncraft.jobapplicationtracker.shared.create_account
+import com.pamneuroncraft.jobapplicationtracker.shared.default_user
+import com.pamneuroncraft.jobapplicationtracker.shared.delete
+import com.pamneuroncraft.jobapplicationtracker.shared.delete_account
+import com.pamneuroncraft.jobapplicationtracker.shared.delete_account_confirmation_message
+import com.pamneuroncraft.jobapplicationtracker.shared.delete_account_confirmation_title
+import com.pamneuroncraft.jobapplicationtracker.shared.dont_have_account
+import com.pamneuroncraft.jobapplicationtracker.shared.error_email_required_reset
+import com.pamneuroncraft.jobapplicationtracker.shared.forgot_password
+import com.pamneuroncraft.jobapplicationtracker.shared.hello_user
+import com.pamneuroncraft.jobapplicationtracker.shared.label_email
+import com.pamneuroncraft.jobapplicationtracker.shared.label_full_name
+import com.pamneuroncraft.jobapplicationtracker.shared.label_password
+import com.pamneuroncraft.jobapplicationtracker.shared.manage_subscription
+import com.pamneuroncraft.jobapplicationtracker.shared.ok
+import com.pamneuroncraft.jobapplicationtracker.shared.password_reset_sent_message
+import com.pamneuroncraft.jobapplicationtracker.shared.password_reset_sent_title
+import com.pamneuroncraft.jobapplicationtracker.shared.profile
+import com.pamneuroncraft.jobapplicationtracker.shared.reset_password_message
+import com.pamneuroncraft.jobapplicationtracker.shared.reset_password_title
+import com.pamneuroncraft.jobapplicationtracker.shared.send_email
+import com.pamneuroncraft.jobapplicationtracker.shared.sign_in
+import com.pamneuroncraft.jobapplicationtracker.shared.sign_out
+import com.pamneuroncraft.jobapplicationtracker.shared.sign_up
+import com.pamneuroncraft.jobapplicationtracker.shared.welcome_back
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +84,7 @@ fun ProfileScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var showResetConfirmation by remember { mutableStateOf(false) }
 
     val emailRequiredMessage = stringResource(Res.string.error_email_required_reset)
 
@@ -67,8 +98,8 @@ fun ProfileScreen(
     if (passwordResetSent) {
         AlertDialog(
             onDismissRequest = { viewModel.resetPasswordState() },
-            title = { Text("Check your email") },
-            text = { Text("A password reset link has been sent to $email. Please check your inbox.") },
+            title = { Text(stringResource(Res.string.password_reset_sent_title)) },
+            text = { Text(stringResource(Res.string.password_reset_sent_message, email)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.resetPasswordState() }) {
                     Text(stringResource(Res.string.ok))
@@ -95,6 +126,29 @@ fun ProfileScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showResetConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirmation = false },
+            title = { Text(stringResource(Res.string.reset_password_title)) },
+            text = { Text(stringResource(Res.string.reset_password_message, email)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetConfirmation = false
+                        viewModel.resetPassword(email)
+                    }
+                ) {
+                    Text(stringResource(Res.string.send_email))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirmation = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             }
@@ -235,7 +289,7 @@ fun ProfileScreen(
                         TextButton(
                             onClick = {
                                 if (email.isNotBlank()) {
-                                    viewModel.resetPassword(email)
+                                    showResetConfirmation = true
                                 } else {
                                     viewModel.showValidationError(emailRequiredMessage)
                                 }

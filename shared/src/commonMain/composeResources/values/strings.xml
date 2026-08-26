@@ -111,6 +111,11 @@
     <string name="delete_account_confirmation_title">Delete Account?</string>
     <string name="delete_account_confirmation_message">This action is permanent and will delete all your job applications and account data. Are you sure?</string>
     <string name="delete_account_warning">Permanently delete your account and data</string>
+    <string name="reset_password_title">Reset Password?</string>
+    <string name="reset_password_message">Are you sure you want to send a password reset link to %1$s?</string>
+    <string name="send_email">Send Email</string>
+    <string name="password_reset_sent_title">Check your email</string>
+    <string name="password_reset_sent_message">A password reset link has been sent to %1$s. Please check your inbox.</string>
 
     <!-- SubscriptionScreen -->
     <string name="subscription">Subscription</string>

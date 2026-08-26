@@ -107,8 +107,9 @@ class ProfileViewModel(
     }
 
     fun resetPassword(email: String) {
-        if (appConfig.isFirebaseTestLab) {
-            // Silently ignore during automated testing to prevent spam
+        val testAccountEmail = "pascaladjaero@gmail.com" // Replace with the email receiving spam
+        if (appConfig.isFirebaseTestLab || email.trim().equals(testAccountEmail, ignoreCase = true)) {
+            // Silently ignore during automated testing or for the dedicated test account to prevent spam
             return
         }
         viewModelScope.launch {
