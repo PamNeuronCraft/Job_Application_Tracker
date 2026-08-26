@@ -43,6 +43,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+import platform.Foundation.NSBundle
+
 actual val platformModule = module {
     single<BillingManager> { IosBillingManager(get(), get()) }
     single<SyncManager> { IosSyncManager() }
@@ -82,7 +84,12 @@ actual val platformModule = module {
             }
         }
     }
-    single<AppConfig> { CommonAppConfig(get(), false) }
+    single<AppConfig> { 
+        val version = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
+        val build = NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String
+        val fullVersion = if (version != null && build != null) "$version ($build)" else version ?: "1.0.0"
+        CommonAppConfig(get(), false, false, fullVersion) 
+    }
     single<JobDatabase> {
         getDatabaseBuilder()
             .setDriver(BundledSQLiteDriver())

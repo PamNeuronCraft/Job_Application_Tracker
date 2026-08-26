@@ -31,8 +31,14 @@ actual val platformModule = module {
     single<SyncManager> { AndroidSyncManager(get()) }
     single<ExportManager> { AndroidExportManager(get()) }
     single<AppConfig> { 
-        val isTestLab = android.provider.Settings.System.getString(get<Context>().contentResolver, "firebase.test.lab") == "true"
-        CommonAppConfig(get(), AppBuildKonfig.IS_DEBUG, isTestLab) 
+        val context = get<Context>()
+        val isTestLab = android.provider.Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+        val versionName = try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+        CommonAppConfig(get(), AppBuildKonfig.IS_DEBUG, isTestLab, versionName) 
     }
     single<JobDatabase> {
         getDatabaseBuilder(get())
