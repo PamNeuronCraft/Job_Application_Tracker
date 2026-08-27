@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.JobApplicationTracker" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.JobApplicationTracker" parent="Theme.AppCompat.DayNight.NoActionBar" />
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <!-- Replace with your actual splash icon resource after manual step -->
