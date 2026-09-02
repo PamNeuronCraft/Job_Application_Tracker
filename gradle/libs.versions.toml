@@ -2,7 +2,6 @@
 agp = "9.3.0"
 coreKtx = "1.13.1"
 lifecycle = "2.8.3"
-lifecycleRuntimeKtx = "2.8.0"
 activityCompose = "1.9.1"
 kotlin = "2.3.10"
 composeMultiplatform = "1.11.1"
@@ -25,6 +24,7 @@ firebaseAnalytics = "22.5.0"
 firebaseCrashlytics = "19.4.4"
 googleServices = "4.5.0"
 firebaseCrashlyticsPlugin = "3.0.7"
+firebasePerfPlugin = "2.0.2"
 playServicesAds = "23.6.0"
 androidxCredentials = "1.6.0"
 googleid = "1.2.0"
@@ -94,6 +94,7 @@ firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseA
 firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+firebase-perf = { module = "com.google.firebase:firebase-perf" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "androidxCredentials" }
@@ -135,3 +136,4 @@ androidx-room = { id = "androidx.room", version.ref = "room" }
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }

@@ -137,6 +137,7 @@ kotlin {
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
+            implementation(libs.firebase.perf)
 
             api(libs.androidx.activity.compose)
             api(libs.androidx.core.ktx)
