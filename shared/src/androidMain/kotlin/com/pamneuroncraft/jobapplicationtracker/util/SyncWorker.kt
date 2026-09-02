@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.google.firebase.perf.FirebasePerformance
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobApplication
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.AuthService
@@ -44,8 +45,14 @@ class SyncWorker(
             return Result.success()
         }
 
+        val trace = FirebasePerformance.getInstance().newTrace("cloud_sync")
+        trace.start()
+
         return try {
-            val uid = authService.currentUser.first()?.uid ?: return Result.success()
+            val uid = authService.currentUser.first()?.uid ?: run {
+                trace.stop()
+                return Result.success()
+            }
 
             // 1. Pull Phase: Download remote changes
             Log.e("SyncWorker", "Pull phase starting...")
@@ -91,6 +98,8 @@ class SyncWorker(
             } else {
                 Result.failure()
             }
+        } finally {
+            trace.stop()
         }
     }
 }

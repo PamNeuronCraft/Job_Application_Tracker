@@ -5,10 +5,11 @@
 -keep class com.google.ads.** { *; }
 
 # =========================================================
-# Firebase (raw Android SDK bits: Analytics, Crashlytics)
+# Firebase (raw Android SDK bits: Analytics, Crashlytics, Performance)
 # =========================================================
 -keep class com.google.firebase.analytics.** { *; }
 -keep class com.google.firebase.crashlytics.** { *; }
+-keep class com.google.firebase.perf.** { *; }
 
 # gitlive Firebase KMP wrappers (firebase-auth, firebase-firestore)
 -keep class dev.gitlive.firebase.** { *; }
