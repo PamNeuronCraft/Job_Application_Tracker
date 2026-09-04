@@ -54,9 +54,9 @@ class JobRepositoryImpl(
     }
 
     override suspend fun insertJob(job: JobApplication) {
-        val userId = authService.currentUser.firstOrNull()?.uid
+        val currentUserId = authService.currentUser.firstOrNull()?.uid
         val jobToInsert = job.copy(
-            userId = userId,
+            userId = job.userId ?: currentUserId,
             updatedAt = Clock.System.now()
         )
         dao.insertJob(JobApplicationEntity.fromDomainModel(jobToInsert))
@@ -64,7 +64,14 @@ class JobRepositoryImpl(
     }
 
     override suspend fun updateJob(job: JobApplication) {
-        val jobToUpdate = job.copy(updatedAt = Clock.System.now())
+        val currentUserId = authService.currentUser.firstOrNull()?.uid
+        val existingJob = dao.getJobByIdIncludingDeleted(job.id)
+        
+        val jobToUpdate = job.copy(
+            userId = job.userId ?: existingJob?.userId ?: currentUserId,
+            dateAdded = existingJob?.dateAdded?.let { Instant.fromEpochMilliseconds(it) } ?: job.dateAdded,
+            updatedAt = Clock.System.now()
+        )
         dao.updateJob(JobApplicationEntity.fromDomainModel(jobToUpdate))
         syncManager.triggerSync()
     }
@@ -94,7 +101,12 @@ class JobRepositoryImpl(
     override suspend fun upsertJobFromRemote(job: JobApplication) {
         val localJob = dao.getJobByIdIncludingDeleted(job.id)
         if (localJob == null || job.updatedAt > Instant.fromEpochMilliseconds(localJob.updatedAt)) {
-            dao.insertJob(JobApplicationEntity.fromDomainModel(job))
+            val jobToUpsert = if (job.lastSyncedAt == null) {
+                job.copy(lastSyncedAt = Clock.System.now())
+            } else {
+                job
+            }
+            dao.insertJob(JobApplicationEntity.fromDomainModel(jobToUpsert))
         }
     }
 

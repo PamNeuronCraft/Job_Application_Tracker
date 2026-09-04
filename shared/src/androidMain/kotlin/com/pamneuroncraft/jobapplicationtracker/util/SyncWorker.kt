@@ -54,6 +54,9 @@ class SyncWorker(
                 return Result.success()
             }
 
+            // Ensure any local jobs created/updated with missing userId are assigned to current uid
+            jobRepository.updateJobsUserId(uid)
+
             // 1. Pull Phase: Download remote changes
             Log.e("SyncWorker", "Pull phase starting...")
             val remoteJson = cloudBackupService.restore()

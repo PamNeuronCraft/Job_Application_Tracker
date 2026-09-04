@@ -1,5 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.data.repository
 
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.firebase.perf.FirebasePerformance
@@ -20,9 +21,13 @@ class JobExtractorImpl(
         val trace = FirebasePerformance.getInstance().newTrace("ai_job_extraction")
         trace.start()
         try {
-            val doc = Jsoup.connect(url)
+            val cleanUrl = """https?://[^\s]+""".toRegex().find(url)?.value ?: url
+            Log.d("JobExtractor", "Extracting from clean URL: $cleanUrl")
+
+            val doc = Jsoup.connect(cleanUrl)
                 .userAgent("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36")
                 .followRedirects(true)
+                .timeout(15000)
                 .get()
             val pageText = doc.body().text()
             

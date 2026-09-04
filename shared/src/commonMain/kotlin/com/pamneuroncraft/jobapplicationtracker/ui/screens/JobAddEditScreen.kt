@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -137,6 +139,7 @@ fun JobAddEditScreen(
     val interviewDate by viewModel.interviewDate
     val reminderDuration by viewModel.reminderDuration
     val isAutoExtracting by viewModel.isAutoExtracting
+    val extractionError by viewModel.extractionError
 
     Scaffold(
         topBar = {
@@ -172,6 +175,22 @@ fun JobAddEditScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            extractionError?.let { errorMsg ->
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = errorMsg,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+
             OutlinedTextField(
                 value = jobName,
                 onValueChange = { viewModel.onJobNameChange(it) },

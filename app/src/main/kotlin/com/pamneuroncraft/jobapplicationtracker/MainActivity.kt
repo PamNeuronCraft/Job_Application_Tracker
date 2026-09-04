@@ -12,10 +12,15 @@ class MainActivity : FragmentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         
-        val sharedUrl = if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+        val sharedText = if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             intent.getStringExtra(Intent.EXTRA_TEXT)
         } else {
             null
+        }
+
+        val sharedUrl = sharedText?.let { text ->
+            val urlRegex = """https?://\S+""".toRegex()
+            urlRegex.find(text)?.value ?: text
         }
 
         val shortcut = intent.getStringExtra("shortcut")

@@ -11,6 +11,7 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
 import com.pamneuroncraft.jobapplicationtracker.domain.repository.NotificationService
 import com.pamneuroncraft.jobapplicationtracker.domain.usecase.JobUseCases
+import com.pamneuroncraft.jobapplicationtracker.util.AnalyticsHelper
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
@@ -18,7 +19,8 @@ import kotlin.time.Instant
 class JobAddEditViewModel(
     private val jobUseCases: JobUseCases,
     private val notificationService: NotificationService,
-    private val localSettings: LocalSettings
+    private val localSettings: LocalSettings,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _jobName = mutableStateOf("")
@@ -53,7 +55,11 @@ class JobAddEditViewModel(
     private val _isAutoExtracting = mutableStateOf(false)
     val isAutoExtracting: State<Boolean> = _isAutoExtracting
 
+    private val _extractionError = mutableStateOf<String?>(null)
+    val extractionError: State<String?> = _extractionError
+
     private var currentJobId: String? = null
+    private var loadedJob: JobApplication? = null
 
     fun loadJob(
         jobId: String?,
@@ -68,6 +74,7 @@ class JobAddEditViewModel(
             viewModelScope.launch {
                 jobUseCases.getJobById(jobId)?.let { job ->
                     currentJobId = job.id
+                    loadedJob = job
                     _jobName.value = job.jobName
                     _companyName.value = job.companyName
                     _description.value = job.description
@@ -92,6 +99,7 @@ class JobAddEditViewModel(
             _reminderDuration.value = null
             _isAutoExtracting.value = false
             currentJobId = null
+            loadedJob = null
 
             prefilledJobName?.let { _jobName.value = it }
             prefilledCompanyName?.let { _companyName.value = it }
@@ -101,6 +109,7 @@ class JobAddEditViewModel(
             initialUrl?.let { url ->
                 viewModelScope.launch {
                     _isAutoExtracting.value = true
+                    _extractionError.value = null
                     try {
                         val extracted = jobUseCases.extractJobFromUrl(url)
                         extracted.jobName?.let { _jobName.value = it }
@@ -108,7 +117,8 @@ class JobAddEditViewModel(
                         extracted.description?.let { _description.value = it }
                         extracted.compensation?.let { parseCompensation(it) }
                     } catch (e: Exception) {
-                        // Silent fail for auto-extract
+                        _extractionError.value = "Unable to auto-extract details from this link. Please fill in the details manually."
+                        analyticsHelper.logNonFatal(e)
                     } finally {
                         _isAutoExtracting.value = false
                     }
@@ -145,7 +155,19 @@ class JobAddEditViewModel(
     fun onSaveJob(onSaved: () -> Unit) {
         viewModelScope.launch {
             val amount = _compensationAmount.value.toDoubleOrNull()
-            val job = if (currentJobId != null) {
+            val job = if (loadedJob != null) {
+                loadedJob!!.copy(
+                    jobName = _jobName.value,
+                    companyName = _companyName.value,
+                    description = _description.value,
+                    jobType = _jobType.value,
+                    compensationAmount = amount,
+                    compensationType = _compensationType.value,
+                    status = _status.value,
+                    interviewDate = _interviewDate.value,
+                    reminderDuration = _reminderDuration.value
+                )
+            } else if (currentJobId != null) {
                 JobApplication(
                     id = currentJobId!!,
                     jobName = _jobName.value,
