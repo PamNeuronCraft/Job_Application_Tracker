@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,8 +11,12 @@ import androidx.fragment.app.FragmentActivity
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         super.onCreate(savedInstanceState)
-        
+
         val sharedText = if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             intent.getStringExtra(Intent.EXTRA_TEXT)
         } else {
@@ -25,7 +30,6 @@ class MainActivity : FragmentActivity() {
 
         val shortcut = intent.getStringExtra("shortcut")
 
-        enableEdgeToEdge()
         setContent {
             App(
                 initialUrl = sharedUrl,
