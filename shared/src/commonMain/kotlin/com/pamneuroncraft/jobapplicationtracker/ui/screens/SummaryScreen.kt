@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,12 +47,20 @@ fun SummaryScreen(
     viewModel: SummaryViewModel = koinViewModel(),
     appConfig: AppConfig = koinInject()
 ) {
+    var isDialogVisible by rememberSaveable { mutableStateOf(true) }
+
     if (!appConfig.featureSummary) {
-        PaidFeatureDialog(
-            onDismiss = { onBack?.invoke() },
-            title = stringResource(Res.string.paid_feature_summary_title),
-            message = stringResource(Res.string.paid_feature_summary_message)
-        )
+        if (isDialogVisible) {
+            PaidFeatureDialog(
+                onDismiss = {
+                    isDialogVisible = false
+                    onBack?.invoke()
+                },
+                title = stringResource(Res.string.paid_feature_summary_title),
+                message = stringResource(Res.string.paid_feature_summary_message)
+            )
+        }
+        return
     }
 
     val analytics by viewModel.analytics.collectAsState()
