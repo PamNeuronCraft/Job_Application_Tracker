@@ -448,10 +448,19 @@ fun JobItem(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    if (job.companyName.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = job.companyName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LocalContentColor.current.copy(alpha = 0.8f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = DateFormatter.format(job.dateAdded, "MMM dd, yyyy"),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalContentColor.current.copy(alpha = 0.6f)
                     )
                 }
             }
