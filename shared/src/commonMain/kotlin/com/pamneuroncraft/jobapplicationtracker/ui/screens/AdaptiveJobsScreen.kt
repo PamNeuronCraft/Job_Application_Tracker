@@ -1,6 +1,7 @@
 package com.pamneuroncraft.jobapplicationtracker.ui.screens
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,44 +36,49 @@ fun AdaptiveJobsScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
 
-    ListDetailPaneScaffold(
-        directive = navigator.scaffoldDirective,
-        value = navigator.scaffoldValue,
-        listPane = {
-            JobListScreen(
-                onAddJob = onAddJob,
-                onJobClick = { jobId ->
-                    scope.launch {
-                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, jobId)
-                    }
-                },
-                onSummaryClick = onSummaryClick,
-                showPremiumShareRationale = showPremiumShareRationale,
-                selectedJobId = navigator.currentDestination?.contentKey
-            )
-        },
-        detailPane = {
-            val jobId = navigator.currentDestination?.contentKey
-            if (jobId != null) {
-                val isListVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
-                JobDetailScreen(
-                    jobId = jobId,
-                    onBack = {
-                        if (navigator.canNavigateBack()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        if (maxWidth > 0.dp && maxHeight > 0.dp) {
+            ListDetailPaneScaffold(
+                modifier = Modifier.fillMaxSize(),
+                directive = navigator.scaffoldDirective,
+                value = navigator.scaffoldValue,
+                listPane = {
+                    JobListScreen(
+                        onAddJob = onAddJob,
+                        onJobClick = { jobId ->
                             scope.launch {
-                                navigator.navigateBack()
+                                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, jobId)
                             }
-                        }
-                    },
-                    onEditJob = onEditJob,
-                    isPane = isListVisible
-                )
-            } else {
-                // Placeholder for empty detail pane on large screens
-                EmptyDetailPane()
-            }
+                        },
+                        onSummaryClick = onSummaryClick,
+                        showPremiumShareRationale = showPremiumShareRationale,
+                        selectedJobId = navigator.currentDestination?.contentKey
+                    )
+                },
+                detailPane = {
+                    val jobId = navigator.currentDestination?.contentKey
+                    if (jobId != null) {
+                        val isListVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
+                        JobDetailScreen(
+                            jobId = jobId,
+                            onBack = {
+                                if (navigator.canNavigateBack()) {
+                                    scope.launch {
+                                        navigator.navigateBack()
+                                    }
+                                }
+                            },
+                            onEditJob = onEditJob,
+                            isPane = isListVisible
+                        )
+                    } else {
+                        // Placeholder for empty detail pane on large screens
+                        EmptyDetailPane()
+                    }
+                }
+            )
         }
-    )
+    }
 }
 
 @Composable
