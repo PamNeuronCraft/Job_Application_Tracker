@@ -61,6 +61,30 @@ class JobAddEditViewModel(
     private var currentJobId: String? = null
     private var loadedJob: JobApplication? = null
 
+    val hasUnsavedChanges: Boolean
+        get() {
+            val initial = loadedJob
+            return if (initial != null) {
+                _jobName.value != initial.jobName ||
+                _companyName.value != initial.companyName ||
+                _description.value != initial.description ||
+                _jobType.value != initial.jobType ||
+                _compensationAmount.value != (initial.compensationAmount?.toString() ?: "") ||
+                _compensationType.value != initial.compensationType ||
+                _status.value != initial.status ||
+                _interviewDate.value != initial.interviewDate ||
+                _reminderDuration.value != initial.reminderDuration
+            } else {
+                _jobName.value.isNotBlank() ||
+                _companyName.value.isNotBlank() ||
+                _description.value.isNotBlank() ||
+                _compensationAmount.value.isNotBlank() ||
+                _status.value != JobStatus.APPLIED ||
+                _interviewDate.value != null ||
+                _reminderDuration.value != null
+            }
+        }
+
     fun loadJob(
         jobId: String?,
         prefilledJobName: String? = null,

@@ -70,6 +70,10 @@
     <string name="none">None</string>
     <string name="interview_date">Interview Date</string>
     <string name="interview_time">Interview Time</string>
+    <string name="discard_changes_title">Discard changes?</string>
+    <string name="discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
 
     <!-- SummaryScreen -->
     <string name="status_breakdown">Status Breakdown</string>
