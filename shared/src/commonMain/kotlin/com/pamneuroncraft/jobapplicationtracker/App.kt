@@ -47,6 +47,11 @@ import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobDetailKey
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobListKey
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.OnboardingKey
+import com.pamneuroncraft.jobapplicationtracker.shared.Res
+import com.pamneuroncraft.jobapplicationtracker.shared.paid_feature_summary_message
+import com.pamneuroncraft.jobapplicationtracker.shared.paid_feature_summary_title
+import com.pamneuroncraft.jobapplicationtracker.ui.components.PaidFeatureDialog
+import org.jetbrains.compose.resources.stringResource
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.ProfileKey
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.SettingsKey
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.SubscriptionKey
@@ -216,6 +221,7 @@ fun MainAppNavigation(
     } == true
 
     val isPremium by billingManager.isPremium.collectAsState()
+    var showPaidSummaryDialog by remember { mutableStateOf(false) }
 
     if (showNavigationSuite) {
         NavigationSuiteScaffold(
@@ -235,10 +241,14 @@ fun MainAppNavigation(
                 item(
                     selected = currentDestination.hierarchy.any { it.hasRoute(SummaryKey::class) },
                     onClick = {
-                        navController.navigate(SummaryKey) {
-                            popUpTo(JobListKey) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (appConfig.featureSummary) {
+                            navController.navigate(SummaryKey) {
+                                popUpTo(JobListKey) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        } else {
+                            showPaidSummaryDialog = true
                         }
                     },
                     icon = { 
@@ -289,6 +299,14 @@ fun MainAppNavigation(
         }
     } else {
         AppNavHost(navController, startDestination, initialUrl, appConfig)
+    }
+
+    if (showPaidSummaryDialog) {
+        PaidFeatureDialog(
+            onDismiss = { showPaidSummaryDialog = false },
+            title = stringResource(Res.string.paid_feature_summary_title),
+            message = stringResource(Res.string.paid_feature_summary_message)
+        )
     }
 }
 
