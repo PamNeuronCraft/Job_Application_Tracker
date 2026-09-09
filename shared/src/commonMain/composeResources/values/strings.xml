@@ -34,6 +34,9 @@
     <string name="settings_version">Version %1$s</string>
     <string name="settings_contact_support">Contact Support</string>
     <string name="settings_contact_support_desc">Need help? Send us an email</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="sign_up_terms_agreement">By creating an account, you agree to our %1$s and %2$s.</string>
     <string name="add_job">Add Job</string>
     <string name="search_jobs">Search jobs...</string>
     <string name="clear_search">Clear search</string>
@@ -67,6 +70,10 @@
     <string name="none">None</string>
     <string name="interview_date">Interview Date</string>
     <string name="interview_time">Interview Time</string>
+    <string name="discard_changes_title">Discard changes?</string>
+    <string name="discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
 
     <!-- SummaryScreen -->
     <string name="status_breakdown">Status Breakdown</string>

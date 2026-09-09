@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.util.BackHandler
 import com.pamneuroncraft.jobapplicationtracker.domain.model.CompensationType
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobStatus
 import com.pamneuroncraft.jobapplicationtracker.domain.model.JobType
@@ -65,8 +66,12 @@ import com.pamneuroncraft.jobapplicationtracker.domain.model.ReminderDuration
 import com.pamneuroncraft.jobapplicationtracker.shared.Res
 import com.pamneuroncraft.jobapplicationtracker.shared.back
 import com.pamneuroncraft.jobapplicationtracker.shared.cancel
+import com.pamneuroncraft.jobapplicationtracker.shared.discard
+import com.pamneuroncraft.jobapplicationtracker.shared.discard_changes_message
+import com.pamneuroncraft.jobapplicationtracker.shared.discard_changes_title
 import com.pamneuroncraft.jobapplicationtracker.shared.interview_date
 import com.pamneuroncraft.jobapplicationtracker.shared.interview_time
+import com.pamneuroncraft.jobapplicationtracker.shared.keep_editing
 import com.pamneuroncraft.jobapplicationtracker.shared.label_company_name
 import com.pamneuroncraft.jobapplicationtracker.shared.label_compensation
 import com.pamneuroncraft.jobapplicationtracker.shared.label_description
@@ -116,6 +121,19 @@ fun JobAddEditScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showReminderMenu by remember { mutableStateOf(false) }
+    var showExitConfirmationDialog by remember { mutableStateOf(false) }
+
+    val handleBackNavigation = {
+        if (viewModel.hasUnsavedChanges) {
+            showExitConfirmationDialog = true
+        } else {
+            onBack()
+        }
+    }
+
+    BackHandler(enabled = viewModel.hasUnsavedChanges) {
+        showExitConfirmationDialog = true
+    }
 
     LaunchedEffect(jobId, prefilledJobName, prefilledCompanyName, prefilledDescription, prefilledCompensation, initialUrl) {
         viewModel.loadJob(
@@ -146,7 +164,7 @@ fun JobAddEditScreen(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(if (jobId == null) Res.string.title_add_job else Res.string.title_edit_job)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = handleBackNavigation) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
@@ -428,6 +446,34 @@ fun JobAddEditScreen(
     if (showPermissionRationale) {
         PermissionRationaleDialog(
             onDismiss = { showPermissionRationale = false }
+        )
+    }
+
+    if (showExitConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmationDialog = false },
+            title = { Text(stringResource(Res.string.discard_changes_title)) },
+            text = { Text(stringResource(Res.string.discard_changes_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitConfirmationDialog = false
+                        onBack()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.discard),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExitConfirmationDialog = false }
+                ) {
+                    Text(stringResource(Res.string.keep_editing))
+                }
+            }
         )
     }
 }

@@ -52,12 +52,21 @@ import com.pamneuroncraft.jobapplicationtracker.shared.ok
 import com.pamneuroncraft.jobapplicationtracker.shared.password_reset_sent_message
 import com.pamneuroncraft.jobapplicationtracker.shared.password_reset_sent_title
 import com.pamneuroncraft.jobapplicationtracker.shared.profile
+import com.pamneuroncraft.jobapplicationtracker.shared.privacy_policy
 import com.pamneuroncraft.jobapplicationtracker.shared.reset_password_message
 import com.pamneuroncraft.jobapplicationtracker.shared.reset_password_title
 import com.pamneuroncraft.jobapplicationtracker.shared.send_email
 import com.pamneuroncraft.jobapplicationtracker.shared.sign_in
 import com.pamneuroncraft.jobapplicationtracker.shared.sign_out
 import com.pamneuroncraft.jobapplicationtracker.shared.sign_up
+import com.pamneuroncraft.jobapplicationtracker.shared.sign_up_terms_agreement
+import com.pamneuroncraft.jobapplicationtracker.shared.terms_and_conditions
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import com.pamneuroncraft.jobapplicationtracker.shared.welcome_back
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,7 +203,7 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
-            ) {
+            ) { 
                 Text(
                     text = user?.displayName?.firstOrNull()?.toString()?.uppercase() 
                         ?: user?.email?.firstOrNull()?.toString()?.uppercase() 
@@ -284,7 +293,62 @@ fun ProfileScreen(
                     enabled = !isLoading
                 )
 
-                if (!isSignUp) {
+                if (isSignUp) {
+                    val termsText = stringResource(Res.string.terms_and_conditions)
+                    val privacyText = stringResource(Res.string.privacy_policy)
+                    val fullAgreementText = stringResource(Res.string.sign_up_terms_agreement, termsText, privacyText)
+
+                    val termsStart = fullAgreementText.indexOf(termsText)
+                    val termsEnd = if (termsStart != -1) termsStart + termsText.length else -1
+
+                    val privacyStart = fullAgreementText.indexOf(privacyText)
+                    val privacyEnd = if (privacyStart != -1) privacyStart + privacyText.length else -1
+
+                    val linkStyles = TextLinkStyles(
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+
+                    val annotatedAgreementText = buildAnnotatedString {
+                        append(fullAgreementText)
+
+                        if (termsStart != -1) {
+                            addLink(
+                                url = LinkAnnotation.Url(
+                                    url = "https://sites.google.com/view/job-application-tracker-terms/home",
+                                    styles = linkStyles
+                                ),
+                                start = termsStart,
+                                end = termsEnd
+                            )
+                        }
+
+                        if (privacyStart != -1) {
+                            addLink(
+                                url = LinkAnnotation.Url(
+                                    url = "https://sites.google.com/view/jobapplicationtracker-privacy/home",
+                                    styles = linkStyles
+                                ),
+                                start = privacyStart,
+                                end = privacyEnd
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = annotatedAgreementText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    )
+                } else {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                         TextButton(
                             onClick = {
