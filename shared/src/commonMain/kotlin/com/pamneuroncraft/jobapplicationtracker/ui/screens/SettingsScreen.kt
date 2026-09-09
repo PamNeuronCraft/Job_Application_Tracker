@@ -344,6 +344,24 @@ fun SettingsScreen(
                 leadingContent = { Icon(Icons.Default.Info, contentDescription = null) }
             )
 
+            // Privacy Policy
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.privacy_policy)) },
+                leadingContent = { Icon(Icons.Default.Security, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    uriHandler.openUri("https://sites.google.com/view/jobapplicationtracker-privacy/home")
+                }
+            )
+
+            // Terms and Conditions
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.terms_and_conditions)) },
+                leadingContent = { Icon(Icons.Default.Description, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    uriHandler.openUri("https://sites.google.com/view/job-application-tracker-terms/home")
+                }
+            )
+
             ListItem(
                 headlineContent = { Text(stringResource(Res.string.settings_contact_support)) },
                 supportingContent = { Text(stringResource(Res.string.settings_contact_support_desc)) },
