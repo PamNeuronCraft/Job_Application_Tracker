@@ -26,6 +26,7 @@ import com.pamneuroncraft.jobapplicationtracker.ui.viewmodel.SettingsViewModel
 import com.pamneuroncraft.jobapplicationtracker.util.BiometricResult
 import com.pamneuroncraft.jobapplicationtracker.util.createBiometricManager
 import com.pamneuroncraft.jobapplicationtracker.util.isAndroid
+import com.pamneuroncraft.jobapplicationtracker.util.rememberInAppReviewManager
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -48,6 +49,7 @@ fun SettingsScreen(
     val isPremium by viewModel.isPremium.collectAsState()
     val biometricManager = createBiometricManager()
     val uriHandler = LocalUriHandler.current
+    val reviewManager = rememberInAppReviewManager()
     
     val platformContext = rememberPlatformContext()
     
@@ -342,6 +344,16 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(Res.string.settings_version, appConfig.appVersion)) },
                 leadingContent = { Icon(Icons.Default.Info, contentDescription = null) }
+            )
+
+            // Rate App
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.settings_rate_app)) },
+                supportingContent = { Text(stringResource(Res.string.settings_rate_app_desc)) },
+                leadingContent = { Icon(Icons.Default.Star, contentDescription = null) },
+                modifier = Modifier.clickable {
+                    reviewManager.requestReview()
+                }
             )
 
             // Privacy Policy

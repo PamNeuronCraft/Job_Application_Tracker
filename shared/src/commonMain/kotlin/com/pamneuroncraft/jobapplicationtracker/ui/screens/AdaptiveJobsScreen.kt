@@ -17,13 +17,26 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pamneuroncraft.jobapplicationtracker.shared.Res
+import com.pamneuroncraft.jobapplicationtracker.shared.cancel
+import com.pamneuroncraft.jobapplicationtracker.shared.exit
+import com.pamneuroncraft.jobapplicationtracker.shared.exit_app_message
+import com.pamneuroncraft.jobapplicationtracker.shared.exit_app_title
 import com.pamneuroncraft.jobapplicationtracker.ui.navigation.JobAddEditKey
+import com.pamneuroncraft.jobapplicationtracker.ui.util.exitApp
+import com.pamneuroncraft.jobapplicationtracker.ui.util.rememberPlatformContext
+import com.pamneuroncraft.jobapplicationtracker.util.BackHandler
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -35,6 +48,14 @@ fun AdaptiveJobsScreen(
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
+    val platformContext = rememberPlatformContext()
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    val canNavigateBackInScaffold = navigator.canNavigateBack()
+
+    BackHandler(enabled = !canNavigateBackInScaffold) {
+        showExitDialog = true
+    }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         if (maxWidth > 0.dp && maxHeight > 0.dp) {
@@ -78,6 +99,34 @@ fun AdaptiveJobsScreen(
                 }
             )
         }
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text(stringResource(Res.string.exit_app_title)) },
+            text = { Text(stringResource(Res.string.exit_app_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        exitApp(platformContext)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.exit),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExitDialog = false }
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        )
     }
 }
 
