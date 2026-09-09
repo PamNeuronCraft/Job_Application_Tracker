@@ -34,6 +34,8 @@
     <string name="settings_version">Version %1$s</string>
     <string name="settings_contact_support">Contact Support</string>
     <string name="settings_contact_support_desc">Need help? Send us an email</string>
+    <string name="settings_rate_app">Rate the App</string>
+    <string name="settings_rate_app_desc">Enjoying the app? Leave us a review</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_and_conditions">Terms and Conditions</string>
     <string name="sign_up_terms_agreement">By creating an account, you agree to our %1$s and %2$s.</string>
@@ -41,6 +43,9 @@
     <string name="search_jobs">Search jobs...</string>
     <string name="clear_search">Clear search</string>
     <string name="delete">Delete</string>
+    <string name="exit_app_title">Exit?</string>
+    <string name="exit_app_message">You are about to exit the app</string>
+    <string name="exit">Exit</string>
 
     <!-- JobDetailScreen -->
     <string name="job_details">Job Details</string>

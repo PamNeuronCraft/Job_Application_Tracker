@@ -4,3 +4,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 expect fun rememberPlatformContext(): Any?
+
+expect fun exitApp(context: Any?)
