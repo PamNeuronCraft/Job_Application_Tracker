@@ -342,7 +342,11 @@ private fun AppNavHost(
             val key = backStackEntry.toRoute<JobDetailKey>()
             JobDetailScreen(
                 jobId = key.jobId,
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(JobDetailKey::class) == true) {
+                        navController.popBackStack()
+                    }
+                },
                 onEditJob = { jobId -> navController.navigate(JobAddEditKey(jobId)) }
             )
         }
@@ -355,30 +359,50 @@ private fun AppNavHost(
                 prefilledDescription = key.prefilledDescription,
                 prefilledCompensation = key.prefilledCompensation,
                 initialUrl = key.initialUrl,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(JobAddEditKey::class) == true) {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
         composable<ProfileKey> {
             ProfileScreen(
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(ProfileKey::class) == true) {
+                        navController.popBackStack(JobListKey, inclusive = false)
+                    }
+                },
                 onSubscriptionClick = { navController.navigate(SubscriptionKey) }
             )
         }
         composable<SettingsKey> {
             SettingsScreen(
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(SettingsKey::class) == true) {
+                        navController.popBackStack(JobListKey, inclusive = false)
+                    }
+                },
                 onProfileClick = { navController.navigate(ProfileKey) },
                 onSubscriptionClick = { navController.navigate(SubscriptionKey) }
             )
         }
         composable<SummaryKey> {
             SummaryScreen(
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(SummaryKey::class) == true) {
+                        navController.popBackStack(JobListKey, inclusive = false)
+                    }
+                }
             )
         }
         composable<SubscriptionKey> {
             SubscriptionScreen(
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    if (navController.currentDestination?.hasRoute(SubscriptionKey::class) == true) {
+                        navController.popBackStack()
+                    }
+                },
                 onSignInClick = { navController.navigate(ProfileKey) }
             )
         }
