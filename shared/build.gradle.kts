@@ -40,12 +40,10 @@ buildkonfig {
         // Defaults to Test IDs
         buildConfigField(STRING, "ADMOB_APP_ID_DEBUG", "ca-app-pub-3940256099942544~3347511713")
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID_DEBUG", "ca-app-pub-3940256099942544/6300978111")
-        buildConfigField(STRING, "GEMINI_API_KEY_DEBUG", getSecret("GEMINI_API_KEY_DEV", ""))
 
         // Release IDs
         buildConfigField(STRING, "ADMOB_APP_ID_RELEASE", getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769"))
         buildConfigField(STRING, "ADMOB_BANNER_UNIT_ID_RELEASE", getSecret("ADMOB_BANNER_UNIT_ID_PROD", "ca-app-pub-9098088729873683/1918835878"))
-        buildConfigField(STRING, "GEMINI_API_KEY_RELEASE", getSecret("GEMINI_API_KEY_PROD", ""))
     }
 }
 
@@ -138,6 +136,7 @@ kotlin {
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.perf)
+            implementation(libs.firebase.functions)
 
             api(libs.androidx.activity.compose)
             api(libs.androidx.core.ktx)

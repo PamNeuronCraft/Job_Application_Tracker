@@ -96,3 +96,15 @@ fabric.properties
 /shelf/
 /workspace.xml
 
+# AI Agent & Skills Tooling
+.agents/
+skills-lock.json
+
+# Firebase Functions
+.firebase/
+functions/node_modules/
+functions/lib/
+functions/.runtimeconfig.json
+functions/*.log
+
+
