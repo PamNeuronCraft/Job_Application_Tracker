@@ -1,6 +1,6 @@
 package com.pamneuroncraft.jobapplicationtracker.di
 
-import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.functions.FirebaseFunctions
 import com.pamneuroncraft.jobapplicationtracker.data.local.JobDatabase
 import com.pamneuroncraft.jobapplicationtracker.data.local.getDatabaseBuilder
 import android.content.Context
@@ -47,18 +47,7 @@ actual val platformModule = module {
             .build()
     }
     
-    single {
-        val apiKey = if (AppBuildKonfig.IS_DEBUG) AppBuildKonfig.GEMINI_API_KEY_DEBUG else AppBuildKonfig.GEMINI_API_KEY_RELEASE
-        android.util.Log.d("PlatformModule", "Gemini API Key length: ${apiKey.length}")
-        if (apiKey.isBlank()) {
-            android.util.Log.e("PlatformModule", "Gemini API Key is BLANK! AI features will fail.")
-        }
-        GenerativeModel(
-            modelName = "gemini-3.6-flash",
-            apiKey = apiKey
-        )
-    }
-
+    single { FirebaseFunctions.getInstance() }
     single<JobExtractor> { JobExtractorImpl(get()) }
     single<NotificationService> { AndroidNotificationService(get()) }
     single<EmailSyncService> { AndroidEmailSyncService(get<Context>()) }
