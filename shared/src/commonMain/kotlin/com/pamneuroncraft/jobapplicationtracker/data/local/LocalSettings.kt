@@ -22,6 +22,7 @@ class LocalSettings(private val settings: Settings) {
         private const val KEY_EMAIL_SYNC_ENABLED = "email_sync_enabled"
         private const val KEY_LAST_EMAIL_SYNC_TIME = "last_email_sync_time"
         private const val KEY_PREFERRED_CURRENCY = "preferred_currency"
+        private const val KEY_PROCESSED_EMAIL_IDS = "processed_email_ids"
     }
 
     private val _themePreferenceFlow = MutableStateFlow(getInitialTheme())
@@ -95,4 +96,26 @@ class LocalSettings(private val settings: Settings) {
     var lastEmailSyncTime: Long
         get() = settings.getLong(KEY_LAST_EMAIL_SYNC_TIME, 0L)
         set(value) = settings.putLong(KEY_LAST_EMAIL_SYNC_TIME, value)
+
+    fun isEmailProcessed(emailId: String): Boolean {
+        if (emailId.isBlank()) return false
+        val set = settings.getString(KEY_PROCESSED_EMAIL_IDS, "")
+            .split(",")
+            .filter { it.isNotBlank() }
+            .toSet()
+        return emailId in set
+    }
+
+    fun markEmailProcessed(emailId: String) {
+        if (emailId.isBlank()) return
+        val currentList = settings.getString(KEY_PROCESSED_EMAIL_IDS, "")
+            .split(",")
+            .filter { it.isNotBlank() }
+            .toMutableList()
+        if (!currentList.contains(emailId)) {
+            currentList.add(emailId)
+        }
+        val trimmed = if (currentList.size > 500) currentList.takeLast(500) else currentList
+        settings.putString(KEY_PROCESSED_EMAIL_IDS, trimmed.joinToString(","))
+    }
 }

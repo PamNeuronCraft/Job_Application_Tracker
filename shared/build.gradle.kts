@@ -67,6 +67,7 @@ kotlin {
         homepage = "https://github.com/PamNeuronCraft/Job_Application_Tracker"
         version = "1.0"
         ios.deploymentTarget = "16.0"
+        podfile = file("../iosApp/Podfile")
         framework {
             baseName = "ComposeApp"
             isStatic = true
@@ -80,6 +81,22 @@ kotlin {
         // Add Google Sign-In for the Email Sync feature
         pod("GoogleSignIn")
     }
+
+tasks.matching { it.name.contains("pod", ignoreCase = true) || it.name.contains("synthetic", ignoreCase = true) }.configureEach {
+    val buildDirectory = layout.buildDirectory.asFile.get()
+    doFirst {
+        val syntheticPodfile = File(buildDirectory, "cocoapods/synthetic/ios/Podfile")
+        if (syntheticPodfile.exists()) {
+            val content = syntheticPodfile.readText()
+            if (content.contains("version = \"#{12}.#{0}\"") || content.contains("< 12")) {
+                val updatedContent = content
+                    .replace("< 12 || (deployment_target_major == 12 && deployment_target_minor < 0)", "< 15")
+                    .replace("version = \"#{12}.#{0}\"", "version = \"15.0\"")
+                syntheticPodfile.writeText(updatedContent)
+            }
+        }
+    }
+}
     
     iosArm64()
     iosSimulatorArm64()

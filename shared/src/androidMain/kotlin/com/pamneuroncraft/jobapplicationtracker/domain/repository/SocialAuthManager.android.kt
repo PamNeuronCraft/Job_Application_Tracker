@@ -2,21 +2,30 @@ package com.pamneuroncraft.jobapplicationtracker.domain.repository
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
+import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.pamneuroncraft.jobapplicationtracker.AppConfig
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.security.SecureRandom
-import android.util.Base64
+import kotlin.coroutines.resume
 
 class AndroidSocialAuthManager : SocialAuthManager, KoinComponent {
     private val appConfig: AppConfig by inject()
@@ -119,26 +128,66 @@ class AndroidSocialAuthManager : SocialAuthManager, KoinComponent {
         val activity = findActivity(context) ?: return false
         
         val gmailScope = "https://www.googleapis.com/auth/gmail.readonly"
-        val scope = com.google.android.gms.common.api.Scope(gmailScope)
+        val scope = Scope(gmailScope)
         
-        val account = com.google.android.gms.auth.api.signin.GoogleSignIn.getLastSignedInAccount(activity) ?: return false
-        
-        if (com.google.android.gms.auth.api.signin.GoogleSignIn.hasPermissions(account, scope)) {
+        val existingAccount = GoogleSignIn.getLastSignedInAccount(activity)
+        if (existingAccount != null && GoogleSignIn.hasPermissions(existingAccount, scope)) {
             return true
         }
 
-        // Trigger incremental authorization
-        com.google.android.gms.auth.api.signin.GoogleSignIn.requestPermissions(
-            activity,
-            1001, // Request code
-            account,
-            scope
-        )
-        
-        // Note: In a real app, you'd need to handle the activity result.
-        // For simplicity in this backbone, we assume the user might need to retry or 
-        // we'll handle the result in the next iteration.
-        return false 
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(scope)
+            .requestIdToken(appConfig.googleWebClientId)
+            .build()
+
+        val client = GoogleSignIn.getClient(activity, gso)
+
+        return suspendCancellableCoroutine { continuation ->
+            val key = "gmail_scope_request_${System.currentTimeMillis()}"
+            var launcher: ActivityResultLauncher<Intent>? = null
+
+            try {
+                launcher = activity.activityResultRegistry.register(
+                    key,
+                    ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    try {
+                        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                        val account = task.getResult(ApiException::class.java)
+                        val hasScope = account != null && GoogleSignIn.hasPermissions(account, scope)
+                        if (continuation.isActive) {
+                            continuation.resume(hasScope)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("SocialAuth", "Failed to grant email scope: ${e.message}", e)
+                        if (continuation.isActive) {
+                            continuation.resume(false)
+                        }
+                    } finally {
+                        try {
+                            launcher?.unregister()
+                        } catch (_: Exception) {}
+                    }
+                }
+
+                continuation.invokeOnCancellation {
+                    try {
+                        launcher?.unregister()
+                    } catch (_: Exception) {}
+                }
+
+                launcher.launch(client.signInIntent)
+            } catch (e: Exception) {
+                Log.e("SocialAuth", "Failed to launch Google Sign-In intent for email scope", e)
+                try {
+                    launcher?.unregister()
+                } catch (_: Exception) {}
+                if (continuation.isActive) {
+                    continuation.resume(false)
+                }
+            }
+        }
     }
 }
 
