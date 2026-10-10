@@ -25,10 +25,16 @@ class IosBillingManager(
         } else {
             AppBuildKonfig.REVENUECAT_API_KEY_IOS_RELEASE
         }
-        Purchases.configure(apiKey = apiKey) {
-            appUserId = null
+        if (apiKey.isNotBlank() && !apiKey.contains("placeholder") && apiKey.startsWith("appl_")) {
+            try {
+                Purchases.configure(apiKey = apiKey) {
+                    appUserId = null
+                }
+                updateEntitlementStatus()
+            } catch (e: Exception) {
+                // Ignore invalid key in dev
+            }
         }
-        updateEntitlementStatus()
     }
 
     override suspend fun logIn(uid: String) {
