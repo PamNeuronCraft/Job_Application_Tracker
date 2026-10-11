@@ -96,7 +96,7 @@ fun SubscriptionScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             if (isPremium) {
                 Text(

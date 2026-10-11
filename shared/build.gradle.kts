@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.android.kotlin.multiplatform)
-    kotlin("native.cocoapods")
 }
 
 fun getSecret(key: String, default: String): String {
@@ -62,27 +61,15 @@ kotlin {
         }
     }
 
-    cocoapods {
-        summary = "Shared logic for Job Application Tracker"
-        homepage = "https://github.com/PamNeuronCraft/Job_Application_Tracker"
-        version = "1.0"
-        ios.deploymentTarget = "16.0"
-        framework {
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
-
-        // Add the Firebase pods here
-        pod("FirebaseAuth")
-        pod("FirebaseFirestore")
-        pod("FirebaseAnalytics")
-
-        // Add Google Sign-In for the Email Sync feature
-        pod("GoogleSignIn")
     }
-    
-    iosArm64()
-    iosSimulatorArm64()
     
     sourceSets {
         commonMain.dependencies {

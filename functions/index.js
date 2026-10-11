@@ -41,6 +41,19 @@ function parseJsonFromText(rawText) {
 }
 
 /**
+ * Helper to clean and sanitize input text.
+ * @param {string} text Raw text to clean.
+ * @return {string} Sanitized string.
+ */
+function cleanText(text) {
+  if (!text) return "";
+  return text
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+}
+
+/**
  * 1. Cloud Function: Extract Job Application Details from a Posting URL
  */
 exports.extractJobFromUrl = onCall(
@@ -98,7 +111,12 @@ exports.extractJobFromUrl = onCall(
           ${pageText}
         `.trim();
 
-        const model = genAI.getGenerativeModel({model: "gemini-3.6-flash"});
+        const model = genAI.getGenerativeModel({
+          model: "gemini-3.6-flash",
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        });
         const aiResult = await model.generateContent(prompt);
         const rawText = aiResult.response.text();
 
@@ -141,31 +159,61 @@ exports.extractStatusUpdateFromEmail = onCall(
       }
 
       try {
+        const cleanSubject = cleanText(subject).substring(0, 500);
+        const cleanBody = cleanText(emailBody).substring(0, 5000);
+
         const prompt = `
-          Analyze the following email subject and body related to a job app.
-          Determine if it indicates a status change.
+          Analyze the email subject and body below regarding a job application.
+          Determine if it indicates a job application status update.
 
-          Return ONLY a JSON object with these keys:
-          "companyName": The name of the company.
-          "jobTitle": The title of the position (if found).
-          "newStatus": One of: "APPLIED", "INTERVIEW", "OFFER", "REJECTED".
-          "confidence": A value from 0.0 to 1.0.
+          Allowed status values for "newStatus":
+          - "APPLIED": Application received / confirmation of submission.
+          - "INTERVIEW": Invitation to interview, phone screen, coding assessment, or scheduling.
+          - "OFFER": Job offer extended or details on offer package.
+          - "NO_OFFER": Application rejected, position filled, or decision not to move forward.
 
-          If it's not a clear job status update, return null.
+          Return a JSON object with:
+          - "isJobStatusUpdate": boolean (true if this is a job application status update, false otherwise)
+          - "companyName": string or null (the company name)
+          - "jobTitle": string or null (the position/job title if found)
+          - "newStatus": string or null (one of "APPLIED", "INTERVIEW", "OFFER", "NO_OFFER")
+          - "confidence": number between 0.0 and 1.0 (how confident you are in this classification)
 
-          Subject: ${subject || ""}
-          Body: ${emailBody || ""}
+          Subject: ${cleanSubject}
+          Body: ${cleanBody}
         `.trim();
 
-        const model = genAI.getGenerativeModel({model: "gemini-3.6-flash"});
+        const model = genAI.getGenerativeModel({
+          model: "gemini-3.6-flash",
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        });
+
         const aiResult = await model.generateContent(prompt);
         const rawText = aiResult.response.text();
+        const parsed = parseJsonFromText(rawText);
 
-        if (!rawText || rawText.toLowerCase().includes("null")) {
+        if (!parsed || !parsed.isJobStatusUpdate || !parsed.companyName || !parsed.newStatus) {
           return null;
         }
 
-        return parseJsonFromText(rawText);
+        let status = parsed.newStatus;
+        if (status === "REJECTED") {
+          status = "NO_OFFER";
+        }
+
+        const validStatuses = ["APPLIED", "INTERVIEW", "OFFER", "NO_OFFER"];
+        if (!validStatuses.includes(status)) {
+          return null;
+        }
+
+        return {
+          companyName: parsed.companyName,
+          jobTitle: parsed.jobTitle || null,
+          newStatus: status,
+          confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.5,
+        };
       } catch (error) {
         console.error("Error in extractStatusUpdateFromEmail:", error);
         if (error instanceof HttpsError) throw error;
