@@ -70,6 +70,9 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             signingConfig = signingConfigs.getByName("release")
             manifestPlaceholders["adMobAppId"] = getSecret("ADMOB_APP_ID_PROD", "ca-app-pub-9098088729873683~6121804769")
         }
