@@ -22,7 +22,7 @@ class GetJobAnalyticsUseCase(
             
             // Conversion Funnel
             val reachedInterview = jobs.count { 
-                it.status == JobStatus.INTERVIEW || it.status == JobStatus.OFFER || it.status == JobStatus.NO_OFFER 
+                it.status == JobStatus.INTERVIEW || it.status == JobStatus.OFFER || (it.status == JobStatus.NO_OFFER && it.interviewDate != null)
             }
             val reachedOffer = jobs.count { it.status == JobStatus.OFFER }
             
@@ -31,7 +31,7 @@ class GetJobAnalyticsUseCase(
             
             // Financials
             val annualSalaries = jobs.mapNotNull { job ->
-                job.compensationAmount?.let { amount ->
+                job.compensationAmount?.takeIf { it > 0 }?.let { amount ->
                     if (job.compensationType == CompensationType.HOURLY) {
                         amount * 2080 // Standard 40h * 52 weeks
                     } else {
@@ -43,8 +43,8 @@ class GetJobAnalyticsUseCase(
             val avgSalary = if (annualSalaries.isNotEmpty()) annualSalaries.average() else null
             val maxSalary = annualSalaries.maxOrNull()
             val minSalary = annualSalaries.minOrNull()
-            val hourlyCount = jobs.count { it.compensationType == CompensationType.HOURLY && it.compensationAmount != null }
-            val annualCount = jobs.count { it.compensationType == CompensationType.ANNUAL && it.compensationAmount != null }
+            val hourlyCount = jobs.count { it.compensationType == CompensationType.HOURLY && (it.compensationAmount ?: 0.0) > 0 }
+            val annualCount = jobs.count { it.compensationType == CompensationType.ANNUAL && (it.compensationAmount ?: 0.0) > 0 }
             
             // Timeline (Week-based)
             val now = Clock.System.now()
@@ -66,8 +66,8 @@ class GetJobAnalyticsUseCase(
             val firstAppDate = jobs.minByOrNull { it.dateAdded }?.dateAdded?.toLocalDateTime(systemTZ)?.date
             val weeksActive = if (firstAppDate != null) {
                 val days = firstAppDate.daysUntil(today)
-                (days / 7).coerceAtLeast(1)
-            } else 1
+                (days.toDouble() / 7.0).coerceAtLeast(1.0)
+            } else 1.0
             val avgAppsPerWeek = total.toDouble() / weeksActive
             
             // Distribution
