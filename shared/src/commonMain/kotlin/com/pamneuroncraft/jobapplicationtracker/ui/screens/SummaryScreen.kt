@@ -306,15 +306,15 @@ fun SummaryTimelineTab(analytics: JobAnalytics) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             VelocityCard(
+                modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.this_week),
                 count = analytics.appsThisWeek,
-                trend = analytics.appsThisWeek - analytics.appsLastWeek,
-                modifier = Modifier.weight(1f)
+                trend = analytics.appsThisWeek - analytics.appsLastWeek
             )
             VelocityCard(
+                modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.last_week),
-                count = analytics.appsLastWeek,
-                modifier = Modifier.weight(1f)
+                count = analytics.appsLastWeek
             )
         }
         
@@ -448,7 +448,7 @@ fun FinancialCard(label: String, value: String, color: Color, modifier: Modifier
 }
 
 @Composable
-fun VelocityCard(label: String, count: Int, trend: Int? = null, modifier: Modifier = Modifier) {
+fun VelocityCard(modifier: Modifier = Modifier, label: String, count: Int, trend: Int? = null) {
     Card(modifier = modifier, shape = RoundedCornerShape(16.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(label, style = MaterialTheme.typography.labelMedium)
